@@ -1,0 +1,16 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Установка зависимостей
+COPY package*.json ./
+RUN npm install
+
+# Копирование всего проекта
+COPY . .
+
+# Порт для NestJS (берётся из .env)
+EXPOSE 4200
+
+# Запуск с hot-reload
+CMD ["npm", "run", "start:dev"]

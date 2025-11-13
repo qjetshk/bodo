@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: bodo_user
+      POSTGRES_PASSWORD: bodo_pass
+      POSTGRES_DB: bodo_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    ports:
+      - '6379:6379'
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: bodo-back
+    restart: always
+    ports:
+      - '${PORT}:${PORT}' # порт берём из .env
+    env_file: .env
+    volumes:
+      - .:/app # монтируем текущую папку внутрь контейнера
+      - /app/node_modules # чтобы node_modules не перезаписывались
+    command: npm run start:dev # hot-reload
+    depends_on:
+      - postgres
+      - redis
+
+volumes:
+  pgdata:

@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_prod
+    restart: always
+    environment:
+      POSTGRES_USER: bodo_user
+      POSTGRES_PASSWORD: bodo_pass
+      POSTGRES_DB: bodo_db
+    ports:
+      - "5432:5432"  # можно скрыть наружу, если не нужно
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: redis_prod
+    restart: always
+    ports:
+      - "6379:6379"  # можно скрыть наружу, если Redis нужен только для контейнеров
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile  # твой prod Dockerfile
+    container_name: bodo-back-prod
+    restart: always
+    env_file: .env
+    ports:
+      - "${PORT}:${PORT}"   # порт берём из .env (например 4200)
+    depends_on:
+      - postgres
+      - redis
+
+volumes:
+  pgdata_prod:

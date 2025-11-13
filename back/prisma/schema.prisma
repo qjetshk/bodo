@@ -1,0 +1,177 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  nickName  String   @map("nick_name")
+  email     String   @unique
+  password  String
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  boardsOwned         Board[]           @relation("OwnedBoards")
+  boardMembers        BoardMember[]
+  taskAssignments     TaskAssignment[]
+  comments            Comment[]
+  sentInvitations     BoardInvitation[] @relation("SentInvitations")
+  receivedInvitations BoardInvitation[] @relation("ReceivedInvitations")
+  tasks               Task[]
+
+  @@map("users")
+}
+
+model Board {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  boardType   Boolean // false - public, true - private
+  owner       User     @relation("OwnedBoards", fields: [ownerId], references: [id])
+  ownerId     String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  members         BoardMember[]
+  invitations     BoardInvitation[]
+  columns         Column[]
+  boardTemplateId String?
+  boardTemplate   BoardTemplate?    @relation("TemplateBoards", fields: [boardTemplateId], references: [id])
+
+  @@map("boards")
+}
+
+model BoardInvitation {
+  id          String           @id @default(cuid())
+  board       Board            @relation(fields: [boardId], references: [id])
+  boardId     String           @map("board_id")
+  invitedBy   User             @relation("SentInvitations", fields: [invitedById], references: [id])
+  invitedById String           @map("invited_by_id")
+  user        User             @relation("ReceivedInvitations", fields: [userId], references: [id])
+  userId      String           @map("user_id")
+  status      InvitationStatus @default(PENDING)
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  @@unique([boardId, userId])
+  @@map("board_invitations")
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model BoardMember {
+  id      String @id @default(cuid())
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String @map("user_id")
+  board   Board  @relation(fields: [boardId], references: [id])
+  boardId String @map("board_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, boardId])
+  @@map("board_members")
+}
+
+model Column {
+  id      String @id @default(cuid())
+  title   String
+  order   Int
+  board   Board  @relation(fields: [boardId], references: [id])
+  boardId String @map("board_id")
+  tasks   Task[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("columns")
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  order       Int
+  column      Column   @relation(fields: [columnId], references: [id])
+  columnId    String   @map("column_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  performer   User?   @relation(fields: [performerId], references: [id])
+  performerId String? @map("performer_id")
+
+  assignments TaskAssignment[]
+  comments    Comment[]
+
+  @@map("tasks")
+}
+
+model TaskAssignment {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @map("user_id")
+  task      Task     @relation(fields: [taskId], references: [id])
+  taskId    String   @map("task_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, taskId])
+  @@map("task_assignments")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String   @map("author_id")
+  task      Task     @relation(fields: [taskId], references: [id])
+  taskId    String   @map("task_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("comments")
+}
+
+model BoardTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  columns ColumnTemplate[]
+  boards  Board[]          @relation("TemplateBoards")
+
+  @@map("board_templates")
+}
+
+model ColumnTemplate {
+  id         String        @id @default(cuid())
+  title      String
+  order      Int
+  template   BoardTemplate @relation(fields: [templateId], references: [id])
+  templateId String        @map("template_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("column_templates")
+}

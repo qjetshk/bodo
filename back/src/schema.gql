@@ -1,0 +1,30 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input FindMemberInput {
+  email: String
+  nickName: String
+}
+
+type Mutation {
+  findMembers(member: FindMemberInput!): User!
+}
+
+type Query {
+  hello: String!
+}
+
+type User {
+  avatarUrl: String
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  nickName: String!
+  updatedAt: DateTime!
+}

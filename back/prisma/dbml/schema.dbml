@@ -1,0 +1,172 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table users {
+  id String [pk]
+  nickName String [not null]
+  email String [unique, not null]
+  password String [not null]
+  avatarUrl String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  boardsOwned boards [not null]
+  boardMembers board_members [not null]
+  taskAssignments task_assignments [not null]
+  comments comments [not null]
+  sentInvitations board_invitations [not null]
+  receivedInvitations board_invitations [not null]
+  tasks tasks [not null]
+}
+
+Table boards {
+  id String [pk]
+  name String [not null]
+  description String
+  boardType Boolean [not null]
+  owner users [not null]
+  ownerId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  members board_members [not null]
+  invitations board_invitations [not null]
+  columns columns [not null]
+  boardTemplateId String
+  boardTemplate board_templates
+}
+
+Table board_invitations {
+  id String [pk]
+  board boards [not null]
+  boardId String [not null]
+  invitedBy users [not null]
+  invitedById String [not null]
+  user users [not null]
+  userId String [not null]
+  status InvitationStatus [not null, default: 'PENDING']
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (boardId, userId) [unique]
+  }
+}
+
+Table board_members {
+  id String [pk]
+  user users [not null]
+  userId String [not null]
+  board boards [not null]
+  boardId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+
+  indexes {
+    (userId, boardId) [unique]
+  }
+}
+
+Table columns {
+  id String [pk]
+  title String [not null]
+  order Int [not null]
+  board boards [not null]
+  boardId String [not null]
+  tasks tasks [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table tasks {
+  id String [pk]
+  title String [not null]
+  description String
+  order Int [not null]
+  column columns [not null]
+  columnId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  performer users
+  performerId String
+  assignments task_assignments [not null]
+  comments comments [not null]
+}
+
+Table task_assignments {
+  id String [pk]
+  user users [not null]
+  userId String [not null]
+  task tasks [not null]
+  taskId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+
+  indexes {
+    (userId, taskId) [unique]
+  }
+}
+
+Table comments {
+  id String [pk]
+  content String [not null]
+  author users [not null]
+  authorId String [not null]
+  task tasks [not null]
+  taskId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table board_templates {
+  id String [pk]
+  name String [not null]
+  description String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  columns column_templates [not null]
+  boards boards [not null]
+}
+
+Table column_templates {
+  id String [pk]
+  title String [not null]
+  order Int [not null]
+  template board_templates [not null]
+  templateId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+Ref: boards.ownerId > users.id
+
+Ref: boards.boardTemplateId > board_templates.id
+
+Ref: board_invitations.boardId > boards.id
+
+Ref: board_invitations.invitedById > users.id
+
+Ref: board_invitations.userId > users.id
+
+Ref: board_members.userId > users.id
+
+Ref: board_members.boardId > boards.id
+
+Ref: columns.boardId > boards.id
+
+Ref: tasks.columnId > columns.id
+
+Ref: tasks.performerId > users.id
+
+Ref: task_assignments.userId > users.id
+
+Ref: task_assignments.taskId > tasks.id
+
+Ref: comments.authorId > users.id
+
+Ref: comments.taskId > tasks.id
+
+Ref: column_templates.templateId > board_templates.id
