@@ -33,8 +33,8 @@
 # Environment files
 # -----------------
 # Для dev и Codespaces оставляем
-front/.env
-back/.env
+#front/.env
+#back/.env
 # Для продакшна используем отдельные файлы и не коммитим их
 # back/.env.prod
 # front/.env.prod

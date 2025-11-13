@@ -24,6 +24,7 @@ import { getJwtConfig } from './config/jwt.config';
       driver: ApolloDriver,
       useFactory: getGraphQlConfig,
       inject: [ConfigService],
+      
     }),
     JwtModule.registerAsync({
       imports: [ConfigModule],

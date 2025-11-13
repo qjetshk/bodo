@@ -16,8 +16,12 @@ import BoardTemplate from "./BoardTemplate";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AddBoardForm } from "@/types/add-board-form.type";
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "motion/react";
+import { useMutation } from "@apollo/client/react";
+import { FIND_MEMBERS, FindMembersInput, FindMembersData } from "@/apollo/requests/members";
+import { Skeleton } from "@/components/ui/skeleton";
+import Member from './Member';
 
 const templates = [
   {
@@ -107,11 +111,33 @@ const NewBoardForm = () => {
     },
   });
 
+  // Apollo useMutation с корректной типизацией
+  const [findMembers, { data, loading, error }] = useMutation<
+    FindMembersData,
+    { member: FindMembersInput['member'] }
+  >(FIND_MEMBERS);
+
   const selectedTemplateId = watch("templateId");
   const boardType = watch("boardType");
 
-  const onSubmit: SubmitHandler<AddBoardForm> = (data) => {
-    console.log("Форма успешно отправлена", data);
+  const [findMembersInput, setFindMembersInput] = useState('');
+
+  const onSubmit: SubmitHandler<AddBoardForm> = (formData) => {
+    console.log("Форма успешно отправлена", formData);
+  };
+
+  // Обновляем участников
+  const handleFindMembers = (value: string) => {
+    if (value.trim().length) {
+      findMembers({
+        variables: {
+          member: {
+            nickName: value,
+            email: value
+          }
+        }
+      });
+    }
   };
 
   return (
@@ -131,43 +157,32 @@ const NewBoardForm = () => {
           <CardDescription>Заполните данные и выберите шаблон</CardDescription>
         </CardHeader>
 
-        <CardContent className="">
+        <CardContent>
           <form
             className="flex flex-col gap-5 w-full overflow-x-hidden p-1"
             onSubmit={handleSubmit(onSubmit)}
           >
+            {/* Название доски */}
             <div>
-              {errors.name && (
-                <p className="text-sm text-red-400 mb-1">
-                  {errors.name.message}
-                </p>
-              )}
+              {errors.name && <p className="text-sm text-red-400 mb-1">{errors.name.message}</p>}
               <Input
                 {...register("name")}
                 placeholder="Название доски"
-                className={
-                  errors.name &&
-                  "border-red-400 text-red-400 placeholder:text-red-400"
-                }
+                className={errors.name ? "border-red-400 text-red-400 placeholder:text-red-400" : ""}
               />
             </div>
 
+            {/* Описание */}
             <div>
-              {errors.description && (
-                <p className="text-sm text-red-400 mb-1">
-                  {errors.description.message}
-                </p>
-              )}
+              {errors.description && <p className="text-sm text-red-400 mb-1">{errors.description.message}</p>}
               <Textarea
                 {...register("description")}
                 placeholder="Описание (необязательно)"
-                className={`resize-none ${
-                  errors.description &&
-                  "border-red-400 text-red-400 placeholder:text-red-400"
-                }`}
+                className={`resize-none ${errors.description ? "border-red-400 text-red-400 placeholder:text-red-400" : ""}`}
               />
             </div>
 
+            {/* Выбор шаблона */}
             <div>
               <Label className="text-lg mb-2 block">Выберите шаблон:</Label>
               <section className="grid grid-cols-1 xl:grid-cols-2 gap-5 p-1">
@@ -176,22 +191,17 @@ const NewBoardForm = () => {
                     key={template.id}
                     onClick={() => setValue("templateId", template.id)}
                     className={`text-left rounded-2xl transition-all border cursor-pointer ${
-                      selectedTemplateId === template.id
-                        ? "outline-2 outline-neutral-400"
-                        : "hover:outline-1 hover:outline-neutral-300"
+                      selectedTemplateId === template.id ? "outline-2 outline-neutral-400" : "hover:outline-1 hover:outline-neutral-300"
                     }`}
                   >
                     <BoardTemplate template={template} />
                   </div>
                 ))}
               </section>
-              {errors.templateId && (
-                <p className="text-sm text-red-400 mt-1">
-                  {errors.templateId.message}
-                </p>
-              )}
+              {errors.templateId && <p className="text-sm text-red-400 mt-1">{errors.templateId.message}</p>}
             </div>
 
+            {/* Тип доски */}
             <div>
               <Label className="text-lg mb-2 block">Тип доски:</Label>
               <div className="flex gap-3 items-center">
@@ -204,21 +214,39 @@ const NewBoardForm = () => {
               </div>
             </div>
 
+            {/* Добавление участников */}
             {!boardType && (
               <div>
-                {errors.members && (
-                  <p className="text-sm text-red-400 mb-1">
-                    {errors.members.message}
-                  </p>
-                )}
+                {errors.members && <p className="text-sm text-red-400 mb-1">{errors.members.message}</p>}
                 <Input
                   placeholder="Добавьте участников"
                   {...register("members")}
-                  className={
-                    errors.members &&
-                    "border-red-400 text-red-400 placeholder:text-red-400"
-                  }
+                  className={errors.members ? "border-red-400 text-red-400 placeholder:text-red-400" : ""}
+                  value={findMembersInput}
+                  onChange={e => {
+                    const value = e.target.value;
+                    setFindMembersInput(value);
+                    handleFindMembers(value);
+                    console.log(data)
+                    console.log(error)
+                  }}
                 />
+
+                {findMembersInput.length > 0 && (
+                  <div className="w-full grid gap-4 p-2 grid-cols-5">
+                    {loading && (
+                      <>
+                        {[...Array(5)].map((_, idx) => <Skeleton key={idx} className="h-full rounded-[5px]" />)}
+                      </>
+                    )}
+
+                    {data?.findMembers && data.findMembers.length > 0 ? (
+                      data.findMembers.map(member => <Member key={member.id} user={member} />)
+                    ) : (
+                      !loading && <div className="w-full text-center text-sm">К сожалению ничего не найдено</div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

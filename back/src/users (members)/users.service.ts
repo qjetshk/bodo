@@ -22,6 +22,8 @@ export class UsersService {
         nickName: true,
         avatarUrl: true,
         email: true,
+        createdAt: true,
+        updatedAt: true
       },
     });
 

@@ -17,9 +17,10 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  app.enableCors({
-    origin: config.getOrThrow<string>('FRONTEND_URL')
-  })
+  /*   app.enableCors({
+      origin: config.getOrThrow<string>('FRONTEND_URL'),
+      credentials: true,
+    }) */
 
   /*   // Задаём диапазон портов как массив
   const port = await getPort({ port: Array.from({ length: 101 }, (_, i) => 4200 + i) });
@@ -29,7 +30,7 @@ async function bootstrap() {
 
   console.log(`Application is running on port ${port}`); */
 
-  await app.listen(env.PORT ?? 4200);
+  await app.listen(env.PORT ?? 4200, "0.0.0.0");
   console.log(`app is running on ${env.PORT ?? 4200}`);
 }
 

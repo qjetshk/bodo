@@ -5,10 +5,10 @@ import { JwtPayload } from 'src/auth/interfaces/jwt.interface';
 
 export const CurrentUserId = createParamDecorator(async (data: unknown, ctx: ExecutionContext) => {
   const gqlCtx = GqlExecutionContext.create(ctx).getContext();
-  const refreshToken = gqlCtx.req.cookies['refreshToken'];
+  const refreshToken = gqlCtx.req.cookies['accessToken'];
 
   if (!refreshToken) {
-    throw new UnauthorizedException('Нет refresh token');
+    throw new UnauthorizedException('Нет access token');
   }
 
   const jwtService = gqlCtx.jwtService as JwtService;

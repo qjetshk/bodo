@@ -13,7 +13,7 @@ input FindMemberInput {
 }
 
 type Mutation {
-  findMembers(member: FindMemberInput!): User!
+  findMembers(member: FindMemberInput!): [User!]!
 }
 
 type Query {

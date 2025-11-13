@@ -8,7 +8,14 @@ export async function getGraphQlConfig(configService: ConfigService): Promise<Ap
     driver: ApolloDriver,
     autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
     sortSchema: true,
-    playground: isDev(configService),
+    //playground: isDev(configService),
+    playground: {
+      settings: {
+        // Needed for auth
+        // Docs: https://github.com/prisma/graphql-playground
+        ['request.credentials']: 'same-origin',
+      }
+    },
     context: ({ req, res }) => ({ req, res }),
     subscriptions: {
       'graphql-ws': true,
