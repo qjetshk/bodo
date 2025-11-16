@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { Column } from 'src/board/models/column.model';
 import { TaskAssignment } from './task-assignment.model';
+import { Comment } from './comment.model';
 
 @ObjectType()
 export class Task {

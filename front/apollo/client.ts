@@ -14,8 +14,8 @@ const WS_URL =
 
 // ✅ 1. HTTP линк (для query и mutation)
 const httpLink = new HttpLink({
-    uri: '/graphql',
-    credentials: 'same-origin', // чтобы куки передавались
+    uri: HTTP_URL,
+    credentials: 'include', // чтобы куки передавались
 });
 
 // ✅ 2. Auth линк — добавляем токен в headers
@@ -36,7 +36,7 @@ const wsLink =
     typeof window !== 'undefined'
         ? new GraphQLWsLink(
             createClient({
-                url: 'ws://localhost:4200/graphql', /* WS_URL */
+                url: WS_URL,
                 connectionParams: () => {
                     const token = localStorage.getItem('accessToken');
                     return {

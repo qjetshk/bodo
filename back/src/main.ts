@@ -17,10 +17,10 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  /*   app.enableCors({
+    app.enableCors({
       origin: config.getOrThrow<string>('FRONTEND_URL'),
       credentials: true,
-    }) */
+    })
 
   /*   // Задаём диапазон портов как массив
   const port = await getPort({ port: Array.from({ length: 101 }, (_, i) => 4200 + i) });

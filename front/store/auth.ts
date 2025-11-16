@@ -10,6 +10,7 @@ export const auth = createApi({
   reducerPath: "auth",
   baseQuery: fetchBaseQuery({
     baseUrl: `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth`,
+    credentials: 'include',
 
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("accessToken");
@@ -37,6 +38,7 @@ export const auth = createApi({
         url: "login",
         method: "POST",
         body: data,
+        credentials: 'include',
       }),
       invalidatesTags: ["Auth"],
       async onQueryStarted(_, { queryFulfilled }) {
@@ -54,6 +56,7 @@ export const auth = createApi({
       query: () => ({
         url: "/logout",
         method: "POST",
+        
       }),
       invalidatesTags: ["Auth"],
       async onQueryStarted(_, { queryFulfilled }) {

@@ -1,5 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "motion/react";
+import { useMutation, useQuery } from "@apollo/client/react";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -8,146 +14,86 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
+  CardDescription,
   CardTitle,
 } from "@/components/ui/card";
+
 import BoardTemplate from "./BoardTemplate";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { MembersInput, MemberType } from "./MembersInput";
+
 import { AddBoardForm } from "@/types/add-board-form.type";
-import React, { useState } from "react";
-import { motion } from "motion/react";
-import { useMutation } from "@apollo/client/react";
-import { FIND_MEMBERS, FindMembersInput, FindMembersData } from "@/apollo/requests/members";
+import {
+  FIND_MEMBERS,
+  FindMembersData,
+  FindMembersInput,
+} from "@/apollo/requests/members";
+import {
+  GET_BOARD_TEMPLATES,
+  GetTemplatesData,
+} from "@/apollo/requests/templates";
 import { Skeleton } from "@/components/ui/skeleton";
-import Member from './Member';
 
-const templates = [
-  {
-    id: "asdsdq",
-    name: "Классический Kanban",
-    description: "Базовый канбан из трёх колонок",
-    columns: [
-      { title: "To Do", order: 1 },
-      { title: "In Progress", order: 2 },
-      { title: "Done", order: 3 },
-    ],
-  },
-  {
-    id: "asdsda",
-    name: "Разработка ПО",
-    description: "Типовой процесс разработки задач",
-    columns: [
-      { title: "Backlog", order: 1 },
-      { title: "In Progress", order: 2 },
-      { title: "Code Review", order: 3 },
-      { title: "Testing", order: 4 },
-      { title: "Done", order: 5 },
-    ],
-  },
-  {
-    id: "asdsdz",
-    name: "Маркетинг-кампания",
-    description: "От идей до выполнения маркетинговых задач",
-    columns: [
-      { title: "Ideas", order: 1 },
-      { title: "Planning", order: 2 },
-      { title: "Designing", order: 3 },
-      { title: "Executing", order: 4 },
-      { title: "Completed", order: 5 },
-    ],
-  },
-  {
-    id: "asdsds",
-    name: "Личный To-Do",
-    description: "Простой шаблон для личных задач",
-    columns: [
-      { title: "Tasks", order: 1 },
-      { title: "In Progress", order: 2 },
-      { title: "Done", order: 3 },
-    ],
-  },
-  {
-    id: "asdsdd",
-    name: "Учёба / Обучение",
-    description: "Контроль учебных задач и целей",
-    columns: [
-      { title: "To Study", order: 1 },
-      { title: "Studying", order: 2 },
-      { title: "Review", order: 3 },
-      { title: "Completed", order: 4 },
-    ],
-  },
-  {
-    id: "asdsdf",
-    name: "Scrum Board",
-    description: "Рабочий процесс для команд, использующих Scrum",
-    columns: [
-      { title: "Product Backlog", order: 1 },
-      { title: "Sprint Backlog", order: 2 },
-      { title: "In Progress", order: 3 },
-      { title: "In Review", order: 4 },
-      { title: "Done", order: 5 },
-    ],
-  },
-];
+export default function NewBoardForm() {
+  const [findMembersInput, setFindMembersInput] = useState("");
+  const [findMembers, { data, loading }] = useMutation<
+    FindMembersData,
+    { member: FindMembersInput["member"] }
+  >(FIND_MEMBERS);
 
-const NewBoardForm = () => {
+  const { data: templates, loading: loadingTemplates } =
+    useQuery<GetTemplatesData>(GET_BOARD_TEMPLATES);
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    setValue,
     watch,
+    setValue,
+    formState: { errors },
   } = useForm<AddBoardForm>({
     resolver: zodResolver(AddBoardForm),
     defaultValues: {
       name: "",
       description: "",
-      templateId: templates[0].id,
+      templateId: templates?.getAllBoardTemplates[0]?.id ?? "",
       boardType: false,
       members: [],
     },
   });
 
-  // Apollo useMutation с корректной типизацией
-  const [findMembers, { data, loading, error }] = useMutation<
-    FindMembersData,
-    { member: FindMembersInput['member'] }
-  >(FIND_MEMBERS);
-
-  const selectedTemplateId = watch("templateId");
   const boardType = watch("boardType");
+  const formMemberIds = watch("members") || [];
 
-  const [findMembersInput, setFindMembersInput] = useState('');
+  // Автоматическая очистка участников при переключении на приватную доску
+  useEffect(() => {
+    if (boardType) {
+      setValue("members", []);
+    }
+  }, [boardType, setValue]);
+
+  const handleFindMembers = (value: string) => {
+    if (value.trim().length) {
+      findMembers({
+        variables: { member: { nickName: value, email: value } },
+      });
+    }
+  };
 
   const onSubmit: SubmitHandler<AddBoardForm> = (formData) => {
     console.log("Форма успешно отправлена", formData);
   };
 
-  // Обновляем участников
-  const handleFindMembers = (value: string) => {
-    if (value.trim().length) {
-      findMembers({
-        variables: {
-          member: {
-            nickName: value,
-            email: value
-          }
-        }
-      });
-    }
-  };
+  // Преобразуем id участников из формы в объекты MemberType для отображения
+  const selectedMembers: MemberType[] = formMemberIds
+    .map((id) => data?.findMembers?.find((m) => m.id === id))
+    .filter(Boolean) as MemberType[];
+
+  const selectedTemplateId = watch("templateId");
 
   return (
     <motion.div
       initial={{ y: 10, opacity: 0 }}
-      animate={{
-        y: 0,
-        opacity: 1,
-        transition: { duration: 0.5 },
-      }}
+      animate={{ y: 0, opacity: 1, transition: { duration: 0.5 } }}
     >
       <Card className="max-w-5xl mx-auto">
         <CardHeader>
@@ -164,21 +110,25 @@ const NewBoardForm = () => {
           >
             {/* Название доски */}
             <div>
-              {errors.name && <p className="text-sm text-red-400 mb-1">{errors.name.message}</p>}
-              <Input
-                {...register("name")}
-                placeholder="Название доски"
-                className={errors.name ? "border-red-400 text-red-400 placeholder:text-red-400" : ""}
-              />
+              {errors.name?.message && (
+                <p className="text-sm text-red-400 mb-1">
+                  {errors.name.message}
+                </p>
+              )}
+              <Input {...register("name")} placeholder="Название доски" />
             </div>
 
             {/* Описание */}
             <div>
-              {errors.description && <p className="text-sm text-red-400 mb-1">{errors.description.message}</p>}
+              {errors.description?.message && (
+                <p className="text-sm text-red-400 mb-1">
+                  {errors.description.message}
+                </p>
+              )}
               <Textarea
                 {...register("description")}
+                className="resize-none"
                 placeholder="Описание (необязательно)"
-                className={`resize-none ${errors.description ? "border-red-400 text-red-400 placeholder:text-red-400" : ""}`}
               />
             </div>
 
@@ -186,19 +136,33 @@ const NewBoardForm = () => {
             <div>
               <Label className="text-lg mb-2 block">Выберите шаблон:</Label>
               <section className="grid grid-cols-1 xl:grid-cols-2 gap-5 p-1">
-                {templates.map((template) => (
-                  <div
-                    key={template.id}
-                    onClick={() => setValue("templateId", template.id)}
-                    className={`text-left rounded-2xl transition-all border cursor-pointer ${
-                      selectedTemplateId === template.id ? "outline-2 outline-neutral-400" : "hover:outline-1 hover:outline-neutral-300"
-                    }`}
-                  >
-                    <BoardTemplate template={template} />
-                  </div>
-                ))}
+                {templates &&
+                templates.getAllBoardTemplates.length > 0 &&
+                !loadingTemplates ? (
+                  templates.getAllBoardTemplates.map((template) => (
+                    <div
+                      key={template.id}
+                      onClick={() => setValue("templateId", template.id)}
+                      className={`text-left rounded-2xl transition-all border cursor-pointer ${
+                        selectedTemplateId === template.id
+                          ? "outline-2 outline-neutral-400"
+                          : "hover:outline-1 hover:outline-neutral-300"
+                      }`}
+                    >
+                      <BoardTemplate template={template} />
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <Skeleton className="h-full min-h-[250px]" />
+                    <Skeleton className="h-full min-h-[250px]" />
+                    <Skeleton className="h-full min-h-[250px]" />
+                    <Skeleton className="h-full min-h-[250px]" />
+                    <Skeleton className="h-full min-h-[250px]" />
+                    <Skeleton className="h-full min-h-[250px]" />
+                  </>
+                )}
               </section>
-              {errors.templateId && <p className="text-sm text-red-400 mt-1">{errors.templateId.message}</p>}
             </div>
 
             {/* Тип доски */}
@@ -214,40 +178,25 @@ const NewBoardForm = () => {
               </div>
             </div>
 
-            {/* Добавление участников */}
+            {/* Добавление участников только для публичной доски */}
             {!boardType && (
-              <div>
-                {errors.members && <p className="text-sm text-red-400 mb-1">{errors.members.message}</p>}
-                <Input
-                  placeholder="Добавьте участников"
-                  {...register("members")}
-                  className={errors.members ? "border-red-400 text-red-400 placeholder:text-red-400" : ""}
-                  value={findMembersInput}
-                  onChange={e => {
-                    const value = e.target.value;
-                    setFindMembersInput(value);
-                    handleFindMembers(value);
-                    console.log(data)
-                    console.log(error)
-                  }}
-                />
-
-                {findMembersInput.length > 0 && (
-                  <div className="w-full grid gap-4 p-2 grid-cols-5">
-                    {loading && (
-                      <>
-                        {[...Array(5)].map((_, idx) => <Skeleton key={idx} className="h-full rounded-[5px]" />)}
-                      </>
-                    )}
-
-                    {data?.findMembers && data.findMembers.length > 0 ? (
-                      data.findMembers.map(member => <Member key={member.id} user={member} />)
-                    ) : (
-                      !loading && <div className="w-full text-center text-sm">К сожалению ничего не найдено</div>
-                    )}
-                  </div>
-                )}
-              </div>
+              <MembersInput
+                findMembersInput={findMembersInput}
+                setFindMembersInput={setFindMembersInput}
+                handleFindMembers={handleFindMembers}
+                data={{
+                  findMembers: data?.findMembers?.map((m) => ({
+                    id: m.id,
+                    email: m.email,
+                    nickName: m.nickName,
+                    avatarUrl: m.avatarUrl,
+                  })),
+                }}
+                loading={loading}
+                errors={errors}
+                setValue={setValue}
+                formMembers={selectedMembers}
+              />
             )}
 
             <Button type="submit" size="lg" className="mt-4">
@@ -258,6 +207,4 @@ const NewBoardForm = () => {
       </Card>
     </motion.div>
   );
-};
-
-export default NewBoardForm;
+}

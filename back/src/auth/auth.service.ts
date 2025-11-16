@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterRequest } from './dto/register.dto';
 import { hash, verify } from 'argon2';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt'; 
+import { JwtService } from '@nestjs/jwt';
 import { JwtPayload, StringValue } from './interfaces/jwt.interface';
 import { LoginRequest } from './dto/login.dto';
 import { Request, Response } from 'express';
@@ -54,7 +54,7 @@ export class AuthService {
       }
     })
 
-    return {message: 'Вы успешно зарегистировались!'}
+    return { message: 'Вы успешно зарегистировались!' }
   }
 
   async login(res: Response, dto: LoginRequest) {
@@ -100,7 +100,7 @@ export class AuthService {
         throw new NotFoundException('Такой пользователь не найден');
       }
 
-      return {accessToken: this.auth(res, user.id)};
+      return { accessToken: this.auth(res, user.id) };
     }
   }
 
@@ -144,13 +144,25 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  private setCookie(res: Response, value: string, expires: Date) {
+  /* private setCookie(res: Response, value: string, expires: Date) {
     res.cookie('refreshToken', value, {
       httpOnly: true,
       domain: this.COOKIE_DOMAIN,
       expires,
       secure: !isDev(this.configService),
-      sameSite: isDev(this.configService) ? 'none' : 'lax',
+      sameSite: !isDev(this.configService) ? 'none' : 'lax',
+    });
+  } */
+
+
+    // for codespaces in VsCode Desktop //127.0.0 ...
+  private setCookie(res: Response, value: string, expires: Date) {
+    res.cookie('refreshToken', value, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+      expires,
     });
   }
+
 }

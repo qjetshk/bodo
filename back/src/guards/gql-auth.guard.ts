@@ -12,9 +12,9 @@ export class GqlAuthGuard implements CanActivate {
     const req = gqlCtx.req;
 
     // Берём токен из cookie
-    const token = req.cookies['accessToken'];
+    const token = req.cookies['refreshToken'];
     if (!token) {
-      throw new UnauthorizedException('Нет access token');
+      throw new UnauthorizedException('Нет refresh token');
     }
 
     try {

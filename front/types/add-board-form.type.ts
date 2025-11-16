@@ -8,17 +8,26 @@ export const AddBoardForm = z
       .max(100, "Описание не должно быть больше 100 символов!")
       .optional(),
     templateId: z.string().min(1, "Выберите шаблон!"),
-    boardType: z.boolean(),
+    boardType: z.boolean(), // false - публичная, true - приватная
     members: z.array(z.string()).optional(),
   })
   .superRefine((data, ctx) => {
-
     if (data.boardType === false) {
+      // публичная доска → нужно хотя бы одного участника
       if (!data.members || data.members.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["members"],
           message: "Добавьте хотя бы одного участника для публичной доски!",
+        });
+      }
+    } else {
+      // приватная доска → members всегда пустой
+      if (data.members && data.members.length > 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["members"],
+          message: "Для приватной доски массив участников должен быть пустым",
         });
       }
     }

@@ -13,8 +13,16 @@ export class UsersService {
           id: currentUserId,
         },
         OR: [
-          { nickName: input.nickName },
-          { email: input.email }, 
+          {
+            nickName: {
+              contains: input.nickName?.toLocaleLowerCase(),
+            },
+          },
+          {
+            email: {
+              contains: input.email?.toLocaleLowerCase(),
+            },
+          },
         ],
       },
       select: {
@@ -23,7 +31,7 @@ export class UsersService {
         avatarUrl: true,
         email: true,
         createdAt: true,
-        updatedAt: true
+        updatedAt: true,
       },
     });
 

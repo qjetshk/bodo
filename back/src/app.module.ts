@@ -11,8 +11,10 @@ import { TemplateModule } from './template/template.module';
 import { AppResolver } from './app.resolver';
 import { PubsubModule } from './pubsub/pubsub.module';
 import { UsersModule } from './users (members)/users.module';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { getJwtConfig } from './config/jwt.config';
+import { join } from 'path';
+import { isDev } from './utils/is-dev.util';
 
 @Module({
   imports: [
@@ -22,9 +24,17 @@ import { getJwtConfig } from './config/jwt.config';
     GraphQLModule.forRootAsync({
       imports: [ConfigModule],
       driver: ApolloDriver,
-      useFactory: getGraphQlConfig,
-      inject: [ConfigService],
-      
+      inject: [ConfigService, JwtService],
+      useFactory: async (configService: ConfigService, jwtService: JwtService) => ({
+        driver: ApolloDriver,
+        autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+        sortSchema: true,
+        playground: isDev(configService) && {
+          settings: { 'request.credentials': 'include' },
+        },
+        context: ({ req, res }) => ({ req, res, jwtService }), 
+        subscriptions: { 'graphql-ws': true },
+      }),
     }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
