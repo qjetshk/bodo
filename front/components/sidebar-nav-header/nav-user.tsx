@@ -29,14 +29,16 @@ import { User } from "@/types/auth.type";
 import { useLogoutMutation } from "@/store/auth";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Dialog, DialogTrigger } from "./ui/dialog";
-import Account from "./Account";
-import NotificationsModal from "./NotificationsModal";
 import { getAvatarFallback } from "@/utils/avatar-fallback.util";
+import NotificationsModal from "../notifications/NotificationsModal";
+import { DialogTrigger, Dialog } from "../ui/dialog";
+import Account from "../Account";
+import { useState } from "react";
 
 export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
 
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   const [logout] = useLogoutMutation();
   const router = useRouter();
@@ -114,15 +116,19 @@ export function NavUser({ user }: { user: User }) {
                 <Account />
               </Dialog>
 
-              <Dialog>
+              <Dialog open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
                 <DialogTrigger asChild>
-                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <DropdownMenuItem
+                    onSelect={(e) => { e.preventDefault(); }}
+                  >
                     <Bell />
                     Уведомления
                   </DropdownMenuItem>
                 </DialogTrigger>
-                <NotificationsModal/>
+
+                <NotificationsModal isOpened={isNotificationsOpen} />
               </Dialog>
+
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator />

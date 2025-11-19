@@ -9,7 +9,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/sidebar-nav-header/app-sidebar";
 import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -20,7 +20,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import DashBoardHeader from "@/components/DashBoardHeader";
+import DashBoardHeader from "@/components/sidebar-nav-header/DashBoardHeader"; 
 import PrivateRoute from "./PrivateRoute";
 import { ScrollArea } from "@/components/ui/scroll-area";
 

@@ -1,3 +1,5 @@
+
+import { GetAllBoardTemplatesQuery } from "@/apollo/gql/graphql";
 import {
   Card,
   CardContent,
@@ -7,9 +9,12 @@ import {
 } from "@/components/ui/card";
 import React from "react";
 
+
 interface Props {
-  template: Template;
+  template: BoardTemplateType;
 }
+
+type BoardTemplateType = GetAllBoardTemplatesQuery['getAllBoardTemplates'][number];
 
 interface Template {
   id: string;
@@ -26,9 +31,11 @@ interface Column {
 const BoardTemplate = ({ template }: Props) => {
   const titlesString = template.columns
     .slice()
-    .sort((a, b) => a.order - b.order) 
-    .map((col) => col.title)
+    .sort((a, b) => a.order - b.order)
+    .map(col => col.title)
     .join(" | ");
+
+
 
   return (
     <Card className="h-full cursor-pointer min-h-[250px]">

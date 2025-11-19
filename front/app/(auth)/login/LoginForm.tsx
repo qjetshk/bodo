@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useLoginMutation } from "@/store/auth";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { apolloClient } from "@/apollo/client";
 
 type LoginRequest = Omit<RegisterLoginForm, "nickName">;
 
@@ -29,9 +30,10 @@ export const LoginForm: React.FC = () => {
     console.log(formData);
     try {
       await login(formData).unwrap();
+      apolloClient.resetStore()
       toast.success("Вы успешно вошли!", { duration: 1000 });
       setTimeout(() => {
-        router.push("/dashboard");
+        router.replace("/dashboard");
       }, 1000);
     } catch (err: unknown) {
       if (typeof err === "object" && err && "data" in err) {

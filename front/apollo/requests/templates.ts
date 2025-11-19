@@ -1,20 +1,7 @@
-import { gql } from "@apollo/client";
+import { graphql } from "../gql";
 
-export interface GetTemplatesData {
-  getAllBoardTemplates: {
-    id: string;
-    name: string;
-    description: string;
-    columns: Column[];
-  }[];
-}
 
-interface Column {
-  title: string;
-  order: number;
-}
-
-export const GET_BOARD_TEMPLATES = gql`
+export const GET_BOARD_TEMPLATES = graphql(`
   query GetAllBoardTemplates {
     getAllBoardTemplates {
       id
@@ -26,4 +13,4 @@ export const GET_BOARD_TEMPLATES = gql`
       }
     }
   }
-`;
+`);

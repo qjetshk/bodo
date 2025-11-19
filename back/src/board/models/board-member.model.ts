@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { Board } from './board.model';
 import { User } from 'src/users (members)/models/user.model';
+import { DateTimeResolver } from 'graphql-scalars';
 
 @ObjectType()
 export class BoardMember {
@@ -22,9 +23,9 @@ export class BoardMember {
   @Field()
   role: string;
 
-  @Field()
+  @Field(() => DateTimeResolver)
   createdAt: Date;
 
-  @Field()
+  @Field(() => DateTimeResolver)
   updatedAt: Date;
 }

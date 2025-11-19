@@ -1,7 +1,7 @@
 "use client";
 import { WORDS } from "@/data/words.data";
 import { BgImage } from "./BgImage";
-import TypingAnimation from "./TypeWriter";
+import TypingAnimation from "../TypeWriter";
 import { motion } from "motion/react";
 
 interface Props {

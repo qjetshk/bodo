@@ -3,6 +3,7 @@ import { BoardMember } from './board-member.model';
 import { Column } from './column.model';
 import { BoardTemplate } from 'src/template/models/board-template.model';
 import { User } from 'src/users (members)/models/user.model';
+import { DateTimeResolver } from 'graphql-scalars';
 
 @ObjectType()
 export class Board {
@@ -36,10 +37,10 @@ export class Board {
   @Field({ nullable: true })
   boardTemplateId?: string;
 
-  @Field()
+  @Field(() => DateTimeResolver)
   createdAt: Date;
 
-  @Field()
+  @Field(() => DateTimeResolver)
   updatedAt: Date;
 }
 

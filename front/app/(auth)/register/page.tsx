@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { BgImage } from "@/components/BgImage";
-import { BgSection } from "@/components/BgSection";
+import { BgImage } from "@/components/bg/BgImage";
+import { BgSection } from "@/components/bg/BgSection";
 import { MotionDiv } from "@/components/MotionDiv";
 import { RegisterForm } from "./RegisterForm";
 import { Metadata } from "next";

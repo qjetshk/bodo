@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { Board } from 'src/board/models/board.model';
 import { ColumnTemplate } from './column-template.model';
+import { DateTimeResolver } from 'graphql-scalars';
 
 
 @ObjectType()
@@ -20,9 +21,9 @@ export class BoardTemplate {
   @Field(() => [Board])
   boards: Board[];
 
-  @Field()
+  @Field(() => DateTimeResolver)
   createdAt: Date;
 
-  @Field()
+  @Field(() => DateTimeResolver)
   updatedAt: Date;
 }

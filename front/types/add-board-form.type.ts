@@ -2,19 +2,19 @@ import { z } from "zod";
 
 export const AddBoardForm = z
   .object({
-    name: z.string().min(1, "Введите название доски!"),
+    name: z.string().min(1, "Введите название доски!").max(100, 'Название не должно быть больше 100 символов!'),
     description: z
       .string()
       .max(100, "Описание не должно быть больше 100 символов!")
       .optional(),
-    templateId: z.string().min(1, "Выберите шаблон!"),
+    boardTemplateId: z.string().min(1, "Выберите шаблон!"),
     boardType: z.boolean(), // false - публичная, true - приватная
-    members: z.array(z.string()).optional(),
+    membersToAdd: z.array(z.string()).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.boardType === false) {
       // публичная доска → нужно хотя бы одного участника
-      if (!data.members || data.members.length === 0) {
+      if (!data.membersToAdd || data.membersToAdd.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["members"],
@@ -23,7 +23,7 @@ export const AddBoardForm = z
       }
     } else {
       // приватная доска → members всегда пустой
-      if (data.members && data.members.length > 0) {
+      if (data.membersToAdd && data.membersToAdd.length > 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["members"],

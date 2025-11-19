@@ -45,6 +45,7 @@ Table board_invitations {
   userId String [not null]
   status InvitationStatus [not null, default: 'PENDING']
   createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
 
   indexes {
     (boardId, userId) [unique]
@@ -98,6 +99,7 @@ Table task_assignments {
   task tasks [not null]
   taskId String [not null]
   createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
 
   indexes {
     (userId, taskId) [unique]
@@ -145,7 +147,7 @@ Ref: boards.ownerId > users.id
 
 Ref: boards.boardTemplateId > board_templates.id
 
-Ref: board_invitations.boardId > boards.id
+Ref: board_invitations.boardId > boards.id [delete: Cascade]
 
 Ref: board_invitations.invitedById > users.id
 
@@ -153,20 +155,20 @@ Ref: board_invitations.userId > users.id
 
 Ref: board_members.userId > users.id
 
-Ref: board_members.boardId > boards.id
+Ref: board_members.boardId > boards.id [delete: Cascade]
 
-Ref: columns.boardId > boards.id
+Ref: columns.boardId > boards.id [delete: Cascade]
 
-Ref: tasks.columnId > columns.id
+Ref: tasks.columnId > columns.id [delete: Cascade]
 
 Ref: tasks.performerId > users.id
 
 Ref: task_assignments.userId > users.id
 
-Ref: task_assignments.taskId > tasks.id
+Ref: task_assignments.taskId > tasks.id [delete: Cascade]
 
 Ref: comments.authorId > users.id
 
-Ref: comments.taskId > tasks.id
+Ref: comments.taskId > tasks.id [delete: Cascade]
 
 Ref: column_templates.templateId > board_templates.id

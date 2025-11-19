@@ -11,6 +11,7 @@ export interface NavSubItem {
   title: string;
   url: string;
   isActive?: boolean;
+  description?: string
 }
 
 export interface NavMainItem {
@@ -41,16 +42,13 @@ export const MENU_BAR: SidebarData = {
       isMain: false,
       items: [
         {
-          title: "1",
-          url: "/1",
-        },
-        {
           title: "+ Новая доска",
           url: "/new",
+          description: "Создать новую доску"
         },
       ],
     },
-    {
+    /* {
       title: "Documentation",
       url: "#",
       icon: BookOpen,
@@ -73,8 +71,8 @@ export const MENU_BAR: SidebarData = {
           url: "#",
         },
       ],
-    },
-    {
+    }, */
+    /* {
       title: "Settings",
       url: "settings",
       icon: Settings2,
@@ -97,7 +95,7 @@ export const MENU_BAR: SidebarData = {
           url: "#",
         },
       ],
-    },
+    }, */
   ],
 };
 

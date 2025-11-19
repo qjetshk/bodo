@@ -9,7 +9,6 @@ export class TemplateResolver {
   @Query(() => [BoardTemplate])
   async getAllBoardTemplates() {
     const templates = await this.templateService.getAllBoardTemplates();
-    console.log('Templates from DB:', templates);
     return templates;
   }
 }

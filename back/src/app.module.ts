@@ -32,8 +32,41 @@ import { isDev } from './utils/is-dev.util';
         playground: isDev(configService) && {
           settings: { 'request.credentials': 'include' },
         },
-        context: ({ req, res }) => ({ req, res, jwtService }), 
-        subscriptions: { 'graphql-ws': true },
+        context: ({ req, extra }) => {
+          // extra приходит из onConnect
+          // extra.user должен содержать payload из JWT
+          if (extra?.user) {
+            return { user: extra.user };
+          } 
+
+          // для обычных HTTP запросов
+          return { req, jwtService };
+        },
+
+        subscriptions: {
+          'graphql-ws': {
+            onConnect: async (ctx) => {
+              const { extra } = ctx;
+              console.log(ctx.connectionParams)
+              const token = ctx.connectionParams?.Authorization?.replace('Bearer ', '');
+              if (!token) {
+                console.log('No JWT provided in connectionParams');
+                return false; // подписка не активна
+              }
+
+              try {
+                const payload = await jwtService.verifyAsync(token);
+                console.log('WS connected', { user: payload });
+                extra.user = payload
+                return { user: payload };
+              } catch (err) {
+                console.log('JWT verification failed:', err.message);
+                return false;
+              }
+            }
+          }
+        }
+
       }),
     }),
     JwtModule.registerAsync({
@@ -50,4 +83,4 @@ import { isDev } from './utils/is-dev.util';
   ],
   providers: [AppResolver],
 })
-export class AppModule {}
+export class AppModule { }

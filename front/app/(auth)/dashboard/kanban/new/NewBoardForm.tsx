@@ -25,49 +25,74 @@ import { MembersInput, MemberType } from "./MembersInput";
 import { AddBoardForm } from "@/types/add-board-form.type";
 import {
   FIND_MEMBERS,
-  FindMembersData,
-  FindMembersInput,
 } from "@/apollo/requests/members";
 import {
   GET_BOARD_TEMPLATES,
-  GetTemplatesData,
 } from "@/apollo/requests/templates";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CREATE_BOARD, GET_ALL_USER_BOARDS_FOR_NAVIGATION } from "@/apollo/requests/boards";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function NewBoardForm() {
+  const router = useRouter()
   const [findMembersInput, setFindMembersInput] = useState("");
-  const [findMembers, { data, loading }] = useMutation<
-    FindMembersData,
-    { member: FindMembersInput["member"] }
-  >(FIND_MEMBERS);
+  const [findMembers, { data, loading }] = useMutation(FIND_MEMBERS);
 
   const { data: templates, loading: loadingTemplates } =
-    useQuery<GetTemplatesData>(GET_BOARD_TEMPLATES);
+    useQuery(GET_BOARD_TEMPLATES);
+
+  const [sendForm, { data: boardData }] = useMutation(CREATE_BOARD, {
+    refetchQueries: [GET_ALL_USER_BOARDS_FOR_NAVIGATION]
+  })
 
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<AddBoardForm>({
     resolver: zodResolver(AddBoardForm),
     defaultValues: {
       name: "",
       description: "",
-      templateId: templates?.getAllBoardTemplates[0]?.id ?? "",
+      boardTemplateId: "",
       boardType: false,
-      members: [],
+      membersToAdd: [],
     },
   });
 
-  const boardType = watch("boardType");
-  const formMemberIds = watch("members") || [];
+  useEffect(() => {
+    if (!loadingTemplates && templates?.getAllBoardTemplates.length) {
+      reset({
+        name: "",
+        description: "",
+        boardTemplateId: templates.getAllBoardTemplates[0].id,
+        boardType: false,
+        membersToAdd: [],
+      });
+    }
+  }, [loadingTemplates, templates, reset]);
 
-  // Автоматическая очистка участников при переключении на приватную доску
+  useEffect(() => {
+    if (boardData) {
+      toast.success('Доска успешно создана!', { duration: 1500 })
+      setTimeout(() => {
+        router.push(`/dashboard/kanban/${boardData.createBoard.id}`)
+      }, 1000)
+
+    }
+  }, [boardData])
+
+
+  const boardType = watch("boardType");
+  const formMemberIds = watch("membersToAdd") || [];
+
   useEffect(() => {
     if (boardType) {
-      setValue("members", []);
+      setValue("membersToAdd", []);
     }
   }, [boardType, setValue]);
 
@@ -81,14 +106,17 @@ export default function NewBoardForm() {
 
   const onSubmit: SubmitHandler<AddBoardForm> = (formData) => {
     console.log("Форма успешно отправлена", formData);
+    sendForm({ variables: { boardInput: formData } })
   };
 
-  // Преобразуем id участников из формы в объекты MemberType для отображения
   const selectedMembers: MemberType[] = formMemberIds
     .map((id) => data?.findMembers?.find((m) => m.id === id))
     .filter(Boolean) as MemberType[];
 
-  const selectedTemplateId = watch("templateId");
+  const selectedTemplateId =
+    watch("boardTemplateId") ||
+    templates?.getAllBoardTemplates[0]?.id ||
+    "";
 
   return (
     <motion.div
@@ -108,17 +136,15 @@ export default function NewBoardForm() {
             className="flex flex-col gap-5 w-full overflow-x-hidden p-1"
             onSubmit={handleSubmit(onSubmit)}
           >
-            {/* Название доски */}
             <div>
               {errors.name?.message && (
                 <p className="text-sm text-red-400 mb-1">
                   {errors.name.message}
                 </p>
               )}
-              <Input {...register("name")} placeholder="Название доски" />
+              <Input maxLength={100} {...register("name")} placeholder="Название доски" />
             </div>
 
-            {/* Описание */}
             <div>
               {errors.description?.message && (
                 <p className="text-sm text-red-400 mb-1">
@@ -126,28 +152,27 @@ export default function NewBoardForm() {
                 </p>
               )}
               <Textarea
+                maxLength={100}
                 {...register("description")}
                 className="resize-none"
                 placeholder="Описание (необязательно)"
               />
             </div>
 
-            {/* Выбор шаблона */}
             <div>
               <Label className="text-lg mb-2 block">Выберите шаблон:</Label>
               <section className="grid grid-cols-1 xl:grid-cols-2 gap-5 p-1">
                 {templates &&
-                templates.getAllBoardTemplates.length > 0 &&
-                !loadingTemplates ? (
+                  templates.getAllBoardTemplates.length > 0 &&
+                  !loadingTemplates ? (
                   templates.getAllBoardTemplates.map((template) => (
                     <div
                       key={template.id}
-                      onClick={() => setValue("templateId", template.id)}
-                      className={`text-left rounded-2xl transition-all border cursor-pointer ${
-                        selectedTemplateId === template.id
-                          ? "outline-2 outline-neutral-400"
-                          : "hover:outline-1 hover:outline-neutral-300"
-                      }`}
+                      onClick={() => setValue("boardTemplateId", template.id)}
+                      className={`text-left rounded-2xl transition-all border cursor-pointer ${selectedTemplateId === template.id
+                        ? "outline-2 outline-neutral-400"
+                        : "hover:outline-1 hover:outline-neutral-300"
+                        }`}
                     >
                       <BoardTemplate template={template} />
                     </div>
@@ -165,7 +190,6 @@ export default function NewBoardForm() {
               </section>
             </div>
 
-            {/* Тип доски */}
             <div>
               <Label className="text-lg mb-2 block">Тип доски:</Label>
               <div className="flex gap-3 items-center">
@@ -178,7 +202,6 @@ export default function NewBoardForm() {
               </div>
             </div>
 
-            {/* Добавление участников только для публичной доски */}
             {!boardType && (
               <MembersInput
                 findMembersInput={findMembersInput}
@@ -189,7 +212,7 @@ export default function NewBoardForm() {
                     id: m.id,
                     email: m.email,
                     nickName: m.nickName,
-                    avatarUrl: m.avatarUrl,
+                    avatarUrl: m.avatarUrl ?? ""
                   })),
                 }}
                 loading={loading}

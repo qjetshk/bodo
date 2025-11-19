@@ -1,7 +1,7 @@
-import { BgSection } from "@/components/BgSection";
+import { BgSection } from "@/components/bg/BgSection";
 import FeatureCard from "@/components/FeatureCard";
 import { MotionDiv } from "@/components/MotionDiv";
-import NavBar from "@/components/NavBar";
+import NavBar from "@/components/sidebar-nav-header/NavBar";
 import { Button } from "@/components/ui/button";
 import { FEATURES_CARDS } from "@/data/features-cards.data";
 import Link from "next/link";

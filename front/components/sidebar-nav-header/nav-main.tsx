@@ -15,10 +15,10 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Tooltip, TooltipTrigger, TooltipContent } from "../ui/tooltip";
 
 export function NavMain({
   items,
@@ -32,6 +32,7 @@ export function NavMain({
       title: string;
       url: string;
       isActive?: boolean;
+      description?: string
     }[];
   }[];
 }) {
@@ -97,9 +98,9 @@ export function NavMain({
                 key={item.title}
                 asChild
                 defaultOpen={isActive}
-                className="group/collapsible"
+                className="group/collapsible "
               >
-                <SidebarMenuItem>
+                <SidebarMenuItem >
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton tooltip={item.title} isActive={isActive}>
                       {item.icon && <item.icon />}
@@ -108,39 +109,44 @@ export function NavMain({
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {item.items.map((subItem) => {
-                        const isSubItemActive =
-                          subItem.isActive !== false &&
-                          isLinkActive(subItem.url);
 
-                        return (
-                          <SidebarMenuSubItem key={subItem.title}>
-                            {subItem.isActive === false ? (
-                              // Неактивная дочерняя ссылка
-                              <SidebarMenuSubButton
-                                isActive={false}
-                                className="opacity-50 cursor-not-allowed"
-                              >
-                                <span>{subItem.title}</span>
-                              </SidebarMenuSubButton>
-                            ) : (
-                              // Активная дочерняя ссылка
-                              <SidebarMenuSubButton
-                                asChild
-                                isActive={isSubItemActive}
-                              >
-                                <Link
-                                  href={`/dashboard/${item.url}${subItem.url}`}
+                    <SidebarMenuSub className="max-h-[500px] overflow-auto scrollbar-track-neutral-900! scrollbar-thumb-neutral-800!">
+                      <ul className="flex flex-col">
+                        {item.items.map((subItem) => {
+                          const isSubItemActive =
+                            subItem.isActive !== false && isLinkActive(subItem.url);
+                          return (
+                            <li key={subItem.url}>
+                              {subItem.isActive === false ? (
+                                <SidebarMenuSubButton
+                                  isActive={false}
                                 >
                                   <span>{subItem.title}</span>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            )}
-                          </SidebarMenuSubItem>
-                        );
-                      })}
+                                </SidebarMenuSubButton>
+                              ) : (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <SidebarMenuSubButton
+                                      asChild
+                                      isActive={isSubItemActive}
+                                    >
+                                      <Link href={`/dashboard/${item.url}${subItem.url}`}>
+                                        <span>{subItem.title}</span>
+                                      </Link>
+                                    </SidebarMenuSubButton>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="right">
+                                    <p className="max-w-50 truncate">{subItem.description || subItem.title}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
                     </SidebarMenuSub>
+
+
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>

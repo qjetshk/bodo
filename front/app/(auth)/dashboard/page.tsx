@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import React from "react";
-import HelloPage from "./HelloPage";
+import DashBoard from "./DashBoardPage";
 
 export const metadata: Metadata = {
   title: "Bōdo - Дашбоард",
@@ -9,9 +9,8 @@ export const metadata: Metadata = {
 
 const DashBoardPage = () => {
 
-
   return (
-    <HelloPage/>
+    <DashBoard />
   );
 };
 

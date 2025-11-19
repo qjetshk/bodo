@@ -7,9 +7,10 @@ interface Props {
         id: string;
         email: string;
         nickName: string;
-        avatarUrl: string
+        avatarUrl?: string | ''; // <-- null теперь разрешён
     }
 }
+
 
 const Member = ({ user }: Props) => {
     return (

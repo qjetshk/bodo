@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { Task } from './task.model';
 import { User } from 'src/users (members)/models/user.model';
+import { DateTimeResolver } from 'graphql-scalars';
 
 @ObjectType()
 export class TaskAssignment {
@@ -19,6 +20,6 @@ export class TaskAssignment {
   @Field()
   taskId: string;
 
-  @Field()
+  @Field(() => DateTimeResolver)
   createdAt: Date;
 }

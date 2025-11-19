@@ -1,14 +1,18 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { auth } from "./auth";
+import navReducer from "./nav-main";
 
 export const store = configureStore({
   reducer: {
     [auth.reducerPath]: auth.reducer,
+    nav: navReducer,
   },
-
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat([auth.middleware]),
+  middleware: (getDefault) =>
+    getDefault({
+      serializableCheck: false,
+    }).concat(auth.middleware),
 });
+
 
 export type RootState = ReturnType<typeof store.getState>;
 

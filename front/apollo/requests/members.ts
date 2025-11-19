@@ -1,23 +1,7 @@
-import { gql } from "@apollo/client";
+import { graphql } from "../gql";
 
-export interface FindMembersInput {
-    member: {
-        nickName?: string
-        email?: string
-    }
 
-}
-
-export interface FindMembersData {
-    findMembers: {
-        id: string;
-        email: string;
-        nickName: string;
-        avatarUrl: string
-    }[];
-}
-
-export const FIND_MEMBERS = gql`
+export const FIND_MEMBERS = graphql(`
     mutation FindMembers($member: FindMemberInput!) {
         findMembers(member: $member) {
             id
@@ -26,4 +10,4 @@ export const FIND_MEMBERS = gql`
             avatarUrl
         }
     }
-`
+`)

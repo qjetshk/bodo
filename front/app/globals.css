@@ -153,3 +153,9 @@ button {
 input[type="checkbox"]{
   display: none;
 }
+
+.no-highlight[data-state="open"] {
+  background: transparent !important;
+  color: inherit !important;
+}
+

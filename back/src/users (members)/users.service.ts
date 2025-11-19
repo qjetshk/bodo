@@ -4,7 +4,7 @@ import { FindMemberInput } from './inputs/find-member.input';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
 
   async findMembers(input: FindMemberInput, currentUserId: string) {
     const members = await this.prismaService.user.findMany({
@@ -37,4 +37,17 @@ export class UsersService {
 
     return members;
   }
+
+  async getAllUserInvations(id: string) {
+    const invations = await this.prismaService.boardInvitation.findMany({
+      where: {
+        userId: id,
+        status: 'PENDING'
+      }
+    })
+
+    return invations
+  }
+
+
 }

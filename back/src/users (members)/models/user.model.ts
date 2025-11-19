@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { DateTimeResolver } from 'graphql-scalars';
 
 @ObjectType()
 export class User {
@@ -14,9 +15,9 @@ export class User {
   @Field({ nullable: true })
   avatarUrl?: string;
 
-  @Field()
+  @Field(() => DateTimeResolver)
   createdAt: Date;
 
-  @Field()
+  @Field(() => DateTimeResolver)
   updatedAt: Date;
-}
+} 

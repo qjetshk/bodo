@@ -1,25 +1,19 @@
 "use client";
+
 import React from "react";
-import { SidebarTrigger } from "./ui/sidebar";
 import { Separator } from "@radix-ui/react-separator";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "./ui/breadcrumb";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { MENU_BAR, SidebarData } from "@/data/menubar.data";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
+import { SidebarData } from "@/data/menubar.data";
+import { SidebarTrigger } from "../ui/sidebar";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "../ui/breadcrumb";
 
-const getPathInfo = (
-  navMain: SidebarData["navMain"],
-  pathname: string
-) => {
+// функция для построения breadcrumb 
+const getPathInfo = (navMain: SidebarData["navMain"], pathname: string) => {
   const breadcrumbs: { title: string; url: string; isMain?: boolean }[] = [];
 
-  // убираем префикс /dashboard для сравнения с navMain
   const cleanPath = pathname.replace(/^\/dashboard/, "");
 
   for (const item of navMain) {
@@ -33,6 +27,7 @@ const getPathInfo = (
       if (item.items?.length) {
         for (const sub of item.items) {
           const fullUrl = item.url + sub.url;
+
           if (cleanPath.startsWith(fullUrl)) {
             breadcrumbs.push({
               title: sub.title,
@@ -51,16 +46,15 @@ const DashBoardHeader = () => {
   const pathname = usePathname();
   const isOnDashboardMainPage = pathname === "/dashboard";
 
-  const breadcrumbs = getPathInfo(MENU_BAR.navMain, pathname);
+  const navMain = useSelector((state: RootState) => state.nav.navMain);
+
+  const breadcrumbs = getPathInfo(navMain, pathname);
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
       <div className="flex items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
-        <Separator
-          orientation="vertical"
-          className="mr-2 data-[orientation=vertical]:h-4"
-        />
+        <Separator orientation="vertical" className="mr-2 h-4" />
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -68,8 +62,8 @@ const DashBoardHeader = () => {
                 <BreadcrumbPage>Главная</BreadcrumbPage>
               ) : (
                 <Link
-                  className="transition-colors hover:text-white"
                   href="/dashboard"
+                  className="transition-colors hover:text-white"
                 >
                   Главная
                 </Link>
