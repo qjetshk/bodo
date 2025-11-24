@@ -4,7 +4,7 @@ import { Task } from 'src/task/models/task.model';
 import { DateTimeResolver } from 'graphql-scalars';
 
 @ObjectType()
-export class Column {
+class Column {
   @Field(() => ID)
   id: string;
 
@@ -29,3 +29,35 @@ export class Column {
   @Field(() => DateTimeResolver)
   updatedAt: Date;
 }
+
+@ObjectType()
+class UpdatedColumn {
+  @Field(() => ID)
+  id: string;
+
+  @Field()
+  title: string;
+
+}
+
+@ObjectType()
+class ChangedColumn {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => Int)
+  order: number;
+}
+
+
+@ObjectType()
+class ChangedColumnsOrder {
+  @Field(() => ID)
+  boardId: string;
+
+  @Field(() => [ChangedColumn])
+  columns: ChangedColumn[];
+}
+
+
+export { Column, UpdatedColumn, ChangedColumnsOrder, ChangedColumn }

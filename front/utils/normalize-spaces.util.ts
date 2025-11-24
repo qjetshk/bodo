@@ -1,0 +1,1 @@
+export const normalizeSpaces = (str: string) => str.trim().replace(/\s+/g, ' ');

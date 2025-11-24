@@ -1,12 +1,15 @@
-import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
+import { Args, ID, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { BoardService } from './board.service';
 import { Inject, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/guards/gql-auth.guard';
 import { CreateBoardInput } from './inputs/create-board.input';
 import { CurrentUserId } from 'src/decorators/get-id-from-token';
-import { Board } from './models/board.model';
+import { Board, BoardEdited, UpdatedBoard } from './models/board.model';
 import { BoardInvitation } from 'src/users (members)/models/board-invition.model';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
+import { EditBoardInput } from './inputs/edit-board.input';
+import { ChangedColumnsOrder, UpdatedColumn } from './models/column.model';
+import { ChangeColumnOrderInput } from './inputs/change-column-order.input';
 
 @Resolver()
 export class BoardResolver {
@@ -33,33 +36,56 @@ export class BoardResolver {
     return board
   }
 
-  @Subscription(() => BoardInvitation, {
-    filter: (payload, variables, context) => {
-      console.log(context)
-      return context.user?.id === payload.invitationCreated.userId;
-    }
-  }) 
-  invitationCreated() {
-    return this.pubSub.asyncIterator('invitationCreated');
-  }
 
   @UseGuards(GqlAuthGuard)
-  @Query(() => [BoardInvitation])
-  async getAllUserBoardInvitation(@CurrentUserId() id: string) {
-    const invations = await this.boardService.getAllUserBoardInvitation(id)
-    return invations
-  }
-
-  @Mutation(() => Board)
-  async acceptInvitation(@Args('invitationId') invitationId: string) {
-    const updatedBoard = await this.boardService.acceptInvitation(invitationId)
+  @Mutation(() => UpdatedBoard, { nullable: true })
+  async editBoard(@Args('editBoardInput') editBoardInput: EditBoardInput, @Args('boardId') boardId: string, @CurrentUserId() id: string) {
+    const updatedBoard = await this.boardService.editBoard(editBoardInput, boardId, id)
     return updatedBoard
   }
 
+  @Subscription(() => BoardEdited, {
+    filter(payload, variables, context) {
+      return payload.boardEdited.members.includes(context?.user.id)
+    },
+  })
+  boardEdited() {
+    return this.pubSub.asyncIterator('boardEdited')
+  }
+
   @Mutation(() => Boolean)
-  async declineInvitation(@Args('invitationId') invitationId: string) {
-    await this.boardService.declineInvitation(invitationId)
+  async changeColumnTitle(@Args('newTitle') newTitle: string, @Args('columnId') columnId: string,) {
+    await this.boardService.changeColumnTitle(newTitle, columnId)
     return true
+  }
+
+  @Subscription(() => UpdatedColumn, {
+    filter(payload, variables, context) {
+      return payload.columnTitleChanged.membersAndOwnerIds.includes(context?.user.id)
+    },
+  })
+  columnTitleChanged() {
+    return this.pubSub.asyncIterator('columnTitleChanged');
+  }
+
+  @Mutation(() => Boolean)
+  async changeColumnsOrder(
+    @Args('changeColumnInput', { type: () => [ChangeColumnOrderInput] })
+    changeColumnInput: ChangeColumnOrderInput[],
+    @Args('boardId', { type: () => ID })
+    boardId: string
+  ) {
+    await this.boardService.changeColumnsOrder(changeColumnInput, boardId);
+    return true;
+  }
+
+  @Subscription(() => ChangedColumnsOrder, {
+    filter(payload, variables, context) {
+      return payload.columnOrderChanged.membersAndOwnerIds.includes(context?.user.id)
+    },
+  })
+  columnOrderChanged() {
+    return this.pubSub.asyncIterator('columnOrderChanged')
   }
 
 }

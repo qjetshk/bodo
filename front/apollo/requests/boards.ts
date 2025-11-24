@@ -76,9 +76,66 @@ export const GET_INITIAL_BOARD = graphql(`
                     order
                     title
                     updatedAt
+                    columnId
                 }
             }
         }
     }
 `)
 
+export const EDIT_BOARD = graphql(`
+    mutation EditBoard($boardId: String!, $editBoardInput: EditBoardInput!) {
+        editBoard(editBoardInput: $editBoardInput, boardId: $boardId) {
+            id 
+            name 
+            description 
+            updatedAt
+        }
+    }
+`)
+
+export const CHANGE_COLUMN_TITLE = graphql(`
+    mutation ChangeColumnTitle($newTitle: String!, $columnId: String!){
+        changeColumnTitle(newTitle: $newTitle, columnId: $columnId)
+    }
+`)
+
+export const COLUMN_TITLE_CHANGED = graphql(`
+    subscription ColumnTitleChanged{
+        columnTitleChanged{
+            id
+            title
+        }
+    }
+`)
+
+export const CHANGE_COLUMNS_ORDER = graphql(`
+  mutation ChangeColumnsOrder($changeColumnInput: [ChangeColumnOrderInput!]!, $boardId: ID!){
+    changeColumnsOrder(changeColumnInput: $changeColumnInput, boardId: $boardId)
+  }
+`)
+
+export const COLUMN_ORDER_CHANGED = graphql(`
+    subscription ColumnOrderChanged{
+        columnOrderChanged{
+            boardId
+            columns{
+                id
+                order
+            }
+        }
+    }
+
+`)
+
+
+export const BOARD_EDITED = graphql(`
+    subscription BoardEdited{
+        boardEdited{
+            description
+            id
+            name
+            updatedAt
+        }
+    }
+`)

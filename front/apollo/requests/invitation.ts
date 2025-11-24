@@ -33,3 +33,52 @@ export const DECLINE_INVITATION = graphql(`
         declineInvitation(invitationId: $invitationId)
     }
 `)
+
+export const GET_BOARD_INVITATION = graphql(`
+    subscription GetBoardInvitation{
+        invitationCreated{
+            board{
+                name
+            }
+            invitedBy{
+                nickName
+            }
+        }
+    }
+`)
+
+export const USER_ACCEPT_INVITATION = graphql(`
+    subscription UserAcceptInvitation{
+        invitationAccepted{
+            id
+            invitedById
+            boardId
+            member{
+                user{
+                    avatarUrl
+                    email
+                    id
+                    nickName
+                }
+            }
+        }
+    }
+`)
+
+export const USER_DECLINE_INVITATION = graphql(`
+    subscription UserDeclineInvitation{
+        invitationDeclined{
+            id
+            invitedById
+            boardId
+            member{
+                user{
+                    avatarUrl
+                    email
+                    id
+                    nickName
+                }
+            }
+        }
+    }
+`)

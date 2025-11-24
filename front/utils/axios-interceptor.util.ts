@@ -1,47 +1,60 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth`,
+  baseURL: `${process.env.NEXT_PUBLIC_BACK_URL}/api`,
   withCredentials: true,
 });
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 let isRefreshing = false;
-let failedRequests: Array<() => void> = [];
+let failedRequests: Array<(token: string) => void> = [];
 
 const refreshAccessToken = async () => {
-  try {
-    const result = await api.post("/refresh");
-    const {data} = result
-    localStorage.setItem("accessToken", data.accessToken);
-  } catch (error) {
-    throw new Error("Failed to refresh token");
-  }
+  const res = await api.post("/auth/refresh");
+
+  const { accessToken } = res.data;
+  localStorage.setItem("accessToken", accessToken);
+
+  api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+
+  return accessToken;
 };
 
 api.interceptors.response.use(
-  (response) => response,
+  res => res,
   async (error) => {
     const originalRequest = error.config;
-    if (
-      error.response?.status === 401 &&
-      !originalRequest.url?.includes("/auth/refresh")
-    ) {
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
       if (isRefreshing) {
         return new Promise((resolve) => {
-          failedRequests.push(() => resolve(api(originalRequest)));
+          failedRequests.push((token) => {
+            originalRequest.headers["Authorization"] = `Bearer ${token}`;
+            resolve(api(originalRequest));
+          });
         });
       }
 
       isRefreshing = true;
 
       try {
-        localStorage.removeItem('user')
-        console.log('sdfsd')
-        await refreshAccessToken();
-        failedRequests.forEach((cb) => cb());
+        const newToken = await refreshAccessToken();
+
+        failedRequests.forEach(cb => cb(newToken));
         failedRequests = [];
+
+        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
         return api(originalRequest);
-      } catch (refreshError) {
+      } catch (err) {
         window.location.href = "/login";
       } finally {
         isRefreshing = false;

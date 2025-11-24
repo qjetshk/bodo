@@ -22,14 +22,6 @@ async function bootstrap() {
       credentials: true,
     })
 
-  /*   // Задаём диапазон портов как массив
-  const port = await getPort({ port: Array.from({ length: 101 }, (_, i) => 4200 + i) });
-  
-  // Для облачной IDE слушаем на всех интерфейсах
-  await app.listen(port, '0.0.0.0');
-
-  console.log(`Application is running on port ${port}`); */
-
   await app.listen(env.PORT ?? 4200, "0.0.0.0");
   console.log(`app is running on ${env.PORT ?? 4200}`);
 }

@@ -5,10 +5,10 @@ import { User } from "@/types/auth.type";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { copyToClipboard } from "@/utils/copy-to-clipboard.util";
 import { getAvatarFallback } from "@/utils/avatar-fallback.util";
+import { useCurrentUser } from "@/hooks/use-user";
 
 const Account = () => {
-  const user_ = localStorage.getItem("user");
-  const user: User = user_ ? JSON.parse(user_) : undefined;
+  const { user } = useCurrentUser()
 
   return (
     <DialogContent className="dark">
@@ -26,7 +26,7 @@ const Account = () => {
           <div className="grid flex-1 text-left text-lg leading-tight">
             <span className="truncate font-medium">{`@${user?.nickName}`}</span>
             <span
-              onClick={(e) => copyToClipboard<HTMLSpanElement>(e, user.email)}
+              onClick={(e) => copyToClipboard<HTMLSpanElement>(e, user?.email ?? '')}
               className="text-sm text-neutral-600 cursor-pointer transition-colors hover:text-neutral-300"
             >
               {user?.email}
@@ -36,7 +36,7 @@ const Account = () => {
         <div className="flex flex-col gap-1 justify-center">
           <span
             onClick={(e) =>
-              copyToClipboard<HTMLSpanElement>(e, user?.id.toString())
+              copyToClipboard<HTMLSpanElement>(e, user?.id?.toString() || '')
             }
             className="text-sm text-neutral-600 max-w-15 truncate cursor-pointer transition-colors hover:text-neutral-300"
           >
@@ -44,7 +44,7 @@ const Account = () => {
           </span>
           <span className="text-sm text-neutral-600">
             {" "}
-            {new Date(user?.createdAt).toLocaleDateString()}
+            {new Date(user?.createdAt ?? '').toLocaleDateString()}
           </span>
         </div>
       </section>

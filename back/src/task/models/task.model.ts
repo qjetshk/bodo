@@ -12,8 +12,8 @@ export class Task {
   @Field()
   title: string;
 
-  @Field({ nullable: true })
-  description?: string;
+  @Field()
+  description: string;
 
   @Field(() => Int)
   order: number;
@@ -24,11 +24,11 @@ export class Task {
   @Field()
   columnId: string;
 
-  @Field(() => [TaskAssignment])
-  assignments: TaskAssignment[];
+  @Field(() => [TaskAssignment], { nullable: true })
+  assignments?: TaskAssignment[];
 
-  @Field(() => [Comment])
-  comments: Comment[];
+  @Field(() => [Comment], { nullable: true })
+  comments?: Comment[];
 
   @Field(() => DateTimeResolver)
   createdAt: Date;
@@ -36,3 +36,39 @@ export class Task {
   @Field(() => DateTimeResolver)
   updatedAt: Date;
 }
+
+@ObjectType()
+export class CreatedTask {
+  @Field(() => ID)
+  id: string;
+
+  @Field()
+  title: string;
+
+  @Field()
+  description: string;
+
+  @Field(() => Int)
+  order: number;
+
+  @Field()
+  columnId: string;
+
+  @Field(() => DateTimeResolver)
+  updatedAt: Date
+}
+
+
+@ObjectType()
+export class DeletedTask {
+  @Field()
+  columnId: string
+
+  @Field(() => DateTimeResolver)
+  boardUpdatedAt: Date
+
+  @Field(() => [CreatedTask])
+  tasks: CreatedTask[]
+}
+
+

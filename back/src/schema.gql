@@ -2,6 +2,13 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AcceptedOrDeclinedInvitation {
+  boardId: String!
+  id: String!
+  invitedById: String!
+  member: BoardMember!
+}
+
 type Board {
   boardTemplate: BoardTemplate
   boardTemplateId: String
@@ -14,6 +21,14 @@ type Board {
   name: String!
   owner: User!
   ownerId: String!
+  updatedAt: DateTime!
+}
+
+type BoardEdited {
+  description: String
+  id: ID!
+  members: [User!]!
+  name: String
   updatedAt: DateTime!
 }
 
@@ -49,6 +64,21 @@ type BoardTemplate {
   id: ID!
   name: String!
   updatedAt: DateTime!
+}
+
+input ChangeColumnOrderInput {
+  id: ID!
+  order: Int!
+}
+
+type ChangedColumn {
+  id: ID!
+  order: Int!
+}
+
+type ChangedColumnsOrder {
+  boardId: ID!
+  columns: [ChangedColumn!]!
 }
 
 type Column {
@@ -91,10 +121,37 @@ input CreateBoardInput {
   name: String!
 }
 
+input CreateTaskInput {
+  columnId: String!
+  description: String
+  title: String!
+}
+
+type CreatedTask {
+  columnId: String!
+  description: String!
+  id: ID!
+  order: Int!
+  title: String!
+  updatedAt: DateTime!
+}
+
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
 scalar DateTime
+
+type DeletedTask {
+  boardUpdatedAt: DateTime!
+  columnId: String!
+  tasks: [CreatedTask!]!
+}
+
+input EditBoardInput {
+  description: String
+  membersToAdd: [String!]
+  name: String!
+}
 
 input FindMemberInput {
   email: String
@@ -109,8 +166,13 @@ enum InvitationStatus {
 
 type Mutation {
   acceptInvitation(invitationId: String!): Board!
+  changeColumnTitle(columnId: String!, newTitle: String!): Boolean!
+  changeColumnsOrder(boardId: ID!, changeColumnInput: [ChangeColumnOrderInput!]!): Boolean!
   createBoard(boardInput: CreateBoardInput!): Board!
+  createTask(taskInput: CreateTaskInput!): Boolean!
   declineInvitation(invitationId: String!): Boolean!
+  deleteTask(taskId: String!): Boolean!
+  editBoard(boardId: String!, editBoardInput: EditBoardInput!): UpdatedBoard
   findMembers(member: FindMemberInput!): [User!]!
 }
 
@@ -124,16 +186,23 @@ type Query {
 }
 
 type Subscription {
+  boardEdited: BoardEdited!
+  columnOrderChanged: ChangedColumnsOrder!
+  columnTitleChanged: UpdatedColumn!
+  invitationAccepted: AcceptedOrDeclinedInvitation!
   invitationCreated: BoardInvitation!
+  invitationDeclined: AcceptedOrDeclinedInvitation!
+  taskCreated: CreatedTask!
+  taskDeleted: DeletedTask!
 }
 
 type Task {
-  assignments: [TaskAssignment!]!
+  assignments: [TaskAssignment!]
   column: Column!
   columnId: String!
-  comments: [Comment!]!
+  comments: [Comment!]
   createdAt: DateTime!
-  description: String
+  description: String!
   id: ID!
   order: Int!
   title: String!
@@ -147,6 +216,18 @@ type TaskAssignment {
   taskId: String!
   user: User!
   userId: String!
+}
+
+type UpdatedBoard {
+  description: String
+  id: ID!
+  name: String
+  updatedAt: DateTime!
+}
+
+type UpdatedColumn {
+  id: ID!
+  title: String!
 }
 
 type User {

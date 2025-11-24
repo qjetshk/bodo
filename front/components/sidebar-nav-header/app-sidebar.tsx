@@ -19,12 +19,13 @@ import { useDispatch } from "react-redux";
 import { setNavMain } from "@/store/nav-main";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
+import { setIsMobile, setIsSidebarOpened } from "@/store/sidebar";
 
 // This is sample data.
 const menu_data = MENU_BAR;
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { state } = useSidebar();
+  const { state, isMobile } = useSidebar();
   const isActive = state === "expanded";
   const { isLoading, data: userData } = useGetMeQuery();
 
@@ -59,6 +60,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   useEffect(() => {
     dispatch(setNavMain(navMain));
   }, [dispatch, navMain]);
+
+  useEffect(() => {
+    dispatch(setIsSidebarOpened(isActive));
+  }, [isActive])
+
+  useEffect(() => {
+    dispatch(setIsMobile(isMobile));
+  }, [isMobile])
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

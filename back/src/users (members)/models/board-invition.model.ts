@@ -2,6 +2,7 @@ import { Field, ObjectType, registerEnumType } from "@nestjs/graphql";
 import { Board } from "src/board/models/board.model";
 import { User } from "./user.model";
 import { DateTimeResolver } from 'graphql-scalars'
+import { BoardMember } from "src/board/models/board-member.model";
 
 @ObjectType()
 export class BoardInvitation {
@@ -45,3 +46,19 @@ export enum InvitationStatus {
 registerEnumType(InvitationStatus, {
   name: 'InvitationStatus',
 });
+
+@ObjectType()
+export class AcceptedOrDeclinedInvitation {
+  @Field()
+  id: string; 
+
+  @Field()
+  boardId: string
+
+  @Field()
+  invitedById: string;
+
+  @Field(() => BoardMember)
+  member: BoardMember
+
+}

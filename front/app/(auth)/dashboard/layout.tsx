@@ -1,34 +1,23 @@
 "use client";
-import Link from "next/link";
 import React from "react";
-import { PanelRightOpen } from "lucide-react";
-import { MENU_BAR } from "@/data/menubar.data";
-import { MotionDiv } from "@/components/MotionDiv";
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar-nav-header/app-sidebar";
 import { motion } from "motion/react";
 import { Separator } from "@/components/ui/separator";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import DashBoardHeader from "@/components/sidebar-nav-header/DashBoardHeader"; 
+import DashBoardHeader from "@/components/sidebar-nav-header/DashBoardHeader";
 import PrivateRoute from "./PrivateRoute";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
 
 const DashBoardLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
+
   return (
     <PrivateRoute>
       <motion.section

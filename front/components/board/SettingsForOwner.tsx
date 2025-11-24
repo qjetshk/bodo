@@ -16,13 +16,15 @@ import { GetInitialBoardQuery } from '@/apollo/gql/graphql'
 import DefaultUserPreview from '../DefaultUserPreview'
 import { copyToClipboard } from '@/utils/copy-to-clipboard.util'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
+import { EDIT_BOARD } from '@/apollo/requests/boards'
+import { toast } from 'sonner'
+import { normalizeSpaces } from '@/utils/normalize-spaces.util'
+import { Board } from '@/types/board.type'
 
 interface Props {
-    board?: InitialBoard
+    board: Board
     isOpened: boolean
 }
-
-export type InitialBoard = GetInitialBoardQuery['getBoardById']
 
 const SettingsForOwner = ({ board, isOpened }: Props) => {
     const [findMembersInput, setFindMembersInput] = useState("")
@@ -37,25 +39,48 @@ const SettingsForOwner = ({ board, isOpened }: Props) => {
         formState: { errors },
     } = useForm<EditBoardForm>({
         resolver: zodResolver(EditBoardForm),
-        mode: "onSubmit", // ошибки появляются при submit
+        mode: "onSubmit",
         defaultValues: {
             name: board?.name ?? "",
             description: board?.description ?? "",
-            boardType: board?.boardType ?? false,
             membersToAdd: [],
-            canAddMember: true
         },
     })
+
+    const [editBoard, { data: editBoardData, error: editBoardError, loading: editingBoard }] = useMutation(EDIT_BOARD, {
+        update: (cache, { data }) => {
+            const board = data?.editBoard;
+            if (!board?.id) return;
+
+            cache.modify({
+                id: cache.identify({ __typename: 'Board', id: board.id }),
+                fields: {
+                    name: () => board.name,
+                    description: () => board.description,
+                    updatedAt: () => board.updatedAt
+                },
+            });
+        }
+    });
+
+    useEffect(() => {
+        if (editBoardData) {
+            toast.success('Вы успешно сохранили настроки доски!', { duration: 1000 })
+        }
+        if (editBoardError) {
+            toast.error(editBoardError.message, { duration: 1000 })
+        }
+    }, [editBoardData, editBoardError])
+
 
     useEffect(() => {
         if (isOpened && board) {
             reset({
                 name: board.name ?? "",
                 description: board.description ?? "",
-                boardType: board.boardType ?? false,
                 membersToAdd: [],
-                canAddMember: true
             })
+            setFindMembersInput('')
         }
     }, [isOpened, board, reset, trigger])
 
@@ -76,9 +101,21 @@ const SettingsForOwner = ({ board, isOpened }: Props) => {
         .map((id) => data?.findMembers?.find((m) => m.id === id))
         .filter(Boolean) as MemberType[]
 
+   
+
     const onSubmit: SubmitHandler<EditBoardForm> = (formData) => {
         console.log("Форма успешно отправлена", formData)
-        console.log('sds')
+        editBoard({
+            variables: {
+                editBoardInput: {
+                    name: normalizeSpaces(formData.name),
+                    description: normalizeSpaces(formData?.description ?? ''),
+                    membersToAdd: formData.membersToAdd
+                },
+                boardId: board?.id ?? ''
+            }
+        });
+
     }
 
     const watchedName = watch("name");
@@ -88,17 +125,16 @@ const SettingsForOwner = ({ board, isOpened }: Props) => {
     const isUpdated = useMemo(() => {
         if (!board) return false;
 
-        const nameChanged = watchedName !== (board.name ?? "");
-        const descriptionChanged = watchedDescription !== (board.description ?? "");
+        const nameChanged = normalizeSpaces(watchedName) !== normalizeSpaces(board.name ?? "");
+        const descriptionChanged = normalizeSpaces(watchedDescription ?? "") !== normalizeSpaces(board.description ?? "");
         const membersChanged = watchedMembers.length > 0;
 
         return nameChanged || descriptionChanged || membersChanged;
     }, [board, watchedName, watchedDescription, watchedMembers]);
 
-
     return (
 
-        <DialogContent className="dark">
+        <DialogContent className={`dark ${editingBoard && 'bg-neutral-900'}`}>
             <form className='flex flex-col gap-4' onSubmit={handleSubmit(onSubmit)}>
                 <DialogHeader>
                     <DialogTitle>Настройки</DialogTitle>
@@ -118,7 +154,8 @@ const SettingsForOwner = ({ board, isOpened }: Props) => {
                             )}
                         </div>
                         <Input
-                            maxLength={100}
+                            disabled={editingBoard}
+                            maxLength={50}
                             {...register('name')}
                             placeholder='Введите новое имя доски'
                             className={errors.name ? 'outline-1! outline-red-400!' : ''}
@@ -135,6 +172,7 @@ const SettingsForOwner = ({ board, isOpened }: Props) => {
                             )}
                         </div>
                         <Textarea
+                            disabled={editingBoard}
                             {...register('description')}
                             maxLength={100}
                             placeholder='Введите новое описание доски'
@@ -149,6 +187,10 @@ const SettingsForOwner = ({ board, isOpened }: Props) => {
                         onClick={(e) => copyToClipboard(e, board?.id ?? '')}
                         className='pl-2 w-fit text-sm hover:text-neutral-300 cursor-pointer transition-colors text-neutral-500'>
                         {`id: ${board?.id}`}
+                    </p>
+                    <p
+                        className='pl-2 w-fit text-sm text-neutral-500'>
+                        {`Дата создания: ${new Date(board?.createdAt).toLocaleDateString()}`}
                     </p>
                     {!board?.boardType &&
                         <>
@@ -181,6 +223,7 @@ const SettingsForOwner = ({ board, isOpened }: Props) => {
                                     formMembers={selectedMembers}
                                     maxMembers={5 - (board?.members.length ?? 0)}
                                     addedMembers={board?.members}
+                                    disabled={editingBoard}
                                 />
                             }
                         </>
