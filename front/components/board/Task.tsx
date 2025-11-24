@@ -53,13 +53,13 @@ const Task = ({ task }: { task: TaskType }) => {
         <div  className='relative hover:text-neutral-600 text-neutral-900 transition-colors cursor-grab'>
             <Card style={style} ref={setNodeRef} {...attributes} {...listeners} className="gap-2 py-4 dark">
                 <CardHeader className='block px-4'>
-                    <CardTitle className={`${isDragging ? 'text-neutral-900' : 'text-white'}  max-w-[87%] break-all line-clamp-3`}>
+                    <CardTitle className={`${isDragging && 'opacity-0'}  max-w-[87%] break-all line-clamp-3`}>
                         {task.title}
                     </CardTitle>
 
                 </CardHeader>
-                <CardContent className={`px-4 max-h-30 overflow-y-auto text-sm ${isDragging ? 'text-neutral-900' : 'text-neutral-300'}  scrollbar-track-neutral-900! break-all`}>
-                    {task.description}
+                <CardContent className={`px-4 max-h-30 overflow-y-auto text-sm ${isDragging && 'opacity-0'} scrollbar-track-neutral-900! break-all`}>
+                    {task.description ? <pre className='text-neutral-400 font-mono'>{task.description}</pre> : <p className='text-center w-full text-neutral-600'>-- Без описания --</p>}
                 </CardContent>
             </Card>
             {!isDragging &&
