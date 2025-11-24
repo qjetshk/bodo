@@ -6,7 +6,7 @@ import { toast } from "sonner"
 interface Props<T> {
   isOpen: boolean
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>
-  deleteFn: (arg: T) => Promise<unknown>
+  deleteFn?: (arg: T) => Promise<unknown>
   payload: T
   title?: string
 }
@@ -22,7 +22,8 @@ function ConfirmDelete<T>({
   const [loading, setLoading] = useState(false)
 
   const onConfirm = async () => {
-    try {
+    try { 
+      if (!deleteFn) return
       setLoading(true)
       await deleteFn(payload)
 

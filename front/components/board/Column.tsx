@@ -5,15 +5,16 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import type { Column as ColumnType, Task as TaskType } from "@/types/board.type";
-import { CirclePlus, PencilLine } from "lucide-react";
+import { CirclePlus, PencilLine, Trash2 } from "lucide-react";
 import { Input } from "../ui/input";
-import { useMutation } from "@apollo/client/react";
-import { CHANGE_COLUMN_TITLE } from "@/apollo/requests/boards";
+import { useMutation, useSubscription } from "@apollo/client/react";
+import { CHANGE_COLUMN_TITLE, COLUMN_TITLE_CHANGED } from "@/apollo/requests/boards";
 import Task from "./Task";
 import { Dialog } from "@radix-ui/react-dialog";
 import AddNewTask from "./AddNewTask";
-import { DropdownMenu, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import {Ellipsis} from 'lucide-react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Ellipsis } from 'lucide-react'
+import ConfirmDelete from "../ConfirmDelete";
 
 interface Props {
   column: ColumnType;
@@ -24,9 +25,21 @@ export default function Column({ column }: Props) {
 
   const [isEditing, setIsEditing] = useState(false);
   const [isNewTaskFormOpen, setIsNewTaskFormOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [title, setTitle] = useState(column.title);
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useSubscription(COLUMN_TITLE_CHANGED, {
+    onData: ({ data }) => {
+      const updatedColumn = data.data?.columnTitleChanged;
+      console.log(updatedColumn)
+      if (!updatedColumn) return;
+      if (updatedColumn.id === column.id) {
+        setTitle(updatedColumn.title);
+      }
+    }
+  });
 
   const [changeColumnTitle] = useMutation(CHANGE_COLUMN_TITLE, {
     variables: {
@@ -76,7 +89,7 @@ export default function Column({ column }: Props) {
       <CardHeader className={`pt-4 pb-4 flex select-none cursor-grab transition-colors rounded-t-lg hover:bg-neutral-900/60 text-neutral-950 hover:text-neutral-600 relative ${isDragging && "opacity-0"}`}>
         <div {...attributes} {...listeners} className="w-full cursor-grab">
           {!isEditing ? (
-            <CardTitle className="truncate max-w-[calc(100%-62px)] text-white h-5">{title}</CardTitle>
+            <CardTitle className="truncate max-w-[calc(100%-30px)] text-white h-5">{title}</CardTitle>
           ) : (
             <Input
               ref={inputRef}
@@ -90,13 +103,24 @@ export default function Column({ column }: Props) {
           )}
         </div>
 
-        {!isEditing && 
+        {!isEditing &&
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              </>
+            <DropdownMenuTrigger asChild className="absolute top-3.5 right-3.5 cursor-pointer">
+              <Ellipsis />
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-
+            <DropdownMenuContent className="dark">
+              <DropdownMenuItem onClick={() => setIsEditing(true)} className="cursor-pointer hover:text-neutral-400 transition-colors">
+                <PencilLine />
+                Редактировать
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsNewTaskFormOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors">
+                <CirclePlus />
+                Добавить задачу
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsDeleteOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors hover:bg-red-700/15!">
+                <Trash2 />
+                Удалить колонку
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         }
@@ -115,20 +139,12 @@ export default function Column({ column }: Props) {
       <Dialog open={isNewTaskFormOpen} onOpenChange={setIsNewTaskFormOpen}>
         <AddNewTask isOpen={isNewTaskFormOpen} onOpenChange={setIsNewTaskFormOpen} columnId={column.id} />
       </Dialog>
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <ConfirmDelete onOpenChange={setIsDeleteOpen} payload={{}} isOpen={isDeleteOpen} title='Вы действительно хотите удалить эту колонку?' />
+      </Dialog>
     </Card>
   );
 }
 
-{/* <div className="flex gap-2 absolute top-3.5 right-3.5 items-center">
-  <PencilLine
-    strokeWidth={2}
-    size={20}
-    className="cursor-pointer hover:text-neutral-400 transition-colors"
-    onClick={() => setIsEditing(true)}
-  />
-  <CirclePlus
-    onClick={() => setIsNewTaskFormOpen(true)}
-    className="cursor-pointer hover:text-neutral-400 transition-colors"
-  />
-</div> */}
+
 

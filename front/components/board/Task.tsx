@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Task as TaskType } from '@/types/board.type'
-import { PencilLine, Trash2 } from 'lucide-react'
+import { Ellipsis, PencilLine, Trash2 } from 'lucide-react'
 import { Dialog } from '../ui/dialog'
 import EditTask from './EditTask'
 import ConfirmDelete from '../ConfirmDelete'
@@ -9,6 +9,7 @@ import { useMutation } from '@apollo/client/react'
 import { DELETE_TASK } from '@/apollo/requests/tasks'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu'
 
 const Task = ({ task }: { task: TaskType }) => {
     const [isOpen, setIsOpen] = useState(false)
@@ -50,7 +51,7 @@ const Task = ({ task }: { task: TaskType }) => {
     };
 
     return (
-        <div  className='relative hover:text-neutral-600 text-neutral-900 transition-colors cursor-grab'>
+        <div className='relative hover:text-neutral-600 text-neutral-900 transition-colors cursor-grab'>
             <Card style={style} ref={setNodeRef} {...attributes} {...listeners} className="gap-2 py-4 dark">
                 <CardHeader className='block px-4'>
                     <CardTitle className={`${isDragging && 'opacity-0'}  max-w-[87%] break-all line-clamp-3`}>
@@ -63,10 +64,21 @@ const Task = ({ task }: { task: TaskType }) => {
                 </CardContent>
             </Card>
             {!isDragging &&
-                <div className='flex gap-1 absolute top-2 right-2'>
-                    <PencilLine onClick={() => setIsOpen(true)} className=' cursor-pointer hover:text-neutral-400 transition-colors' size={16} />
-                    <Trash2 onClick={() => setIsDeleteOpen(true)} className='cursor-pointer hover:text-rose-400 transition-colors' size={16} />
-                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild className="absolute top-1.5 right-3 cursor-pointer">
+                        <Ellipsis size={18}/>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="dark">
+                        <DropdownMenuItem onClick={() => setIsOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors">
+                            <PencilLine />
+                            Редактировать
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setIsDeleteOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors hover:bg-red-700/15!">
+                            <Trash2 />
+                            Удалить задачу
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             }
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <EditTask isOpen={isOpen} task={task} />

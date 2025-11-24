@@ -36,6 +36,7 @@ const EditTask = ({ task, isOpen }: Props) => {
     const watchedDescription = watch('description')
 
     const isUpdated = useMemo(() => {
+        if (!watchedDescription) return
         const nameChanged = (normalizeSpaces(watchedTitle) !== task.title) && (watchedTitle.length > 0);
         const descriptionChanged = (normalizeSpaces(watchedDescription ?? "") !== task.description) && (watchedDescription.length > 0);
 
@@ -65,9 +66,9 @@ const EditTask = ({ task, isOpen }: Props) => {
         <DialogContent className={`dark ${/* loading && */ 'bg-neutral-900'}`}>
             <form className='flex flex-col gap-4' onSubmit={handleSubmit(onSubmit)}>
                 <DialogHeader>
-                    <DialogTitle>Новая задача</DialogTitle>
+                    <DialogTitle>Изменить задачу</DialogTitle>
                     <DialogDescription>
-                        Здесь вы создать новую задачу
+                        Здесь вы можете изменить текущую задачу
                     </DialogDescription>
                 </DialogHeader>
 

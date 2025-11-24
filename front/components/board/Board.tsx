@@ -9,10 +9,11 @@ import {
   DragOverlay,
   DragEndEvent,
   DragStartEvent,
-  DragOverEvent
+  DragOverEvent,
+  PointerSensor
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, horizontalListSortingStrategy } from "@dnd-kit/sortable";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import Column from "./Column";
 import Task from "./Task";
 import type { Board, Column as ColumnType, Task as TaskType } from "@/types/board.type";
@@ -28,18 +29,12 @@ export default function Board({ board }: { board: Board }) {
   const [activeColumn, setActiveColumn] = useState<ColumnType | null>(null);
   const [activeTask, setActiveTask] = useState<TaskType | null>(null);
 
+  useEffect(() => {
+    setAllColumns(board.columns)
+  }, [board])
+
   const [changeOrder] = useMutation(CHANGE_COLUMNS_ORDER);
 
-  // Apollo subscriptions
-  useSubscription(COLUMN_TITLE_CHANGED, {
-    onData: ({ data }) => {
-      const updatedColumn = data.data?.columnTitleChanged;
-      if (!updatedColumn) return;
-      setAllColumns(prev =>
-        prev.map(col => col.id === updatedColumn.id ? { ...col, title: updatedColumn.title } : col)
-      );
-    }
-  });
 
   useSubscription(COLUMN_ORDER_CHANGED, {
     onData: ({ data }) => {
@@ -91,38 +86,38 @@ export default function Board({ board }: { board: Board }) {
   };
 
   // Drag end
-const handleDragEnd = (event: DragEndEvent) => {
-  const { active, over } = event;
-  setActiveColumn(null);
-  setActiveTask(null);
-  if (!over) return;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveColumn(null);
+    setActiveTask(null);
+    if (!over) return;
 
-  const activeColumnId = active.id.toString();
-  const overColumnId = over.id.toString();
+    const activeColumnId = active.id.toString();
+    const overColumnId = over.id.toString();
 
-  if (activeColumnId === overColumnId) return;
+    if (activeColumnId === overColumnId) return;
 
-  setAllColumns(columns => {
-    const activeColumnIdx = columns.findIndex(col => col.id === activeColumnId);
-    const overColumnIdx = columns.findIndex(col => col.id === overColumnId);
+    setAllColumns(columns => {
+      const activeColumnIdx = columns.findIndex(col => col.id === activeColumnId);
+      const overColumnIdx = columns.findIndex(col => col.id === overColumnId);
 
-    const movedColumns = arrayMove(columns, activeColumnIdx, overColumnIdx);
+      const movedColumns = arrayMove(columns, activeColumnIdx, overColumnIdx);
 
-    const updatedColumns = movedColumns.map((col, index) => ({
-      ...col,
-      order: index
-    }));
+      const updatedColumns = movedColumns.map((col, index) => ({
+        ...col,
+        order: index
+      }));
 
-    changeOrder({
-      variables: {
-        boardId: board.id,
-        changeColumnInput: updatedColumns.map(col => ({ id: col.id, order: col.order }))
-      }
+      changeOrder({
+        variables: {
+          boardId: board.id,
+          changeColumnInput: updatedColumns.map(col => ({ id: col.id, order: col.order }))
+        }
+      });
+
+      return updatedColumns;
     });
-
-    return updatedColumns;
-  });
-};
+  };
 
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -158,15 +153,19 @@ const handleDragEnd = (event: DragEndEvent) => {
           ))}
         </SortableContext>
 
-        <div
+        <motion.div
           onClick={addNewColumn}
-          className="dark border-3 border-dashed opacity-65 hover:opacity-95 transition-all border-neutral-700 text-neutral-400 cursor-pointer hover:text-neutral-300 bg-neutral-900 rounded-xl max-h-[700px] flex justify-center items-center min-h-50 min-w-[300px]"
+          style={{ maxWidth: `${100 / allColumns.length}%` }}
+          className=" border-3 border-dashed opacity-65 hover:opacity-95 transition-all border-neutral-700 text-neutral-400 cursor-pointer hover:text-neutral-300 bg-neutral-900 rounded-xl max-h-[700px] flex justify-center items-center min-h-50 min-w-[300px]"
+          initial={{ opacity: 0, filter: 'blur(5px)' }}
+          animate={{ opacity: 1, filter: 'blur(0px)' }}
+          transition={{ duration: 0.3, delay: allColumns.length * 0.2 }}
         >
-          <div className="flex gap-3">
-            <CirclePlus />
+          <div className="flex gap-2 items-center">
+            <CirclePlus size={20} />
             <span>Новая колонка</span>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {createPortal(
