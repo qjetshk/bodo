@@ -111,7 +111,7 @@ export function NavMain({
                   <CollapsibleContent>
 
                     <SidebarMenuSub className="max-h-[500px] overflow-auto scrollbar-track-neutral-900! scrollbar-thumb-neutral-800!">
-                      <ul className="flex flex-col">
+                      <ul className="flex flex-col gap-1">
                         {item.items.map((subItem) => {
                           const isSubItemActive =
                             subItem.isActive !== false && isLinkActive(subItem.url);

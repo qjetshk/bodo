@@ -1,7 +1,7 @@
 import { RegisterLoginForm } from "./login-reg-form.type";
 
 export interface User {
-  id: number;
+  id: string;
   email: string;
   nickName: string;
   avatarUrl: string;

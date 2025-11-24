@@ -171,4 +171,4 @@ Ref: comments.authorId > users.id
 
 Ref: comments.taskId > tasks.id [delete: Cascade]
 
-Ref: column_templates.templateId > board_templates.id
+Ref: column_templates.templateId > board_templates.id [delete: Cascade]

@@ -7,16 +7,14 @@ import { Label } from '../ui/label'
 import { GetInitialBoardQuery } from '@/apollo/gql/graphql'
 import DefaultUserPreview from '../DefaultUserPreview'
 import { copyToClipboard } from '@/utils/copy-to-clipboard.util'
+import { Board } from '@/types/board.type'
 
 interface Props {
-    board?: InitialBoard
+    board: Board
     isOpened: boolean
 }
 
-export type InitialBoard = GetInitialBoardQuery['getBoardById']
-
 const SettingsForMembers = ({ board, isOpened }: Props) => {
-    if (!board) return null
 
     return (
         <DialogContent className="dark">
@@ -30,17 +28,17 @@ const SettingsForMembers = ({ board, isOpened }: Props) => {
             <section className='flex flex-col gap-5 mt-4'>
                 <div className='flex flex-col gap-1'>
                     <Label className='pl-2 text-neutral-500 font-normal'>Название доски:</Label>
-                    <p className='break-all whitespace-normal pl-2 text-neutral-300'>{board.name}</p>
+                    <p className='break-all whitespace-normal pl-2 text-neutral-300'>{board?.name}</p>
                 </div>
 
                 <div className='flex flex-col gap-1'>
                     <Label className='pl-2 text-neutral-500 font-normal'>Описание доски:</Label>
-                    <p className='break-all whitespace-normal pl-2 text-neutral-300'>{board.description || '-'}</p>
+                    <p className='break-all whitespace-normal pl-2 text-neutral-300'>{board?.description || '-'}</p>
                 </div>
 
                 <div className='flex flex-col gap-1'>
                     <Label className='pl-2 text-neutral-500 font-normal'>Тип доски:</Label>
-                    <p className='pl-2 text-neutral-300'>{board.boardType ? 'Приватная' : 'Публичная'}</p>
+                    <p className='pl-2 text-neutral-300'>{board?.boardType ? 'Приватная' : 'Публичная'}</p>
                 </div>
 
                 <p
@@ -48,11 +46,15 @@ const SettingsForMembers = ({ board, isOpened }: Props) => {
                     className='pl-2 w-fit text-sm hover:text-neutral-300 cursor-pointer transition-colors text-neutral-500'>
                     {`id: ${board?.id}`}
                 </p>
+                <p
+                    className='pl-2 w-fit text-sm text-neutral-500'>
+                    {`Дата создания: ${new Date(board?.createdAt).toLocaleDateString()}`}
+                </p>
 
                 <div className='flex flex-col gap-2'>
                     <Label className='pl-2 text-neutral-500 font-normal'>Участники доски:</Label>
                     <div className='flex flex-wrap gap-3 px-2'>
-                        {board.members.map(member => (
+                        {board?.members.map(member => (
                             <div key={member.user.id} className='text-neutral-300'>
                                 <DefaultUserPreview
                                     nickName={member.user.nickName ?? ''}
@@ -61,7 +63,7 @@ const SettingsForMembers = ({ board, isOpened }: Props) => {
                                 />
                             </div>
                         ))}
-                        {board.members.length === 0 && (
+                        {board?.members.length === 0 && (
                             <p className='pl-2 text-neutral-400'>Нет участников</p>
                         )}
                     </div>

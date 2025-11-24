@@ -28,7 +28,8 @@ interface MembersInputProps {
   setValue: UseFormSetValue<any>;
   formMembers: MemberType[]; // ← ОБЯЗАТЕЛЬНО!
   maxMembers?: number; // добавим опциональный лимит
-  addedMembers?: Members
+  addedMembers?: Members,
+  disabled?: boolean
 }
 
 export function MembersInput({
@@ -40,7 +41,8 @@ export function MembersInput({
   errors,
   setValue,
   maxMembers = 5,
-  addedMembers = []
+  addedMembers = [],
+  disabled
 }: MembersInputProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedMembers, setSelectedMembers] = useState<MemberType[]>([]);
@@ -101,6 +103,7 @@ export function MembersInput({
 
       {/* Инпут */}
       <Input
+        disabled={disabled}
         placeholder="Добавьте участников"
         value={findMembersInput}
         onChange={(e) => {

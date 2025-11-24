@@ -3,6 +3,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBoardInput } from './inputs/create-board.input';
 import { Prisma } from '@prisma/client';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
+import { EditBoardInput } from './inputs/edit-board.input';
+import { ChangeColumnOrderInput } from './inputs/change-column-order.input';
 
 @Injectable()
 export class BoardService {
@@ -95,7 +97,8 @@ export class BoardService {
                     }
                 },
                 owner: true
-            }
+            },
+            orderBy: { updatedAt: 'asc' }
         })
 
         return boards
@@ -110,8 +113,10 @@ export class BoardService {
                     include: { user: true }
                 },
                 columns: {
+                    orderBy: { order: 'asc' },
                     include: {
                         tasks: {
+                            orderBy: {order: 'asc'},
                             include: {
                                 assignments: {
                                     include: {
@@ -136,11 +141,11 @@ export class BoardService {
                 boardTemplate: {
                     include: { columns: true }
                 }
-            }
+            },
         })
 
         if (!board) {
-            throw new NotFoundException('This board doesnt exist')
+            throw new NotFoundException('Такой доски не существует!')
         }
 
         const isOwner = board?.ownerId === userId;
@@ -149,123 +154,253 @@ export class BoardService {
         if (isOwner || isMember) {
             return board
         } else {
-            throw new ForbiddenException('You do not have access to this board')
+            throw new ForbiddenException('У вас нет доступа к этой доске, попросите ее владельца, чтобы он вас добавил!')
         }
     }
 
-    async getAllUserBoardInvitation(userId: string) {
-        const invitations = await this.prismaService.boardInvitation.findMany({
-            where:
-            {
-                AND: [
-                    { userId },
-                    { status: 'PENDING' }
-                ]
-            }
-            ,
-            include: {
-                board: {
-                    include: {
-                        owner: true,                   // владелец доски
-                        columns: { include: { tasks: true } }, // колонки и задачи
-                        members: { include: { user: true } }  // участники доски
-                    }
-                },
-                user: true,        // приглашённый пользователь
-                invitedBy: true    // кто пригласил
-            }
-        });
-        return invitations;
-    }
 
-    async acceptInvitation(invitationId: string) {
-        const currentInvitation = await this.prismaService.boardInvitation.findUnique({
-            where: {
-                id: invitationId,
+    async editBoard(editBoardInput: EditBoardInput, boardId: string, userId: string) {
+        const currentBoard = await this.prismaService.board.findUnique({
+            where: { id: boardId },
+            include: {
+                members: {
+                    include: { user: true }
+                }
             }
         })
 
-        if (!currentInvitation) {
-            throw new NotFoundException('This invitation doesn exist!')
+        if (!currentBoard) {
+            throw new NotFoundException('Такая доска не найдена!')
         }
 
-        if (currentInvitation?.status === 'PENDING') {
-            const invitation = await this.prismaService.boardInvitation.update({
+        if (currentBoard.ownerId !== userId) {
+            throw new ForbiddenException('У вас нет прав на редактирование этой доски!')
+        }
+
+        if (editBoardInput.membersToAdd?.includes(currentBoard.ownerId)) {
+            throw new ConflictException('Вы не можете добавить владельца доски в ее участников!')
+        }
+
+        const updatedBoard = await this.prismaService.board.update({
+            where: { id: currentBoard.id },
+            data: {
+                name: editBoardInput.name,
+                description: editBoardInput.description
+            },
+            include: {
+                members: {
+                    include: {
+                        user: true,
+                    },
+                }
+            }
+        })
+
+        const boardMembersIds = currentBoard.members.map(member => {
+            return member.user.id
+        })
+
+        const newMembersOnly = editBoardInput?.membersToAdd?.filter(
+            userId => !boardMembersIds.includes(userId)
+        );
+
+        if (
+            (currentBoard.name === editBoardInput.name) &&
+            (currentBoard.description === editBoardInput.description) &&
+            (newMembersOnly && newMembersOnly.length === 0)
+        ) {
+            throw new ConflictException('Вы ничего не поменяли!')
+        }
+
+        if (newMembersOnly && newMembersOnly.length > 0) {
+            const invitationsData = newMembersOnly.map(userId => ({
+                boardId: currentBoard.id,
+                userId,
+                invitedById: currentBoard.ownerId
+            }));
+
+            const currentInvitations = await this.prismaService.boardInvitation.findMany({
                 where: {
-                    id: invitationId
+                    boardId: currentBoard.id,
+
                 },
-                data: {
-                    status: 'ACCEPTED'
-                },
-                include: {
-                    user: true,
-                    board: {
-                        include: {
-                            members: true
-                        }
-                    }
+                select: {
+                    userId: true
                 }
             })
 
-            const updatedBoard = await this.prismaService.board.update({
-                where: { id: invitation.board.id },
-                data: {
-                    members: {
-                        create: {
-                            user: {
-                                connect: { id: invitation.user.id }
-                            }
-                        }
-                    }
+            if (currentInvitations.length >= 5) {
+                throw new ConflictException('Вы не можете пригласить больше 5 пользователей!')
+            }
+
+            const invitedMembersIds = currentInvitations.flatMap(inv => inv.userId)
+
+            for (const member of newMembersOnly) {
+                if (invitedMembersIds.includes(member)) {
+                    throw new ConflictException('Вы уже пригласили этих пользователей!')
+                }
+            }
+
+            await this.prismaService.boardInvitation.createMany({
+                data: invitationsData,
+            });
+
+            const createdInvitations = await this.prismaService.boardInvitation.findMany({
+                where: {
+                    boardId: currentBoard.id,
+                    userId: { in: newMembersOnly }
                 },
                 include: {
-                    members: {
+                    board: {
                         include: {
-                            user: true
+                            owner: true,
+                            columns: { include: { tasks: true } },
+                            members: { include: { user: true } }
                         }
-                    }
+                    },
+                    user: true,
+                    invitedBy: true
                 }
             });
 
-            return updatedBoard
+            for (const inv of createdInvitations) {
+                await this.pubSub.publish('invitationCreated', {
+                    invitationCreated: {
+                        ...inv,
+                        userId: inv.userId,
+                        createdAt: inv.createdAt,
+                        updatedAt: inv.updatedAt
+                    },
 
-        } else {
-            throw new ConflictException('You can accept only pending invitation')
+                });
+
+            }
         }
 
-
-
-    }
-
-    async declineInvitation(invitationId: string) {
-        const currentInvitation = await this.prismaService.boardInvitation.findUnique({
-            where: {
-                id: invitationId,
+        await this.pubSub.publish('boardEdited', {
+            boardEdited: {
+                id: updatedBoard.id,
+                name: updatedBoard.name,
+                description: updatedBoard.description,
+                updatedAt: updatedBoard.updatedAt,
+                members: updatedBoard.members.map(m => m.userId),
             }
         })
 
-        if (!currentInvitation) {
-            throw new NotFoundException('This invitation doesn exist!')
+        return updatedBoard
+    }
+
+    async changeColumnTitle(newTitle: string, columnId: string) {
+        if (!newTitle || newTitle.trim().length === 0) {
+            throw new ConflictException('Название не может быть пустым!');
         }
 
-        if (currentInvitation?.status === 'PENDING') {
-            await this.prismaService.boardInvitation.update({
-                where: {
-                    id: invitationId
-                },
-                data: {
-                    status: 'DECLINED'
+        const currentColumn = await this.prismaService.column.findUnique({
+            where: { id: columnId },
+            include: {
+                board: {
+                    include: {
+                        members: { include: { user: true } }
+                    }
                 }
-            })
+            }
+        });
 
-            return true
-
-        } else {
-            throw new ConflictException('You can decline only pending invitation')
+        if (!currentColumn) {
+            throw new NotFoundException("Колонка не найдена");
         }
 
+        const membersIds = currentColumn.board.members.map(member => member.user.id);
+
+        const membersAndOwnerIds = [
+            ...membersIds,
+            currentColumn.board.ownerId
+        ];
+
+        if (currentColumn.title === newTitle) {
+            throw new ConflictException('Вы не поменяли название колонки!');
+        }
+
+        const updatedColumn = await this.prismaService.column.update({
+            where: { id: currentColumn.id },
+            data: { title: newTitle },
+            select: {
+                id: true,
+                title: true,
+                boardId: true
+            }
+        });
+
+        await this.prismaService.board.update({
+            where: { id: updatedColumn.boardId },
+            data: { updatedAt: new Date() }
+        });
+
+        await this.pubSub.publish('columnTitleChanged', {
+            columnTitleChanged: {
+                id: updatedColumn.id,
+                title: updatedColumn.title,
+                membersAndOwnerIds
+            }
+        });
     }
 
 
+    async changeColumnsOrder(columns: ChangeColumnOrderInput[], boardId: string) {
+        const currentBoard = await this.prismaService.board.findUnique({
+            where: { id: boardId }
+        })
+
+        if (!currentBoard) {
+            throw new NotFoundException('Такой доски не существует!')
+        }
+
+        const updatedColumns = await this.prismaService.$transaction(
+            columns.map(col =>
+                this.prismaService.column.update({
+                    where: { id: col.id },
+                    data: { order: col.order },
+                    select: {
+                        id: true,
+                        order: true,
+                    },
+                })
+            )
+        );
+
+        updatedColumns.sort((a, b) => a.order - b.order);
+
+        const updatedBoard = await this.prismaService.board.update({
+            where: { id: boardId },
+            data: {
+                updatedAt: new Date()
+            },
+            include: {
+                members: {
+                    include: {
+                        user: true
+                    }
+                }
+            }
+        });
+
+        const membersIds = updatedBoard.members.map(member => member.user.id);
+
+        const membersAndOwnerIds = [
+            ...membersIds,
+            updatedBoard.ownerId
+        ];
+
+        await this.pubSub.publish("columnOrderChanged", {
+            columnOrderChanged: {
+                boardId,
+                columns: updatedColumns,
+                membersAndOwnerIds
+            }
+        });
+
+        return true
+
+    }
 
 }

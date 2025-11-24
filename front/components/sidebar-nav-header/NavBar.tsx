@@ -6,16 +6,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { User } from "@/types/auth.type";
 import { getAvatarFallback } from "@/utils/avatar-fallback.util";
+import { useCurrentUser } from "@/hooks/use-user";
 
 const NavBar: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+  const userStr = localStorage.getItem("user");
+  const user: User | null = userStr ? JSON.parse(userStr) : null;
 
   if (!user) {
     return (

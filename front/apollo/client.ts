@@ -24,7 +24,7 @@ const wsLink =
           connectionParams: () => {
             const token = localStorage.getItem('accessToken');
             return {
-              authorization: token ? `Bearer ${token}` : '',
+              Authorization: token ? `Bearer ${token}` : '',
             };
           },
         }),

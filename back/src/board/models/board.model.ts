@@ -6,43 +6,79 @@ import { User } from 'src/users (members)/models/user.model';
 import { DateTimeResolver } from 'graphql-scalars';
 
 @ObjectType()
-export class Board {
-  @Field(() => ID)
-  id: string;
+class Board {
+    @Field(() => ID)
+    id: string;
 
-  @Field()
-  name: string;
+    @Field()
+    name: string;
 
-  @Field({ nullable: true })
-  description?: string;
+    @Field({ nullable: true })
+    description?: string;
 
-  @Field()
-  boardType: boolean; // false - public, true - private
+    @Field()
+    boardType: boolean; // false - public, true - private
 
-  @Field(() => User)
-  owner: User;
+    @Field(() => User)
+    owner: User;
 
-  @Field()
-  ownerId: string;
+    @Field()
+    ownerId: string;
 
-  @Field(() => [BoardMember])
-  members: BoardMember[];
+    @Field(() => [BoardMember])
+    members: BoardMember[];
 
-  @Field(() => [Column])
-  columns: Column[];
+    @Field(() => [Column])
+    columns: Column[];
 
-  @Field(() => BoardTemplate, { nullable: true })
-  boardTemplate?: BoardTemplate;
+    @Field(() => BoardTemplate, { nullable: true })
+    boardTemplate?: BoardTemplate;
 
-  @Field({ nullable: true })
-  boardTemplateId?: string;
+    @Field({ nullable: true })
+    boardTemplateId?: string;
 
-  @Field(() => DateTimeResolver)
-  createdAt: Date;
+    @Field(() => DateTimeResolver)
+    createdAt: Date;
 
-  @Field(() => DateTimeResolver)
-  updatedAt: Date;
+    @Field(() => DateTimeResolver)
+    updatedAt: Date;
 }
+
+@ObjectType()
+class UpdatedBoard {
+    @Field(() => ID)
+    id: string;
+
+    @Field({ nullable: true })
+    name?: string;
+
+    @Field({ nullable: true })
+    description?: string;
+
+    @Field(() => DateTimeResolver)
+    updatedAt: Date;
+}
+
+@ObjectType()
+class BoardEdited {
+    @Field(() => ID)
+    id: string;
+
+    @Field({ nullable: true })
+    name?: string;
+
+    @Field({ nullable: true })
+    description?: string;
+
+    @Field(() => [User])
+    members: User[]
+
+    @Field(() => DateTimeResolver)
+    updatedAt: Date;
+}
+
+
+export { Board, UpdatedBoard, BoardEdited }
 
 /* src 
     board 

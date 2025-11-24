@@ -67,7 +67,7 @@ model BoardInvitation {
   userId      String           @map("user_id")
   status      InvitationStatus @default(PENDING)
   createdAt   DateTime         @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
 
   @@unique([boardId, userId])
   @@map("board_invitations")
@@ -169,7 +169,7 @@ model ColumnTemplate {
   id         String        @id @default(cuid())
   title      String
   order      Int
-  template   BoardTemplate @relation(fields: [templateId], references: [id])
+  template   BoardTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
   templateId String        @map("template_id")
 
   createdAt DateTime @default(now()) @map("created_at")

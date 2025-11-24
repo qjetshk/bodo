@@ -24,7 +24,7 @@ const RecentBoard = ({ board }: Props) => {
     return (
         <Link href={`/dashboard/kanban/${board.id}`}>
             <Card className='hover:bg-neutral-800 transition-colors relative'>
-                <CardHeader className='min-h-11'>
+                <CardHeader className='min-h-11 max-w-[85%]'>
                     <CardTitle className='truncate h-5'>{board.name}</CardTitle>
                     <CardDescription className='truncate'>{board.description}</CardDescription>
                 </CardHeader>

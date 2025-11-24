@@ -29,31 +29,25 @@ import {
 import {
   GET_BOARD_TEMPLATES,
 } from "@/apollo/requests/templates";
-import { Skeleton } from "@/components/ui/skeleton";
 import { CREATE_BOARD, GET_ALL_USER_BOARDS_FOR_NAVIGATION } from "@/apollo/requests/boards";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { normalizeSpaces } from "@/utils/normalize-spaces.util";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function NewBoardForm() {
   const router = useRouter()
   const [findMembersInput, setFindMembersInput] = useState("");
   const [findMembers, { data, loading }] = useMutation(FIND_MEMBERS);
-
-  const { data: templates, loading: loadingTemplates } =
-    useQuery(GET_BOARD_TEMPLATES);
-
-  const [sendForm, { data: boardData }] = useMutation(CREATE_BOARD, {
+  const { data: templates, loading: loadingTemplates } = useQuery(GET_BOARD_TEMPLATES);
+  const [sendForm, { data: boardData, loading: sendingForm }] = useMutation(CREATE_BOARD, {
     refetchQueries: [GET_ALL_USER_BOARDS_FOR_NAVIGATION]
   })
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    reset,
-    formState: { errors },
-  } = useForm<AddBoardForm>({
+  const { data: userBoards } = useQuery(GET_ALL_USER_BOARDS_FOR_NAVIGATION)
+
+  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<AddBoardForm>({
     resolver: zodResolver(AddBoardForm),
     defaultValues: {
       name: "",
@@ -82,31 +76,29 @@ export default function NewBoardForm() {
       setTimeout(() => {
         router.push(`/dashboard/kanban/${boardData.createBoard.id}`)
       }, 1000)
-
     }
-  }, [boardData])
-
+  }, [boardData]);
 
   const boardType = watch("boardType");
   const formMemberIds = watch("membersToAdd") || [];
+  const watchedName = watch("name");
+  const watchedDescription = watch("description");
 
-  useEffect(() => {
-    if (boardType) {
-      setValue("membersToAdd", []);
-    }
-  }, [boardType, setValue]);
-
-  const handleFindMembers = (value: string) => {
-    if (value.trim().length) {
-      findMembers({
-        variables: { member: { nickName: value, email: value } },
-      });
-    }
-  };
-
+  // нормализуем пробелы перед отправкой
   const onSubmit: SubmitHandler<AddBoardForm> = (formData) => {
-    console.log("Форма успешно отправлена", formData);
-    sendForm({ variables: { boardInput: formData } })
+    if (userBoards?.getAllUserBoards.length === 10) {
+      toast.error('Вы не можете создать больше 10 досок!')
+      return
+    }
+    sendForm({
+      variables: {
+        boardInput: {
+          ...formData,
+          name: normalizeSpaces(formData.name),
+          description: normalizeSpaces(formData.description ?? ""),
+        }
+      }
+    })
   };
 
   const selectedMembers: MemberType[] = formMemberIds
@@ -118,86 +110,54 @@ export default function NewBoardForm() {
     templates?.getAllBoardTemplates[0]?.id ||
     "";
 
+  // кнопка disabled, если поля пустые после нормализации пробелов
+  const isButtonDisabled = !normalizeSpaces(watchedName) && !normalizeSpaces(watchedDescription ?? '');
+
   return (
-    <motion.div
-      initial={{ y: 10, opacity: 0 }}
-      animate={{ y: 0, opacity: 1, transition: { duration: 0.5 } }}
-    >
-      <Card className="max-w-5xl mx-auto">
+    <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1, transition: { duration: 0.5 } }}>
+      <Card aria-disabled={sendingForm} className={`${sendingForm && 'opacity-70'} max-w-5xl mx-auto`}>
         <CardHeader>
-          <CardTitle className="font-unbounded text-lg">
-            Создание новой канбан-доски
-          </CardTitle>
+          <CardTitle className="font-unbounded text-lg">Создание новой канбан-доски</CardTitle>
           <CardDescription>Заполните данные и выберите шаблон</CardDescription>
         </CardHeader>
 
         <CardContent>
-          <form
-            className="flex flex-col gap-5 w-full overflow-x-hidden p-1"
-            onSubmit={handleSubmit(onSubmit)}
-          >
+          <form className="flex flex-col gap-5 w-full overflow-x-hidden p-1" onSubmit={handleSubmit(onSubmit)}>
             <div>
-              {errors.name?.message && (
-                <p className="text-sm text-red-400 mb-1">
-                  {errors.name.message}
-                </p>
-              )}
-              <Input maxLength={100} {...register("name")} placeholder="Название доски" />
+              {errors.name?.message && <p className="text-sm text-red-400 mb-1">{errors.name.message}</p>}
+              <Input disabled={sendingForm} maxLength={50} {...register("name")} placeholder="Название доски" />
             </div>
 
             <div>
-              {errors.description?.message && (
-                <p className="text-sm text-red-400 mb-1">
-                  {errors.description.message}
-                </p>
-              )}
-              <Textarea
-                maxLength={100}
-                {...register("description")}
-                className="resize-none"
-                placeholder="Описание (необязательно)"
-              />
+              {errors.description?.message && <p className="text-sm text-red-400 mb-1">{errors.description.message}</p>}
+              <Textarea disabled={sendingForm} maxLength={100} {...register("description")} className="resize-none" placeholder="Описание (необязательно)" />
             </div>
 
+            {/* шаблоны */}
             <div>
               <Label className="text-lg mb-2 block">Выберите шаблон:</Label>
               <section className="grid grid-cols-1 xl:grid-cols-2 gap-5 p-1">
-                {templates &&
-                  templates.getAllBoardTemplates.length > 0 &&
-                  !loadingTemplates ? (
-                  templates.getAllBoardTemplates.map((template) => (
-                    <div
-                      key={template.id}
-                      onClick={() => setValue("boardTemplateId", template.id)}
-                      className={`text-left rounded-2xl transition-all border cursor-pointer ${selectedTemplateId === template.id
-                        ? "outline-2 outline-neutral-400"
-                        : "hover:outline-1 hover:outline-neutral-300"
-                        }`}
-                    >
-                      <BoardTemplate template={template} />
-                    </div>
-                  ))
-                ) : (
-                  <>
-                    <Skeleton className="h-full min-h-[250px]" />
-                    <Skeleton className="h-full min-h-[250px]" />
-                    <Skeleton className="h-full min-h-[250px]" />
-                    <Skeleton className="h-full min-h-[250px]" />
-                    <Skeleton className="h-full min-h-[250px]" />
-                    <Skeleton className="h-full min-h-[250px]" />
-                  </>
-                )}
+                {loadingTemplates ? (
+                    [...Array(6)].map((_, i) => (
+                      <Skeleton key={i} className="min-h-[250px] rounded-xl" />
+                    ))
+                ) : templates?.getAllBoardTemplates?.map(template => (
+                  <div key={template.id}
+                    onClick={() => setValue("boardTemplateId", template.id)}
+                    className={`text-left rounded-2xl transition-all border cursor-pointer ${selectedTemplateId === template.id ? "outline-2 outline-neutral-400" : "hover:outline-1 hover:outline-neutral-300"}`}>
+                    <BoardTemplate template={template} />
+                  </div>
+                ))}
+
               </section>
             </div>
 
+            {/* тип доски */}
             <div>
               <Label className="text-lg mb-2 block">Тип доски:</Label>
               <div className="flex gap-3 items-center">
                 <Label>Публичная</Label>
-                <Switch
-                  checked={boardType}
-                  onCheckedChange={(checked) => setValue("boardType", checked)}
-                />
+                <Switch checked={boardType} onCheckedChange={(checked) => setValue("boardType", checked)} />
                 <Label>Приватная</Label>
               </div>
             </div>
@@ -206,28 +166,35 @@ export default function NewBoardForm() {
               <MembersInput
                 findMembersInput={findMembersInput}
                 setFindMembersInput={setFindMembersInput}
-                handleFindMembers={handleFindMembers}
-                data={{
-                  findMembers: data?.findMembers?.map((m) => ({
-                    id: m.id,
-                    email: m.email,
-                    nickName: m.nickName,
-                    avatarUrl: m.avatarUrl ?? ""
-                  })),
-                }}
+                handleFindMembers={(v) => v.trim().length && findMembers({ variables: { member: { nickName: v, email: v } } })}
+                data={{ findMembers: data?.findMembers?.map(m => ({ id: m.id, email: m.email, nickName: m.nickName, avatarUrl: m.avatarUrl ?? "" })) }}
                 loading={loading}
                 errors={errors}
                 setValue={setValue}
                 formMembers={selectedMembers}
+                disabled={sendingForm}
               />
             )}
 
-            <Button type="submit" size="lg" className="mt-4">
-              Создать доску
-            </Button>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Button type="submit" size="lg" className="mt-4 w-full" disabled={isButtonDisabled || sendingForm}>
+                    Создать доску
+                  </Button>
+                </div>
+              </TooltipTrigger>
+
+              {isButtonDisabled && (
+                <TooltipContent side="top">
+                  <p className="max-w-50 truncate">Вы не заполнили форму</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
           </form>
         </CardContent>
       </Card>
     </motion.div>
-  );
+  )
 }

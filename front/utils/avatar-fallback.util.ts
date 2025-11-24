@@ -1,9 +1,8 @@
-import { User } from "@/types/auth.type";
+import { useCurrentUser } from "@/hooks/use-user";
 
 export const getAvatarFallback = (nickName?: string) => {
   if (!nickName) {
-    const user_ = localStorage.getItem("user");
-    const user: User = user_ ? JSON.parse(user_) : undefined;
+    const {user} = useCurrentUser()
     const avatarFallback = `${user?.nickName
       .slice(0, 1)
       .toLocaleLowerCase()}${user?.nickName

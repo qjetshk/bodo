@@ -19,7 +19,9 @@ const Notification = ({ notification }: Props) => {
 
   const router = useRouter()
 
-  const [acceptInvitation, { data: acceptedIvitation }] = useMutation(ACCEPT_INVITATION)
+  const [acceptInvitation, { data: acceptedIvitation }] = useMutation(ACCEPT_INVITATION, {
+    refetchQueries: [GET_ALL_USER_BOARDS_FOR_NAVIGATION]
+  })
   const [declineInvitation, {data: declinedIvitation}] = useMutation(DECLINE_INVITATION)
 
   useEffect(() => {
