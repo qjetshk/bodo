@@ -16,7 +16,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { USER_ACCEPT_INVITATION, USER_DECLINE_INVITATION } from "@/apollo/requests/invitation";
 import { toast } from "sonner";
-import { TASK_CREATED } from "@/apollo/requests/tasks";
 import { useCurrentUser } from "@/hooks/use-user";
 
 const BoardPage = () => {
@@ -30,7 +29,7 @@ const BoardPage = () => {
 
   const { user } = useCurrentUser()
 
-  const boardData = data?.getBoardById as GetInitialBoardQuery["getBoardById"]
+  const boardData = data?.getBoardById as GetInitialBoardQuery['getBoardById']
 
   const [board, setBoard] = useState(boardData);
 
@@ -85,37 +84,7 @@ const BoardPage = () => {
     },
   })
 
-  useSubscription(TASK_CREATED, {
-    onData: ({ data }) => {
-      const createdTask = data.data?.taskCreated
-      if (!createdTask) return
-
-      setBoard(prev => {
-        const newColumns = prev.columns.map(col => {
-          if (col.id !== createdTask.columnId) return col
-
-          const newTasks = [
-            ...col.tasks,
-            {
-              id: createdTask.id,
-              title: createdTask.title,
-              description: createdTask.description ?? '',
-              order: createdTask.order,
-              columnId: createdTask.columnId,
-              updatedAt: createdTask.updatedAt
-            }
-          ];
-
-          newTasks.sort((a, b) => a.order - b.order)
-
-          return { ...col, tasks: newTasks }
-        })
-
-        return { ...prev, columns: newColumns }
-      })
-    }
-  })
-
+  
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
@@ -183,7 +152,7 @@ const BoardPage = () => {
           </div>
         </CardHeader>
         <CardContent className="">
-          {board && <Board board={board} setBoard={setBoard} />}
+          <Board board={boardData}/>
         </CardContent>
 
       </Card>

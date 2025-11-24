@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
 import { Tooltip, TooltipContent } from '../ui/tooltip'
 import { TooltipTrigger } from '@radix-ui/react-tooltip'
@@ -16,9 +16,10 @@ import { toast } from 'sonner'
 interface Props {
     columnId: string,
     onOpenChange: React.Dispatch<React.SetStateAction<boolean>>
+    isOpen: boolean
 }
 
-const AddNewTask = ({ columnId, onOpenChange }: Props) => {
+const AddNewTask = ({ columnId, onOpenChange, isOpen }: Props) => {
 
     const {
         register,
@@ -47,14 +48,20 @@ const AddNewTask = ({ columnId, onOpenChange }: Props) => {
         }
     })
 
+    useEffect(() => {
+        reset({
+            description: '',
+            title: ''
+        })
+    }, [isOpen])
+
     const watchedTitle = watch('title')
     const watchedDescription = watch('description')
 
     const isUpdated = useMemo(() => {
         const nameChanged = normalizeSpaces(watchedTitle).length > 0;
-        const descriptionChanged = normalizeSpaces(watchedDescription ?? "").length > 0;
 
-        return nameChanged && descriptionChanged
+        return nameChanged 
     }, [watchedDescription, watchedTitle])
 
     const onSubmit: SubmitHandler<NewTaskForm> = (formData) => {
@@ -62,7 +69,7 @@ const AddNewTask = ({ columnId, onOpenChange }: Props) => {
             variables: {
                 taskInput: {
                     title: normalizeSpaces(formData.title),
-                    description: normalizeSpaces(formData.description),
+                    description: formData?.description,
                     columnId
                 }
             }

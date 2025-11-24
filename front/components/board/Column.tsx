@@ -4,29 +4,21 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import type { Column as ColumnType, Task as TaskType } from "@/types/board.type";
+import type { Column as ColumnType, ColumnWithoutTasks, Task as TaskType } from "@/types/board.type";
 import { CirclePlus, PencilLine } from "lucide-react";
 import { Input } from "../ui/input";
 import { useMutation, useSubscription } from "@apollo/client/react";
-import { CHANGE_COLUMN_TITLE, COLUMN_ORDER_CHANGED, COLUMN_TITLE_CHANGED } from "@/apollo/requests/boards";
+import { CHANGE_COLUMN_TITLE } from "@/apollo/requests/boards";
 import Task from "./Task";
 import { Dialog } from "@radix-ui/react-dialog";
-import { DialogTrigger } from "../ui/dialog";
 import AddNewTask from "./AddNewTask";
-import { ScrollArea } from "../ui/scroll-area";
-import { Label } from "../ui/label";
 
 interface Props {
-  column: ColumnType;
+  column: ColumnWithoutTasks;
   tasks: TaskType[]
 }
 
 export default function Column({ column, tasks }: Props) {
-
-  const currentTasks = useMemo(
-    () => tasks.filter(task => task.columnId === column.id),
-    [tasks, column.id]
-  );
 
   const tasksIds = useMemo(() => {
     return tasks.map(t => t.id)
@@ -148,19 +140,20 @@ export default function Column({ column, tasks }: Props) {
 
       </CardHeader>
         <CardContent className={`${isDragging && 'opacity-0'} flex flex-col gap-3 flex-1 px-4 max-h-[548px] h-full overflow-y-auto`}>
-          <SortableContext items={tasksIds} strategy={verticalListSortingStrategy}>
-            {currentTasks.length > 0 ? (
-              currentTasks.map(task => <Task key={task.id} task={task} />)
+          <SortableContext items={tasksIds} >
+            {tasks.length > 0 ? (
+              tasks.map(task => <Task key={task.id} task={task} />)
             ) : (
               <div className="text-center text-neutral-600">
                 Здесь пока нет задач
               </div>
             )}
           </SortableContext>
+          
         </CardContent>
 
       <Dialog open={isNewTaskFormOpen} onOpenChange={setIsNewTaskFormOpen}>
-        <AddNewTask onOpenChange={setIsNewTaskFormOpen} columnId={column.id} />
+        <AddNewTask isOpen={isNewTaskFormOpen} onOpenChange={setIsNewTaskFormOpen} columnId={column.id} />
       </Dialog>
     </Card>
   );

@@ -13,30 +13,25 @@ import {
   closestCorners
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, horizontalListSortingStrategy } from "@dnd-kit/sortable";
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import Column from "./Column";
 import Task from "./Task";
-import type { Board, Column as ColumnType, Task as TaskType } from "@/types/board.type";
+import type { Board, ColumnWithoutTasks, Task as TaskType } from "@/types/board.type";
 import { createPortal } from "react-dom";
 import { useMutation, useSubscription } from "@apollo/client/react";
-import { CHANGE_COLUMNS_ORDER, COLUMN_ORDER_CHANGED, COLUMN_TITLE_CHANGED } from "@/apollo/requests/boards";
-import { TASK_DELETED } from "@/apollo/requests/tasks";
+import { CHANGE_COLUMNS_ORDER, COLUMN_ORDER_CHANGED, COLUMN_TITLE_CHANGED, GET_INITIAL_BOARD } from "@/apollo/requests/boards";
+import { TASK_CREATED, TASK_DELETED } from "@/apollo/requests/tasks";
 import { motion } from 'motion/react';
+import { CirclePlus } from "lucide-react";
 
-interface Props {
-  board: Board;
-  setBoard: React.Dispatch<React.SetStateAction<Board>>;
-}
 
-export default function Board({ board, setBoard }: Props) {
+export default function Board({ board }: { board: Board }) {
+
+
   const [allTasks, setAllTasks] = useState<TaskType[]>(board.columns.flatMap(c => c.tasks));
-  const [activeColumn, setActiveColumn] = useState<ColumnType | null>(null);
+  const [allColumns, setAllColumns] = useState<ColumnWithoutTasks[]>(board.columns.map(({ tasks, ...rest }) => rest))
+  const [activeColumn, setActiveColumn] = useState<ColumnWithoutTasks | null>(null);
   const [activeTask, setActiveTask] = useState<TaskType | null>(null);
-
-
-  useEffect(() => {
-    setAllTasks(board.columns.flatMap(c => c.tasks));
-  }, [board]);
 
   const [changeOrder] = useMutation(CHANGE_COLUMNS_ORDER);
 
@@ -45,10 +40,11 @@ export default function Board({ board, setBoard }: Props) {
     onData: ({ data, client }) => {
       const updatedColumn = data.data?.columnTitleChanged;
       if (!updatedColumn) return;
-      client.cache.modify({
-        id: client.cache.identify({ __typename: "Column", id: updatedColumn.id }),
-        fields: { title: () => updatedColumn.title }
-      });
+      setAllColumns(cols => {
+        const currentColumn = cols.find(c => c.id === updatedColumn.id)
+        const changedColumn = { ...currentColumn, title: updatedColumn.title } as ColumnWithoutTasks
+        return [...cols, changedColumn]
+      })
     }
   });
 
@@ -56,12 +52,10 @@ export default function Board({ board, setBoard }: Props) {
     onData: ({ data }) => {
       const updatedColumns = data.data?.columnOrderChanged.columns;
       if (!updatedColumns) return;
-      setBoard(prev => ({
-        ...prev,
-        columns: prev.columns
-          .map(col => ({ ...col, order: updatedColumns.find(c => c.id === col.id)?.order ?? col.order }))
+      setAllColumns(prev => {
+        return prev.map(col => ({ ...col, order: updatedColumns.find(c => c.id === col.id)?.order ?? col.order }))
           .sort((a, b) => a.order - b.order)
-      }));
+      });
     }
   });
 
@@ -69,18 +63,39 @@ export default function Board({ board, setBoard }: Props) {
     onData: ({ data }) => {
       const tasks = data.data?.taskDeleted.tasks;
       const columnId = data.data?.taskDeleted.columnId;
+
       if (!tasks || !columnId) return;
-      setBoard(prev => ({
-        ...prev,
-        columns: prev.columns.map(col =>
-          col.id === columnId
-            ? { ...col, tasks: tasks.map(t => ({ columnId, ...t })) }
-            : col
-        ) as ColumnType[]
-      }));
-      setAllTasks(prev => prev.filter(t => t.columnId !== columnId));
+
+      setAllTasks(prev => {
+        const withoutColumnTasks = prev.filter(t => t.columnId !== columnId);
+
+        return [...withoutColumnTasks, ...tasks] as TaskType[];
+      });
     }
   });
+
+
+  useSubscription(TASK_CREATED, {
+    onData: ({ data }) => {
+      const createdTask = data.data?.taskCreated
+      if (!createdTask) return
+
+      setAllTasks(prev => {
+        const newTasks = [...prev];
+        newTasks.push({
+          id: createdTask.id,
+          title: createdTask.title,
+          description: createdTask.description ?? '',
+          order: createdTask.order,
+          columnId: createdTask.columnId,
+          updatedAt: createdTask.updatedAt
+        });
+
+        return newTasks.sort((a, b) => a.order - b.order);
+      });
+
+    }
+  })
 
   // Sensors
   const sensors = useSensors(
@@ -104,62 +119,19 @@ export default function Board({ board, setBoard }: Props) {
     if (!over) return;
 
     // Column drag
-    if (active.data.current?.type === "Column") {
-      const oldIndex = board.columns.findIndex(c => c.id === active.id);
-      const newIndex = board.columns.findIndex(c => c.id === over.id);
-      if (oldIndex === newIndex) return;
-      setBoard(prev => {
-        const moved = arrayMove(prev.columns, oldIndex, newIndex);
-        const withUpdatedOrder = moved.map((col, idx) => ({ ...col, order: idx }));
-        changeOrder({
-          variables: {
-            boardId: prev.id,
-            changeColumnInput: withUpdatedOrder.map(col => ({ id: col.id, order: col.order }))
-          }
-        });
-        return { ...prev, columns: withUpdatedOrder };
-      });
-    }
 
     // Task drag
-    if (active.data.current?.type === "Task") {
-      const activeIdx = allTasks.findIndex(t => t.id === active.id);
-      const overColumnId = over.data.current?.type === "Column"
-        ? over.id.toString()
-        : over.data.current?.task.columnId;
-      setAllTasks(tasks => {
-        const updatedTasks = [...tasks];
-        updatedTasks[activeIdx] = { ...tasks[activeIdx], columnId: overColumnId };
-        return updatedTasks;
-      });
-    }
+
   };
 
   // Drag over for tasks (supports empty columns)
   const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event;
-    if (!over || active.data.current?.type !== "Task") return;
 
-    const activeIdx = allTasks.findIndex(t => t.id === active.id);
-
-    if (over.data.current?.type === "Task") {
-      const overIdx = allTasks.findIndex(t => t.id === over.id);
-      setAllTasks(tasks => {
-        const updatedTasks = [...tasks];
-        if (tasks[activeIdx].columnId !== tasks[overIdx].columnId) {
-          updatedTasks[activeIdx] = { ...tasks[activeIdx], columnId: tasks[overIdx].columnId };
-        }
-        return arrayMove(updatedTasks, activeIdx, overIdx);
-      });
-    } else if (over.data.current?.type === "Column") {
-      const overColumnId = over.id.toString();
-      setAllTasks(tasks => {
-        const updatedTasks = [...tasks];
-        updatedTasks[activeIdx] = { ...tasks[activeIdx], columnId: overColumnId };
-        return updatedTasks;
-      });
-    }
   };
+
+  const addNewColumn = () => {
+    
+  }
 
   // Memoized column tasks to avoid unnecessary re-renders
   const getColumnTasks = useCallback(
@@ -167,7 +139,8 @@ export default function Board({ board, setBoard }: Props) {
     [allTasks]
   );
 
-  const columnsIds = board.columns.map(col => col.id);
+  const columnsIds = allColumns.map(col => col.id);
+
 
   return (
     <DndContext
@@ -179,11 +152,11 @@ export default function Board({ board, setBoard }: Props) {
     >
       <div className="flex gap-4 overflow-x-auto p-4 2xl:pb-4! pb-10! max-w-screen">
         <SortableContext items={columnsIds} strategy={horizontalListSortingStrategy}>
-          {board.columns.map((col, i) => (
+          {allColumns.map((col, i) => (
             <motion.div
               key={col.id}
               className="flex-1 min-w-[300px]"
-              style={{ maxWidth: `${100 / board.columns.length}%` }}
+              style={{ maxWidth: `${100 / allColumns.length}%` }}
               initial={{ y: 10, opacity: 0, filter: 'blur(5px)' }}
               animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
               transition={{ duration: 0.3, delay: i * 0.2 }}
@@ -192,6 +165,12 @@ export default function Board({ board, setBoard }: Props) {
             </motion.div>
           ))}
         </SortableContext>
+        <div onClick={addNewColumn} className="dark border-3 border-dashed opacity-65 hover:opacity-95 transition-all border-neutral-700 text-neutral-400 cursor-pointer hover:text-neutral-300 bg-neutral-900 rounded-xl max-h-[700px] flex justify-center items-center min-h-50 min-w-[300px]">
+          <div className="flex gap-3">
+            <CirclePlus/>
+            <span>Новая колонка</span>
+          </div>  
+        </div>
       </div>
 
       {createPortal(
@@ -204,3 +183,6 @@ export default function Board({ board, setBoard }: Props) {
     </DndContext>
   );
 }
+
+
+
