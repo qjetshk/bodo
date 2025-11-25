@@ -6,7 +6,7 @@ import { User } from 'src/users (members)/models/user.model';
 import { DateTimeResolver } from 'graphql-scalars';
 
 @ObjectType()
-class Board {
+export class Board {
     @Field(() => ID)
     id: string;
 
@@ -45,7 +45,7 @@ class Board {
 }
 
 @ObjectType()
-class UpdatedBoard {
+export class UpdatedBoard {
     @Field(() => ID)
     id: string;
 
@@ -60,7 +60,7 @@ class UpdatedBoard {
 }
 
 @ObjectType()
-class BoardEdited {
+export class BoardEdited {
     @Field(() => ID)
     id: string;
 
@@ -78,31 +78,13 @@ class BoardEdited {
 }
 
 
-export { Board, UpdatedBoard, BoardEdited }
+@ObjectType()
+export class BoardDeleted {
+    @Field()
+    id: string;
 
-/* src 
-    board 
-        models 
-            board-member.model.ts 
-            board.model.ts 
-        board.module.ts
-        board.service.ts 
-        board.resolver.ts
-    task
-        models
-            comment.model.ts 
-            task-assignment.model.ts
-            task.model.ts 
-        task.module.ts
-        task.service.ts 
-        task.resolver.ts
-    template
-        models
-            board-template.model.ts
-            column-template.model.ts
-        template.module.ts
-        template.service.ts 
-        template.resolver.ts
-    user
-        models
-            user.model.ts */
+    @Field()
+    name: string
+}
+
+

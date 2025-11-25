@@ -5,6 +5,8 @@ import { Prisma } from '@prisma/client';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { EditBoardInput } from './inputs/edit-board.input';
 import { ChangeColumnOrderInput } from './inputs/change-column-order.input';
+import { AddNewColumnInput } from './inputs/add-new-column.input';
+import { ApolloGatewayDriver } from '@nestjs/apollo';
 
 @Injectable()
 export class BoardService {
@@ -116,7 +118,7 @@ export class BoardService {
                     orderBy: { order: 'asc' },
                     include: {
                         tasks: {
-                            orderBy: {order: 'asc'},
+                            orderBy: { order: 'asc' },
                             include: {
                                 assignments: {
                                     include: {
@@ -287,93 +289,24 @@ export class BoardService {
             }
         })
 
+        await this.prismaService.board.update({
+            where: {
+                id: currentBoard.id
+            },
+            data: {
+                updatedAt: new Date()
+            }
+        })
+
         return updatedBoard
     }
 
-    async changeColumnTitle(newTitle: string, columnId: string) {
-        if (!newTitle || newTitle.trim().length === 0) {
-            throw new ConflictException('Название не может быть пустым!');
-        }
+    
 
-        const currentColumn = await this.prismaService.column.findUnique({
-            where: { id: columnId },
-            include: {
-                board: {
-                    include: {
-                        members: { include: { user: true } }
-                    }
-                }
-            }
-        });
-
-        if (!currentColumn) {
-            throw new NotFoundException("Колонка не найдена");
-        }
-
-        const membersIds = currentColumn.board.members.map(member => member.user.id);
-
-        const membersAndOwnerIds = [
-            ...membersIds,
-            currentColumn.board.ownerId
-        ];
-
-        if (currentColumn.title === newTitle) {
-            throw new ConflictException('Вы не поменяли название колонки!');
-        }
-
-        const updatedColumn = await this.prismaService.column.update({
-            where: { id: currentColumn.id },
-            data: { title: newTitle },
-            select: {
-                id: true,
-                title: true,
-                boardId: true
-            }
-        });
-
-        await this.prismaService.board.update({
-            where: { id: updatedColumn.boardId },
-            data: { updatedAt: new Date() }
-        });
-
-        await this.pubSub.publish('columnTitleChanged', {
-            columnTitleChanged: {
-                id: updatedColumn.id,
-                title: updatedColumn.title,
-                membersAndOwnerIds
-            }
-        });
-    }
-
-
-    async changeColumnsOrder(columns: ChangeColumnOrderInput[], boardId: string) {
-        const currentBoard = await this.prismaService.board.findUnique({
-            where: { id: boardId }
-        })
-
-        if (!currentBoard) {
-            throw new NotFoundException('Такой доски не существует!')
-        }
-
-        const updatedColumns = await this.prismaService.$transaction(
-            columns.map(col =>
-                this.prismaService.column.update({
-                    where: { id: col.id },
-                    data: { order: col.order },
-                    select: {
-                        id: true,
-                        order: true,
-                    },
-                })
-            )
-        );
-
-        updatedColumns.sort((a, b) => a.order - b.order);
-
-        const updatedBoard = await this.prismaService.board.update({
-            where: { id: boardId },
-            data: {
-                updatedAt: new Date()
+    async deleteBoard(boardId: string) {
+        const deletedBoard = await this.prismaService.board.delete({
+            where: {
+                id: boardId
             },
             include: {
                 members: {
@@ -382,25 +315,31 @@ export class BoardService {
                     }
                 }
             }
-        });
+        })
 
-        const membersIds = updatedBoard.members.map(member => member.user.id);
+        if (!deletedBoard) {
+            throw new NotFoundException('Такой доски не существует!')
+        }
+
+        const membersIds = deletedBoard.members.map(member => member.user.id);
 
         const membersAndOwnerIds = [
             ...membersIds,
-            updatedBoard.ownerId
+            deletedBoard.ownerId
         ];
 
-        await this.pubSub.publish("columnOrderChanged", {
-            columnOrderChanged: {
-                boardId,
-                columns: updatedColumns,
+        await this.pubSub.publish('boardDeleted', {
+            boardDeleted: {
+                id: deletedBoard.id,
+                name: deletedBoard.name,
                 membersAndOwnerIds
             }
-        });
+        })
 
         return true
 
     }
+
+    
 
 }

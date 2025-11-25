@@ -15,6 +15,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { getJwtConfig } from './config/jwt.config';
 import { join } from 'path';
 import { isDev } from './utils/is-dev.util';
+import { ColumnModule } from './column/column.module';
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { isDev } from './utils/is-dev.util';
     TemplateModule,
     PubsubModule,
     UsersModule,
+    ColumnModule,
   ],
   providers: [AppResolver],
 })

@@ -27,6 +27,11 @@ export type AcceptedOrDeclinedInvitation = {
   member: BoardMember;
 };
 
+export type AddNewColumnInput = {
+  boardId: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
+
 export type Board = {
   __typename?: 'Board';
   boardTemplate?: Maybe<BoardTemplate>;
@@ -41,6 +46,12 @@ export type Board = {
   owner: User;
   ownerId: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type BoardDeleted = {
+  __typename?: 'BoardDeleted';
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type BoardEdited = {
@@ -118,6 +129,22 @@ export type Column = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type ColumnAdded = {
+  __typename?: 'ColumnAdded';
+  boardId: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
+  tasks: Array<Task>;
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type ColumnDeleted = {
+  __typename?: 'ColumnDeleted';
+  columns: Array<ColumnAdded>;
+};
+
 export type ColumnTemplate = {
   __typename?: 'ColumnTemplate';
   createdAt: Scalars['DateTime']['output'];
@@ -192,11 +219,14 @@ export enum InvitationStatus {
 export type Mutation = {
   __typename?: 'Mutation';
   acceptInvitation: Board;
+  addNewColumn: Scalars['Boolean']['output'];
   changeColumnTitle: Scalars['Boolean']['output'];
   changeColumnsOrder: Scalars['Boolean']['output'];
   createBoard: Board;
   createTask: Scalars['Boolean']['output'];
   declineInvitation: Scalars['Boolean']['output'];
+  deleteBoard: Scalars['Boolean']['output'];
+  deleteColumn: Scalars['Boolean']['output'];
   deleteTask: Scalars['Boolean']['output'];
   editBoard?: Maybe<UpdatedBoard>;
   findMembers: Array<User>;
@@ -205,6 +235,11 @@ export type Mutation = {
 
 export type MutationAcceptInvitationArgs = {
   invitationId: Scalars['String']['input'];
+};
+
+
+export type MutationAddNewColumnArgs = {
+  columnInput: AddNewColumnInput;
 };
 
 
@@ -232,6 +267,16 @@ export type MutationCreateTaskArgs = {
 
 export type MutationDeclineInvitationArgs = {
   invitationId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteBoardArgs = {
+  boardId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteColumnArgs = {
+  columnId: Scalars['String']['input'];
 };
 
 
@@ -267,7 +312,10 @@ export type QueryGetBoardByIdArgs = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  boardDeleted: BoardDeleted;
   boardEdited: BoardEdited;
+  columnAdded: ColumnAdded;
+  columnDeleted: ColumnDeleted;
   columnOrderChanged: ChangedColumnsOrder;
   columnTitleChanged: UpdatedColumn;
   invitationAccepted: AcceptedOrDeclinedInvitation;
@@ -387,6 +435,42 @@ export type BoardEditedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
 export type BoardEditedSubscription = { __typename?: 'Subscription', boardEdited: { __typename?: 'BoardEdited', description?: string | null, id: string, name?: string | null, updatedAt: any } };
+
+export type DeleteBoardMutationVariables = Exact<{
+  boardId: Scalars['String']['input'];
+}>;
+
+
+export type DeleteBoardMutation = { __typename?: 'Mutation', deleteBoard: boolean };
+
+export type BoardDeletedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BoardDeletedSubscription = { __typename?: 'Subscription', boardDeleted: { __typename?: 'BoardDeleted', id: string, name: string } };
+
+export type AddNewColumnMutationVariables = Exact<{
+  columnInput: AddNewColumnInput;
+}>;
+
+
+export type AddNewColumnMutation = { __typename?: 'Mutation', addNewColumn: boolean };
+
+export type ColumnAddedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ColumnAddedSubscription = { __typename?: 'Subscription', columnAdded: { __typename?: 'ColumnAdded', boardId: string, title: string, id: string, order: number, tasks: Array<{ __typename?: 'Task', id: string, title: string, description: string, order: number, columnId: string, updatedAt: any }> } };
+
+export type DeleteColumnMutationVariables = Exact<{
+  columnId: Scalars['String']['input'];
+}>;
+
+
+export type DeleteColumnMutation = { __typename?: 'Mutation', deleteColumn: boolean };
+
+export type ColumnDeletedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ColumnDeletedSubscription = { __typename?: 'Subscription', columnDeleted: { __typename?: 'ColumnDeleted', columns: Array<{ __typename?: 'ColumnAdded', id: string, order: number }> } };
 
 export type GetAllUserBoardInvitationQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -469,6 +553,12 @@ export const ColumnTitleChangedDocument = {"kind":"Document","definitions":[{"ki
 export const ChangeColumnsOrderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ChangeColumnsOrder"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"changeColumnInput"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ChangeColumnOrderInput"}}}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"boardId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"changeColumnsOrder"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"changeColumnInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"changeColumnInput"}}},{"kind":"Argument","name":{"kind":"Name","value":"boardId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"boardId"}}}]}]}}]} as unknown as DocumentNode<ChangeColumnsOrderMutation, ChangeColumnsOrderMutationVariables>;
 export const ColumnOrderChangedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"ColumnOrderChanged"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"columnOrderChanged"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"boardId"}},{"kind":"Field","name":{"kind":"Name","value":"columns"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"order"}}]}}]}}]}}]} as unknown as DocumentNode<ColumnOrderChangedSubscription, ColumnOrderChangedSubscriptionVariables>;
 export const BoardEditedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"BoardEdited"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"boardEdited"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<BoardEditedSubscription, BoardEditedSubscriptionVariables>;
+export const DeleteBoardDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteBoard"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"boardId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteBoard"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"boardId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"boardId"}}}]}]}}]} as unknown as DocumentNode<DeleteBoardMutation, DeleteBoardMutationVariables>;
+export const BoardDeletedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"BoardDeleted"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"boardDeleted"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<BoardDeletedSubscription, BoardDeletedSubscriptionVariables>;
+export const AddNewColumnDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AddNewColumn"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"columnInput"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AddNewColumnInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"addNewColumn"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"columnInput"},"value":{"kind":"Variable","name":{"kind":"Name","value":"columnInput"}}}]}]}}]} as unknown as DocumentNode<AddNewColumnMutation, AddNewColumnMutationVariables>;
+export const ColumnAddedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"ColumnAdded"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"columnAdded"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"boardId"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"order"}},{"kind":"Field","name":{"kind":"Name","value":"tasks"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"order"}},{"kind":"Field","name":{"kind":"Name","value":"columnId"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]}}]} as unknown as DocumentNode<ColumnAddedSubscription, ColumnAddedSubscriptionVariables>;
+export const DeleteColumnDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteColumn"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"columnId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteColumn"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"columnId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"columnId"}}}]}]}}]} as unknown as DocumentNode<DeleteColumnMutation, DeleteColumnMutationVariables>;
+export const ColumnDeletedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"ColumnDeleted"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"columnDeleted"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"columns"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"order"}}]}}]}}]}}]} as unknown as DocumentNode<ColumnDeletedSubscription, ColumnDeletedSubscriptionVariables>;
 export const GetAllUserBoardInvitationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAllUserBoardInvitation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getAllUserBoardInvitation"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"board"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"invitedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"email"}},{"kind":"Field","name":{"kind":"Name","value":"nickName"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}}]}}]}}]}}]} as unknown as DocumentNode<GetAllUserBoardInvitationQuery, GetAllUserBoardInvitationQueryVariables>;
 export const AcceptInvitationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AcceptInvitation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"invitationId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"acceptInvitation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"invitationId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"invitationId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<AcceptInvitationMutation, AcceptInvitationMutationVariables>;
 export const DeclineInvitationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeclineInvitation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"invitationId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"declineInvitation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"invitationId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"invitationId"}}}]}]}}]} as unknown as DocumentNode<DeclineInvitationMutation, DeclineInvitationMutationVariables>;
@@ -500,6 +590,11 @@ export type AcceptedOrDeclinedInvitation = {
   member: BoardMember;
 };
 
+export type AddNewColumnInput = {
+  boardId: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
+
 export type Board = {
   __typename?: 'Board';
   boardTemplate?: Maybe<BoardTemplate>;
@@ -514,6 +609,12 @@ export type Board = {
   owner: User;
   ownerId: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type BoardDeleted = {
+  __typename?: 'BoardDeleted';
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
 };
 
 export type BoardEdited = {
@@ -591,6 +692,22 @@ export type Column = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type ColumnAdded = {
+  __typename?: 'ColumnAdded';
+  boardId: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
+  tasks: Array<Task>;
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type ColumnDeleted = {
+  __typename?: 'ColumnDeleted';
+  columns: Array<ColumnAdded>;
+};
+
 export type ColumnTemplate = {
   __typename?: 'ColumnTemplate';
   createdAt: Scalars['DateTime']['output'];
@@ -665,11 +782,14 @@ export enum InvitationStatus {
 export type Mutation = {
   __typename?: 'Mutation';
   acceptInvitation: Board;
+  addNewColumn: Scalars['Boolean']['output'];
   changeColumnTitle: Scalars['Boolean']['output'];
   changeColumnsOrder: Scalars['Boolean']['output'];
   createBoard: Board;
   createTask: Scalars['Boolean']['output'];
   declineInvitation: Scalars['Boolean']['output'];
+  deleteBoard: Scalars['Boolean']['output'];
+  deleteColumn: Scalars['Boolean']['output'];
   deleteTask: Scalars['Boolean']['output'];
   editBoard?: Maybe<UpdatedBoard>;
   findMembers: Array<User>;
@@ -678,6 +798,11 @@ export type Mutation = {
 
 export type MutationAcceptInvitationArgs = {
   invitationId: Scalars['String']['input'];
+};
+
+
+export type MutationAddNewColumnArgs = {
+  columnInput: AddNewColumnInput;
 };
 
 
@@ -705,6 +830,16 @@ export type MutationCreateTaskArgs = {
 
 export type MutationDeclineInvitationArgs = {
   invitationId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteBoardArgs = {
+  boardId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteColumnArgs = {
+  columnId: Scalars['String']['input'];
 };
 
 
@@ -740,7 +875,10 @@ export type QueryGetBoardByIdArgs = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  boardDeleted: BoardDeleted;
   boardEdited: BoardEdited;
+  columnAdded: ColumnAdded;
+  columnDeleted: ColumnDeleted;
   columnOrderChanged: ChangedColumnsOrder;
   columnTitleChanged: UpdatedColumn;
   invitationAccepted: AcceptedOrDeclinedInvitation;
@@ -860,6 +998,42 @@ export type BoardEditedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
 export type BoardEditedSubscription = { __typename?: 'Subscription', boardEdited: { __typename?: 'BoardEdited', description?: string | null, id: string, name?: string | null, updatedAt: any } };
+
+export type DeleteBoardMutationVariables = Exact<{
+  boardId: Scalars['String']['input'];
+}>;
+
+
+export type DeleteBoardMutation = { __typename?: 'Mutation', deleteBoard: boolean };
+
+export type BoardDeletedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BoardDeletedSubscription = { __typename?: 'Subscription', boardDeleted: { __typename?: 'BoardDeleted', id: string, name: string } };
+
+export type AddNewColumnMutationVariables = Exact<{
+  columnInput: AddNewColumnInput;
+}>;
+
+
+export type AddNewColumnMutation = { __typename?: 'Mutation', addNewColumn: boolean };
+
+export type ColumnAddedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ColumnAddedSubscription = { __typename?: 'Subscription', columnAdded: { __typename?: 'ColumnAdded', boardId: string, title: string, id: string, order: number, tasks: Array<{ __typename?: 'Task', id: string, title: string, description: string, order: number, columnId: string, updatedAt: any }> } };
+
+export type DeleteColumnMutationVariables = Exact<{
+  columnId: Scalars['String']['input'];
+}>;
+
+
+export type DeleteColumnMutation = { __typename?: 'Mutation', deleteColumn: boolean };
+
+export type ColumnDeletedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ColumnDeletedSubscription = { __typename?: 'Subscription', columnDeleted: { __typename?: 'ColumnDeleted', columns: Array<{ __typename?: 'ColumnAdded', id: string, order: number }> } };
 
 export type GetAllUserBoardInvitationQueryVariables = Exact<{ [key: string]: never; }>;
 

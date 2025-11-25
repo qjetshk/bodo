@@ -1,5 +1,5 @@
 'use client'
-import { BOARD_EDITED, GET_ALL_USER_BOARDS_FOR_NAVIGATION, GET_INITIAL_BOARD } from "@/apollo/requests/boards";
+import { BOARD_DELETED, BOARD_EDITED, GET_ALL_USER_BOARDS_FOR_DASHBOARD, GET_ALL_USER_BOARDS_FOR_NAVIGATION, GET_INITIAL_BOARD } from "@/apollo/requests/boards";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { useQuery, useSubscription } from "@apollo/client/react";
@@ -38,6 +38,8 @@ const BoardPage = () => {
       setBoard(data.getBoardById);
     }
   }, [data]);
+
+
 
   useSubscription(USER_ACCEPT_INVITATION, {
     onData: ({ data }) => {
@@ -84,7 +86,7 @@ const BoardPage = () => {
     },
   })
 
-  
+
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
@@ -152,7 +154,7 @@ const BoardPage = () => {
           </div>
         </CardHeader>
         <CardContent className="">
-          <Board board={boardData}/>
+          <Board board={boardData} />
         </CardContent>
 
       </Card>

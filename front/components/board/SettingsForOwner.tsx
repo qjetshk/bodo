@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Textarea } from '../ui/textarea'
@@ -16,10 +16,12 @@ import { GetInitialBoardQuery } from '@/apollo/gql/graphql'
 import DefaultUserPreview from '../DefaultUserPreview'
 import { copyToClipboard } from '@/utils/copy-to-clipboard.util'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
-import { EDIT_BOARD } from '@/apollo/requests/boards'
+import { DELETE_BOARD, EDIT_BOARD } from '@/apollo/requests/boards'
 import { toast } from 'sonner'
 import { normalizeSpaces } from '@/utils/normalize-spaces.util'
 import { Board } from '@/types/board.type'
+import { Trash2 } from 'lucide-react'
+import ConfirmDelete from '../ConfirmDelete'
 
 interface Props {
     board: Board
@@ -28,6 +30,7 @@ interface Props {
 
 const SettingsForOwner = ({ board, isOpened }: Props) => {
     const [findMembersInput, setFindMembersInput] = useState("")
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
 
     const {
         register,
@@ -101,7 +104,7 @@ const SettingsForOwner = ({ board, isOpened }: Props) => {
         .map((id) => data?.findMembers?.find((m) => m.id === id))
         .filter(Boolean) as MemberType[]
 
-   
+
 
     const onSubmit: SubmitHandler<EditBoardForm> = (formData) => {
         console.log("Форма успешно отправлена", formData)
@@ -131,6 +134,14 @@ const SettingsForOwner = ({ board, isOpened }: Props) => {
 
         return nameChanged || descriptionChanged || membersChanged;
     }, [board, watchedName, watchedDescription, watchedMembers]);
+
+    const [deleteBoard] = useMutation(DELETE_BOARD)
+
+    const payload = {
+        variables: {
+            boardId: board.id
+        }
+    }
 
     return (
 
@@ -233,6 +244,9 @@ const SettingsForOwner = ({ board, isOpened }: Props) => {
                 </section>
 
                 <DialogFooter className='flex-col'>
+                    <div onClick={() => setIsDeleteOpen(true)} className='cursor-pointer p-1.5 rounded-lg w-fit hover:text-red-500/90 hover:bg-red-700/20 transition-colors text-neutral-600 absolute bottom-29 right-6 sm:bottom-6 sm:left-6'>
+                        <Trash2 />
+                    </div>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <div>
@@ -254,6 +268,10 @@ const SettingsForOwner = ({ board, isOpened }: Props) => {
                     </DialogClose>
                 </DialogFooter>
             </form>
+            <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                <ConfirmDelete isOpen={isDeleteOpen} onOpenChange={setIsDeleteOpen} title='Вы точно хотите удалить эту доску?' deleteFn={deleteBoard} payload={payload} />
+            </Dialog>
+
         </DialogContent>
 
     )

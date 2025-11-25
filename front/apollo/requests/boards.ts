@@ -94,40 +94,6 @@ export const EDIT_BOARD = graphql(`
     }
 `)
 
-export const CHANGE_COLUMN_TITLE = graphql(`
-    mutation ChangeColumnTitle($newTitle: String!, $columnId: String!){
-        changeColumnTitle(newTitle: $newTitle, columnId: $columnId)
-    }
-`)
-
-export const COLUMN_TITLE_CHANGED = graphql(`
-    subscription ColumnTitleChanged{
-        columnTitleChanged{
-            id
-            title
-        }
-    }
-`)
-
-export const CHANGE_COLUMNS_ORDER = graphql(`
-  mutation ChangeColumnsOrder($changeColumnInput: [ChangeColumnOrderInput!]!, $boardId: ID!){
-    changeColumnsOrder(changeColumnInput: $changeColumnInput, boardId: $boardId)
-  }
-`)
-
-export const COLUMN_ORDER_CHANGED = graphql(`
-    subscription ColumnOrderChanged{
-        columnOrderChanged{
-            boardId
-            columns{
-                id
-                order
-            }
-        }
-    }
-
-`)
-
 
 export const BOARD_EDITED = graphql(`
     subscription BoardEdited{
@@ -139,3 +105,19 @@ export const BOARD_EDITED = graphql(`
         }
     }
 `)
+
+export const DELETE_BOARD = graphql(`
+    mutation DeleteBoard($boardId: String!){
+        deleteBoard(boardId: $boardId)
+    }
+`)
+
+export const BOARD_DELETED = graphql(`
+    subscription BoardDeleted {
+        boardDeleted {
+            id
+            name
+        }
+    }
+`)
+

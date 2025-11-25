@@ -24,6 +24,12 @@ type Documents = {
     "\n  mutation ChangeColumnsOrder($changeColumnInput: [ChangeColumnOrderInput!]!, $boardId: ID!){\n    changeColumnsOrder(changeColumnInput: $changeColumnInput, boardId: $boardId)\n  }\n": typeof types.ChangeColumnsOrderDocument,
     "\n    subscription ColumnOrderChanged{\n        columnOrderChanged{\n            boardId\n            columns{\n                id\n                order\n            }\n        }\n    }\n\n": typeof types.ColumnOrderChangedDocument,
     "\n    subscription BoardEdited{\n        boardEdited{\n            description\n            id\n            name\n            updatedAt\n        }\n    }\n": typeof types.BoardEditedDocument,
+    "\n    mutation DeleteBoard($boardId: String!){\n        deleteBoard(boardId: $boardId)\n    }\n": typeof types.DeleteBoardDocument,
+    "\n    subscription BoardDeleted {\n        boardDeleted {\n            id\n            name\n        }\n    }\n": typeof types.BoardDeletedDocument,
+    "\n    mutation AddNewColumn($columnInput: AddNewColumnInput!){\n        addNewColumn(columnInput: $columnInput)\n    }   \n": typeof types.AddNewColumnDocument,
+    "\n    subscription ColumnAdded {\n        columnAdded {\n            boardId\n            title\n            id\n            order\n            tasks {\n                id\n                title\n                description\n                order\n                columnId\n                updatedAt\n            }\n        }\n    }\n\n": typeof types.ColumnAddedDocument,
+    "\n    mutation DeleteColumn($columnId: String!){\n        deleteColumn(columnId: $columnId)\n    }\n": typeof types.DeleteColumnDocument,
+    "\n    subscription ColumnDeleted {\n        columnDeleted {\n            columns {\n                id\n                order\n            }\n        }\n    }\n": typeof types.ColumnDeletedDocument,
     "\n    query GetAllUserBoardInvitation {\n        getAllUserBoardInvitation {\n            id\n            createdAt\n            board {\n                name\n            }\n            invitedBy {\n                email\n                nickName\n                avatarUrl\n            }\n        }\n    }\n\n": typeof types.GetAllUserBoardInvitationDocument,
     "\n    mutation AcceptInvitation($invitationId: String!) {\n        acceptInvitation(invitationId: $invitationId) {\n            id\n        }\n    }\n\n": typeof types.AcceptInvitationDocument,
     "\n    mutation DeclineInvitation ($invitationId: String!){\n        declineInvitation(invitationId: $invitationId)\n    }\n": typeof types.DeclineInvitationDocument,
@@ -48,6 +54,12 @@ const documents: Documents = {
     "\n  mutation ChangeColumnsOrder($changeColumnInput: [ChangeColumnOrderInput!]!, $boardId: ID!){\n    changeColumnsOrder(changeColumnInput: $changeColumnInput, boardId: $boardId)\n  }\n": types.ChangeColumnsOrderDocument,
     "\n    subscription ColumnOrderChanged{\n        columnOrderChanged{\n            boardId\n            columns{\n                id\n                order\n            }\n        }\n    }\n\n": types.ColumnOrderChangedDocument,
     "\n    subscription BoardEdited{\n        boardEdited{\n            description\n            id\n            name\n            updatedAt\n        }\n    }\n": types.BoardEditedDocument,
+    "\n    mutation DeleteBoard($boardId: String!){\n        deleteBoard(boardId: $boardId)\n    }\n": types.DeleteBoardDocument,
+    "\n    subscription BoardDeleted {\n        boardDeleted {\n            id\n            name\n        }\n    }\n": types.BoardDeletedDocument,
+    "\n    mutation AddNewColumn($columnInput: AddNewColumnInput!){\n        addNewColumn(columnInput: $columnInput)\n    }   \n": types.AddNewColumnDocument,
+    "\n    subscription ColumnAdded {\n        columnAdded {\n            boardId\n            title\n            id\n            order\n            tasks {\n                id\n                title\n                description\n                order\n                columnId\n                updatedAt\n            }\n        }\n    }\n\n": types.ColumnAddedDocument,
+    "\n    mutation DeleteColumn($columnId: String!){\n        deleteColumn(columnId: $columnId)\n    }\n": types.DeleteColumnDocument,
+    "\n    subscription ColumnDeleted {\n        columnDeleted {\n            columns {\n                id\n                order\n            }\n        }\n    }\n": types.ColumnDeletedDocument,
     "\n    query GetAllUserBoardInvitation {\n        getAllUserBoardInvitation {\n            id\n            createdAt\n            board {\n                name\n            }\n            invitedBy {\n                email\n                nickName\n                avatarUrl\n            }\n        }\n    }\n\n": types.GetAllUserBoardInvitationDocument,
     "\n    mutation AcceptInvitation($invitationId: String!) {\n        acceptInvitation(invitationId: $invitationId) {\n            id\n        }\n    }\n\n": types.AcceptInvitationDocument,
     "\n    mutation DeclineInvitation ($invitationId: String!){\n        declineInvitation(invitationId: $invitationId)\n    }\n": types.DeclineInvitationDocument,
@@ -116,6 +128,30 @@ export function graphql(source: "\n    subscription ColumnOrderChanged{\n       
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    subscription BoardEdited{\n        boardEdited{\n            description\n            id\n            name\n            updatedAt\n        }\n    }\n"): (typeof documents)["\n    subscription BoardEdited{\n        boardEdited{\n            description\n            id\n            name\n            updatedAt\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation DeleteBoard($boardId: String!){\n        deleteBoard(boardId: $boardId)\n    }\n"): (typeof documents)["\n    mutation DeleteBoard($boardId: String!){\n        deleteBoard(boardId: $boardId)\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    subscription BoardDeleted {\n        boardDeleted {\n            id\n            name\n        }\n    }\n"): (typeof documents)["\n    subscription BoardDeleted {\n        boardDeleted {\n            id\n            name\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation AddNewColumn($columnInput: AddNewColumnInput!){\n        addNewColumn(columnInput: $columnInput)\n    }   \n"): (typeof documents)["\n    mutation AddNewColumn($columnInput: AddNewColumnInput!){\n        addNewColumn(columnInput: $columnInput)\n    }   \n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    subscription ColumnAdded {\n        columnAdded {\n            boardId\n            title\n            id\n            order\n            tasks {\n                id\n                title\n                description\n                order\n                columnId\n                updatedAt\n            }\n        }\n    }\n\n"): (typeof documents)["\n    subscription ColumnAdded {\n        columnAdded {\n            boardId\n            title\n            id\n            order\n            tasks {\n                id\n                title\n                description\n                order\n                columnId\n                updatedAt\n            }\n        }\n    }\n\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation DeleteColumn($columnId: String!){\n        deleteColumn(columnId: $columnId)\n    }\n"): (typeof documents)["\n    mutation DeleteColumn($columnId: String!){\n        deleteColumn(columnId: $columnId)\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    subscription ColumnDeleted {\n        columnDeleted {\n            columns {\n                id\n                order\n            }\n        }\n    }\n"): (typeof documents)["\n    subscription ColumnDeleted {\n        columnDeleted {\n            columns {\n                id\n                order\n            }\n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

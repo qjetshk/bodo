@@ -19,22 +19,28 @@ import Task from "./Task";
 import type { Board, Column as ColumnType, Task as TaskType } from "@/types/board.type";
 import { createPortal } from "react-dom";
 import { useMutation, useSubscription } from "@apollo/client/react";
-import { CHANGE_COLUMNS_ORDER, COLUMN_ORDER_CHANGED, COLUMN_TITLE_CHANGED } from "@/apollo/requests/boards";
 import { TASK_CREATED, TASK_DELETED } from "@/apollo/requests/tasks";
 import { motion } from 'motion/react';
 import { CirclePlus } from "lucide-react";
+import { ADD_NEW_COLUMN, CHANGE_COLUMNS_ORDER, COLUMN_ADDED, COLUMN_DELETED, COLUMN_ORDER_CHANGED } from "@/apollo/requests/columns";
 
 export default function Board({ board }: { board: Board }) {
   const [allColumns, setAllColumns] = useState<ColumnType[]>(board.columns);
   const [activeColumn, setActiveColumn] = useState<ColumnType | null>(null);
   const [activeTask, setActiveTask] = useState<TaskType | null>(null);
+  const [addingNewColumn, setAddingNewColumn] = useState(false)
+  const [canDelete, setCanDelete] = useState(allColumns.length > 2)
+
+  useEffect(() => {
+    setCanDelete(allColumns.length > 2)
+  }, [allColumns])
 
   useEffect(() => {
     setAllColumns(board.columns)
   }, [board])
 
   const [changeOrder] = useMutation(CHANGE_COLUMNS_ORDER);
-
+  const [addColumn] = useMutation(ADD_NEW_COLUMN)
 
   useSubscription(COLUMN_ORDER_CHANGED, {
     onData: ({ data }) => {
@@ -72,6 +78,40 @@ export default function Board({ board }: { board: Board }) {
             : col
         ) as ColumnType[]
       );
+    }
+  });
+
+  useSubscription(COLUMN_ADDED, {
+    onData: ({ data }) => {
+      console.log('column added')
+      const addedColumn = data.data?.columnAdded as ColumnType
+
+      setAllColumns(columns => {
+        return [...columns, addedColumn].sort((a, b) => a.order - b.order)
+      })
+      setAddingNewColumn(true)
+    }
+  })
+
+  useSubscription(COLUMN_DELETED, {
+    onData: ({ data }) => {
+      const updatedColumns = data.data?.columnDeleted.columns;
+      if (!updatedColumns) return;
+
+      const orderMap = new Map<string, number>();
+      updatedColumns.forEach(col => {
+        orderMap.set(col.id, col.order);
+      });
+
+      setAllColumns(prev => {
+        return prev
+          .filter(col => orderMap.has(col.id))
+          .map(col => ({
+            ...col,
+            order: orderMap.get(col.id)!
+          }))
+          .sort((a, b) => a.order - b.order);
+      });
     }
   });
 
@@ -125,7 +165,14 @@ export default function Board({ board }: { board: Board }) {
   };
 
   const addNewColumn = () => {
-    // TODO: логика создания новой колонки
+    addColumn({
+      variables: {
+        columnInput: {
+          boardId: board.id,
+          title: `Новая колонка ${allColumns.length + 1}`
+        }
+      }
+    })
   };
 
   const columnsIds = allColumns.map(col => col.id);
@@ -148,29 +195,31 @@ export default function Board({ board }: { board: Board }) {
               animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
               transition={{ duration: 0.3, delay: i * 0.2 }}
             >
-              <Column column={col} />
+              <Column canDelete={canDelete} column={col} />
             </motion.div>
           ))}
         </SortableContext>
+        {allColumns.length < 10 &&
+          <motion.div
+            onClick={addNewColumn}
+            style={{ maxWidth: `${100 / allColumns.length}%` }}
+            className=" border-3 border-dashed opacity-65 hover:opacity-95 transition-all border-neutral-700 text-neutral-400 cursor-pointer hover:text-neutral-300 bg-neutral-900 rounded-xl max-h-[700px] flex justify-center items-center min-h-50 min-w-[300px]"
+            initial={{ opacity: 0, filter: 'blur(5px)' }}
+            animate={{ opacity: 1, filter: 'blur(0px)' }}
+            transition={{ duration: 0.3, delay: addingNewColumn ? allColumns.length * 0.2 : 0 }}
+          >
+            <div className="flex gap-2 items-center">
+              <CirclePlus size={20} />
+              <span>Новая колонка</span>
+            </div>
+          </motion.div>
+        }
 
-        <motion.div
-          onClick={addNewColumn}
-          style={{ maxWidth: `${100 / allColumns.length}%` }}
-          className=" border-3 border-dashed opacity-65 hover:opacity-95 transition-all border-neutral-700 text-neutral-400 cursor-pointer hover:text-neutral-300 bg-neutral-900 rounded-xl max-h-[700px] flex justify-center items-center min-h-50 min-w-[300px]"
-          initial={{ opacity: 0, filter: 'blur(5px)' }}
-          animate={{ opacity: 1, filter: 'blur(0px)' }}
-          transition={{ duration: 0.3, delay: allColumns.length * 0.2 }}
-        >
-          <div className="flex gap-2 items-center">
-            <CirclePlus size={20} />
-            <span>Новая колонка</span>
-          </div>
-        </motion.div>
       </div>
 
       {createPortal(
         <DragOverlay>
-          {activeColumn && <Column column={activeColumn} />}
+          {activeColumn && <Column canDelete={canDelete} column={activeColumn} />}
           {activeTask && !activeColumn && <Task task={activeTask} />}
         </DragOverlay>,
         document.body

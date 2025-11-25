@@ -36,9 +36,9 @@ const EditTask = ({ task, isOpen }: Props) => {
     const watchedDescription = watch('description')
 
     const isUpdated = useMemo(() => {
-        if (!watchedDescription) return
+        const desc = watchedDescription ??  ''
         const nameChanged = (normalizeSpaces(watchedTitle) !== task.title) && (watchedTitle.length > 0);
-        const descriptionChanged = (normalizeSpaces(watchedDescription ?? "") !== task.description) && (watchedDescription.length > 0);
+        const descriptionChanged = (normalizeSpaces(watchedDescription ?? "") !== task.description) && (desc.length > 0);
 
         return nameChanged || descriptionChanged
     }, [watchedDescription, watchedTitle])
