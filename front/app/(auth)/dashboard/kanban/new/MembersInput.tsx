@@ -6,8 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FieldErrors, UseFormSetValue } from "react-hook-form";
 import Member from "./Member";
 import { toast } from "sonner";
-import { GetInitialBoardQuery } from "@/apollo/gql/graphql";
-import { InitialBoard } from "@/components/board/SettingsForOwner";
+import { Board } from "@/types/board.type";
 
 export interface MemberType {
   id: string;
@@ -16,7 +15,7 @@ export interface MemberType {
   avatarUrl?: string | null;
 }
 
-type Members = InitialBoard['members']
+type Members = Board['members']
 
 interface MembersInputProps {
   findMembersInput: string;

@@ -24,7 +24,8 @@ const BoardPage = () => {
   const { data, loading, error } = useQuery(GET_INITIAL_BOARD, {
     variables: {
       boardId
-    }
+    },
+    fetchPolicy: "network-only"
   })
 
   const { user } = useCurrentUser()
@@ -39,10 +40,8 @@ const BoardPage = () => {
     }
   }, [data]);
 
-
-
   useSubscription(USER_ACCEPT_INVITATION, {
-    onData: ({ data }) => {
+    onData: ({ data, client }) => {
       console.log(data)
       const member = data.data?.invitationAccepted.member
 
@@ -54,6 +53,13 @@ const BoardPage = () => {
         const newMembers = [...prev.members, member];
 
         return { ...prev, members: newMembers }
+      })
+
+      client.cache.modify({
+        id: client.cache.identify({__typename: 'Board', id: board.id}),
+        fields: {
+          updatedAt: () => new Date().toISOString()
+        }
       })
     }
   })

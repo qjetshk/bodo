@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState, useMemo, useCallback } from "react";
 import {
   DndContext,
   MouseSensor,
@@ -10,216 +11,240 @@ import {
   DragEndEvent,
   DragStartEvent,
   DragOverEvent,
-  PointerSensor
 } from "@dnd-kit/core";
-import { SortableContext, arrayMove, horizontalListSortingStrategy } from "@dnd-kit/sortable";
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import {
+  SortableContext,
+  arrayMove,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import Column from "./Column";
 import Task from "./Task";
-import type { Board, Column as ColumnType, Task as TaskType } from "@/types/board.type";
-import { createPortal } from "react-dom";
-import { useMutation, useSubscription } from "@apollo/client/react";
-import { TASK_CREATED, TASK_DELETED } from "@/apollo/requests/tasks";
-import { motion } from 'motion/react';
+import type { Board, ColumnWithoutTasks, Task as TaskType, Column as ColumnType } from "@/types/board.type";
 import { CirclePlus } from "lucide-react";
+import { motion } from "motion/react";
+import { useMutation, useSubscription } from "@apollo/client/react";
 import { ADD_NEW_COLUMN, CHANGE_COLUMNS_ORDER, COLUMN_ADDED, COLUMN_DELETED, COLUMN_ORDER_CHANGED } from "@/apollo/requests/columns";
+import { TASK_CREATED } from "@/apollo/requests/tasks";
+import { createPortal } from "react-dom";
 
 export default function Board({ board }: { board: Board }) {
-  const [allColumns, setAllColumns] = useState<ColumnType[]>(board.columns);
-  const [activeColumn, setActiveColumn] = useState<ColumnType | null>(null);
+  const [allColumns, setAllColumns] = useState<ColumnWithoutTasks[]>(board.columns);
+  const [allTasks, setAllTasks] = useState<TaskType[]>(board.columns.flatMap(c => c.tasks));
+  const [activeColumn, setActiveColumn] = useState<ColumnWithoutTasks | null>(null);
   const [activeTask, setActiveTask] = useState<TaskType | null>(null);
-  const [addingNewColumn, setAddingNewColumn] = useState(false)
-  const [canDelete, setCanDelete] = useState(allColumns.length > 2)
+  const [addingNewColumn, setAddingNewColumn] = useState(false);
 
-  useEffect(() => {
-    setCanDelete(allColumns.length > 2)
-  }, [allColumns])
-
-  useEffect(() => {
-    setAllColumns(board.columns)
-  }, [board])
-
+  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
   const [changeOrder] = useMutation(CHANGE_COLUMNS_ORDER);
-  const [addColumn] = useMutation(ADD_NEW_COLUMN)
+  const [addColumn] = useMutation(ADD_NEW_COLUMN);
 
+  // --- Подписки ---
   useSubscription(COLUMN_ORDER_CHANGED, {
-    onData: ({ data }) => {
-      const updatedColumns = data.data?.columnOrderChanged.columns;
-      if (!updatedColumns) return;
+    onData: ({ data, client }) => {
+      const updated = data.data?.columnOrderChanged?.columns;
+      if (!updated) return;
       setAllColumns(prev =>
         prev
-          .map(col => ({ ...col, order: updatedColumns.find(c => c.id === col.id)?.order ?? col.order }))
+          .map(c => ({ ...c, order: updated.find(u => u.id === c.id)?.order ?? c.order }))
           .sort((a, b) => a.order - b.order)
       );
-    }
-  });
 
-  useSubscription(TASK_DELETED, {
-    onData: ({ data }) => {
-      const payload = data.data?.taskDeleted;
-      if (!payload) return;
-      const { columnId, tasks } = payload;
-      setAllColumns(prev =>
-        prev.map(col =>
-          col.id === columnId ? { ...col, tasks: tasks.sort((a, b) => a.order - b.order) } : col
-        ) as ColumnType[]
-      );
-    }
+      client.cache.modify({
+        id: client.cache.identify({ __typename: 'Board', id: board.id }),
+        fields: {
+          updatedAt: () => new Date().toISOString()
+        }
+      })
+    },
   });
 
   useSubscription(TASK_CREATED, {
-    onData: ({ data }) => {
+    onData: ({ data, client }) => {
       const created = data.data?.taskCreated;
       if (!created) return;
-      setAllColumns(prev =>
-        prev.map(col =>
-          col.id === created.columnId
-            ? { ...col, tasks: [...col.tasks, created].sort((a, b) => a.order - b.order) }
-            : col
-        ) as ColumnType[]
-      );
-    }
+      setAllTasks(prev => prev.some(t => t.id === created.id) ? prev : [...prev, created as TaskType]);
+
+      client.cache.modify({
+        id: client.cache.identify({ __typename: 'Board', id: board.id }),
+        fields: {
+          updatedAt: () => new Date().toISOString()
+        }
+      })
+    },
   });
 
   useSubscription(COLUMN_ADDED, {
-    onData: ({ data }) => {
-      console.log('column added')
-      const addedColumn = data.data?.columnAdded as ColumnType
+    onData: ({ data, client }) => {
+      const added = data.data?.columnAdded;
+      if (!added) return;
+      setAllColumns(prev => [...prev, added as ColumnType].sort((a, b) => a.order - b.order));
+      setAddingNewColumn(true);
 
-      setAllColumns(columns => {
-        return [...columns, addedColumn].sort((a, b) => a.order - b.order)
+      client.cache.modify({
+        id: client.cache.identify({ __typename: 'Board', id: board.id }),
+        fields: {
+          updatedAt: () => new Date().toISOString()
+        }
       })
-      setAddingNewColumn(true)
-    }
-  })
-
-  useSubscription(COLUMN_DELETED, {
-    onData: ({ data }) => {
-      const updatedColumns = data.data?.columnDeleted.columns;
-      if (!updatedColumns) return;
-
-      const orderMap = new Map<string, number>();
-      updatedColumns.forEach(col => {
-        orderMap.set(col.id, col.order);
-      });
-
-      setAllColumns(prev => {
-        return prev
-          .filter(col => orderMap.has(col.id))
-          .map(col => ({
-            ...col,
-            order: orderMap.get(col.id)!
-          }))
-          .sort((a, b) => a.order - b.order);
-      });
-    }
+    },
   });
 
-  // Sensors
-  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
+  useSubscription(COLUMN_DELETED, {
+    onData: ({ data, client }) => {
+      const updated = data.data?.columnDeleted?.columns;
+      if (!updated) return;
+      const orderMap = new Map(updated.map((c) => [c.id, c.order]));
+      setAllColumns(prev =>
+        prev.filter(c => orderMap.has(c.id)).map(c => ({ ...c, order: orderMap.get(c.id)! })).sort((a, b) => a.order - b.order)
+      );
 
-  // Drag start
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    if (active.data.current?.type === "Column") setActiveColumn(active.data.current.column);
-    if (active.data.current?.type === "Task") setActiveTask(active.data.current.task);
-  };
+      client.cache.modify({
+        id: client.cache.identify({ __typename: 'Board', id: board.id }),
+        fields: {
+          updatedAt: () => new Date().toISOString()
+        }
+      })
+    },
+  });
 
-  // Drag end
-  const handleDragEnd = (event: DragEndEvent) => {
+  // --- Drag & Drop ---
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const type = event.active.data.current?.type;
+    if (type === "Column") setActiveColumn(event.active.data.current?.column);
+    if (type === "Task") setActiveTask(event.active.data.current?.task);
+  }, []);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
     setActiveColumn(null);
     setActiveTask(null);
     if (!over) return;
 
-    const activeColumnId = active.id.toString();
-    const overColumnId = over.id.toString();
+    if (active.data.current?.type === "Column") {
+      const activeId = active.id.toString();
+      const overId = over.id.toString();
+      if (activeId === overId) return;
 
-    if (activeColumnId === overColumnId) return;
+      setAllColumns(cols => {
+        const oldIndex = cols.findIndex(c => c.id === activeId);
+        const newIndex = cols.findIndex(c => c.id === overId);
+        if (oldIndex === -1 || newIndex === -1) return cols;
+        const moved = arrayMove(cols, oldIndex, newIndex).map((c, i) => ({ ...c, order: i }));
+        changeOrder({ variables: { boardId: board.id, changeColumnInput: moved.map(c => ({ id: c.id, order: c.order })) } });
+        return moved;
+      });
+      return;
+    }
 
-    setAllColumns(columns => {
-      const activeColumnIdx = columns.findIndex(col => col.id === activeColumnId);
-      const overColumnIdx = columns.findIndex(col => col.id === overColumnId);
+    if (active.data.current?.type === "Task") {
+      const activeTask = active.data.current.task;
+      if (!activeTask) return;
 
-      const movedColumns = arrayMove(columns, activeColumnIdx, overColumnIdx);
+      const overTask = over.data.current?.task ?? null;
+      const overColumnId = over.data.current?.columnId ?? over.id;
 
-      const updatedColumns = movedColumns.map((col, index) => ({
-        ...col,
-        order: index
-      }));
+      setAllTasks(prev => {
+        const tasks = [...prev];
+        const oldIndex = tasks.findIndex(t => t.id === activeTask.id);
+        if (oldIndex === -1) return prev;
 
-      changeOrder({
-        variables: {
-          boardId: board.id,
-          changeColumnInput: updatedColumns.map(col => ({ id: col.id, order: col.order }))
+        if (overTask) {
+          const newIndex = tasks.findIndex(t => t.id === overTask.id);
+          if (newIndex === -1 || oldIndex === newIndex) return prev;
+          if (tasks[oldIndex].columnId !== tasks[newIndex].columnId) {
+            tasks[oldIndex] = { ...tasks[oldIndex], columnId: tasks[newIndex].columnId };
+          }
+          return arrayMove(tasks, oldIndex, newIndex);
+        } else {
+          // дроп на пустую колонку
+          if (tasks[oldIndex].columnId !== overColumnId) {
+            tasks[oldIndex] = { ...tasks[oldIndex], columnId: overColumnId };
+          }
+          return tasks;
         }
       });
+    }
+  }, [board.id, changeOrder]);
 
-      return updatedColumns;
-    });
-  };
+  const handleDragOver = useCallback((event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over || active.data.current?.type !== "Task") return;
 
+    const activeTask = active.data.current.task;
+    if (!activeTask) return;
 
-  const handleDragOver = (event: DragOverEvent) => {
-    // TODO: поддержка перетаскивания тасок между колонками
-  };
+    const overTask = over.data.current?.task ?? null;
+    const overColumnId = over.data.current?.columnId ?? over.id;
 
-  const addNewColumn = () => {
-    addColumn({
-      variables: {
-        columnInput: {
-          boardId: board.id,
-          title: `Новая колонка ${allColumns.length + 1}`
+    setAllTasks(prev => {
+      const tasks = [...prev];
+      const oldIndex = tasks.findIndex(t => t.id === activeTask.id);
+      if (oldIndex === -1) return prev;
+
+      if (overTask) {
+        const newIndex = tasks.findIndex(t => t.id === overTask.id);
+        if (newIndex === -1 || oldIndex === newIndex) return prev;
+        if (tasks[oldIndex].columnId !== tasks[newIndex].columnId) {
+          tasks[oldIndex] = { ...tasks[oldIndex], columnId: tasks[newIndex].columnId };
         }
+        return arrayMove(tasks, oldIndex, newIndex);
+      } else if (overColumnId && tasks[oldIndex].columnId !== overColumnId) {
+        // перемещение в пустую колонку
+        tasks[oldIndex] = { ...tasks[oldIndex], columnId: overColumnId };
+        return tasks;
       }
-    })
-  };
 
-  const columnsIds = allColumns.map(col => col.id);
+      return prev;
+    });
+  }, []);
+
+  const addNewColumn = useCallback(() => {
+    addColumn({ variables: { columnInput: { boardId: board.id, title: `Новая колонка ${allColumns.length + 1}` } } });
+  }, [addColumn, allColumns.length, board.id]);
+
+  const columnIds = useMemo(() => allColumns.map(c => c.id), [allColumns]);
+
+  const tasksByColumn = useMemo(() => {
+    const map = new Map<string, TaskType[]>();
+    allColumns.forEach(col => {
+      map.set(col.id, allTasks.filter(t => t.columnId === col.id));
+    });
+    return map;
+  }, [allColumns, allTasks]);
 
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      onDragOver={handleDragOver}
-    >
-      <div className="flex gap-4 overflow-x-auto p-4 2xl:pb-4! pb-10! max-w-screen">
-        <SortableContext items={columnsIds} strategy={horizontalListSortingStrategy}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragOver={handleDragOver}>
+      <div className="flex gap-4 overflow-x-auto p-4 pb-10 max-w-screen">
+        <SortableContext items={columnIds} strategy={horizontalListSortingStrategy}>
           {allColumns.map((col, i) => (
-            <motion.div
-              key={col.id}
-              className="flex-1 min-w-[300px]"
-              style={{ maxWidth: `${100 / allColumns.length}%` }}
-              initial={{ y: 10, opacity: 0, filter: 'blur(5px)' }}
-              animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-              transition={{ duration: 0.3, delay: i * 0.2 }}
+            <motion.div key={col.id} className="flex-1 min-w-[300px]" style={{ maxWidth: `${100 / allColumns.length}%` }}
+              initial={{ y: 10, opacity: 0, filter: "blur(5px)" }}
+              animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+              transition={{ duration: 0.3, delay: i * 0.15 }}
             >
-              <Column canDelete={canDelete} column={col} />
+              <Column boardId={board.id} column={col} tasks={tasksByColumn.get(col.id) ?? []} canDelete={allColumns.length > 2} />
             </motion.div>
           ))}
         </SortableContext>
-        {allColumns.length < 10 &&
-          <motion.div
-            onClick={addNewColumn}
-            style={{ maxWidth: `${100 / allColumns.length}%` }}
-            className=" border-3 border-dashed opacity-65 hover:opacity-95 transition-all border-neutral-700 text-neutral-400 cursor-pointer hover:text-neutral-300 bg-neutral-900 rounded-xl max-h-[700px] flex justify-center items-center min-h-50 min-w-[300px]"
-            initial={{ opacity: 0, filter: 'blur(5px)' }}
-            animate={{ opacity: 1, filter: 'blur(0px)' }}
-            transition={{ duration: 0.3, delay: addingNewColumn ? allColumns.length * 0.2 : 0 }}
+
+        {allColumns.length < 10 && (
+          <motion.div onClick={addNewColumn} style={{ maxWidth: `${100 / allColumns.length}%` }}
+            className="border-3 border-dashed opacity-65 hover:opacity-95 transition-all border-neutral-700 text-neutral-400 cursor-pointer hover:text-neutral-300 bg-neutral-900 rounded-xl max-h-[700px] flex justify-center items-center min-h-50 min-w-[300px]"
+            initial={{ opacity: 0, filter: "blur(5px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 0.3, delay: addingNewColumn ? allColumns.length * 0.15 : 0 }}
           >
             <div className="flex gap-2 items-center">
               <CirclePlus size={20} />
               <span>Новая колонка</span>
             </div>
           </motion.div>
-        }
-
+        )}
       </div>
 
       {createPortal(
         <DragOverlay>
-          {activeColumn && <Column canDelete={canDelete} column={activeColumn} />}
+          {activeColumn && <Column boardId={board.id} column={activeColumn} tasks={allTasks.filter(t => t.columnId === activeColumn.id)} canDelete={allColumns.length > 2} />}
           {activeTask && !activeColumn && <Task task={activeTask} />}
         </DragOverlay>,
         document.body
