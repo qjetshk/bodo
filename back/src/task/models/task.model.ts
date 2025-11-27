@@ -71,4 +71,22 @@ export class DeletedTask {
   tasks: CreatedTask[]
 }
 
+@ObjectType()
+export class ChangedTaskOrder {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => Int)
+  order: number;
+}
+
+
+@ObjectType()
+export class ChangedTasksOrderInOneColumn {
+  @Field(() => ID)
+  columnId: string;
+
+  @Field(() => [ChangedTaskOrder])
+  tasks: ChangedTaskOrder[];
+}
 

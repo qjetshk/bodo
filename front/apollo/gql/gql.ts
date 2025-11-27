@@ -19,13 +19,13 @@ type Documents = {
     "\n    mutation CreateBoard($boardInput: CreateBoardInput!) {\n        createBoard(boardInput: $boardInput) {\n            id\n        }\n    }\n\n": typeof types.CreateBoardDocument,
     "\n    query GetInitialBoard($boardId: String!) {\n        getBoardById(boardId: $boardId) {\n            boardType\n            name\n            description\n            id\n            createdAt\n            members{\n                user{\n                    avatarUrl\n                    email\n                    nickName\n                    id\n                }\n            }\n            owner{\n                avatarUrl\n                email\n                nickName\n                id\n            }\n            columns {\n                id\n                order\n                title\n                tasks {\n                    description\n                    id\n                    order\n                    title\n                    updatedAt\n                    columnId\n                }\n            }\n        }\n    }\n": typeof types.GetInitialBoardDocument,
     "\n    mutation EditBoard($boardId: String!, $editBoardInput: EditBoardInput!) {\n        editBoard(editBoardInput: $editBoardInput, boardId: $boardId) {\n            id \n            name \n            description \n            updatedAt\n        }\n    }\n": typeof types.EditBoardDocument,
+    "\n    subscription BoardEdited{\n        boardEdited{\n            description\n            id\n            name\n            updatedAt\n        }\n    }\n": typeof types.BoardEditedDocument,
+    "\n    mutation DeleteBoard($boardId: String!){\n        deleteBoard(boardId: $boardId)\n    }\n": typeof types.DeleteBoardDocument,
+    "\n    subscription BoardDeleted {\n        boardDeleted {\n            id\n            name\n        }\n    }\n": typeof types.BoardDeletedDocument,
     "\n    mutation ChangeColumnTitle($newTitle: String!, $columnId: String!){\n        changeColumnTitle(newTitle: $newTitle, columnId: $columnId)\n    }\n": typeof types.ChangeColumnTitleDocument,
     "\n    subscription ColumnTitleChanged{\n        columnTitleChanged{\n            id\n            title\n        }\n    }\n": typeof types.ColumnTitleChangedDocument,
     "\n  mutation ChangeColumnsOrder($changeColumnInput: [ChangeColumnOrderInput!]!, $boardId: ID!){\n    changeColumnsOrder(changeColumnInput: $changeColumnInput, boardId: $boardId)\n  }\n": typeof types.ChangeColumnsOrderDocument,
     "\n    subscription ColumnOrderChanged{\n        columnOrderChanged{\n            boardId\n            columns{\n                id\n                order\n            }\n        }\n    }\n\n": typeof types.ColumnOrderChangedDocument,
-    "\n    subscription BoardEdited{\n        boardEdited{\n            description\n            id\n            name\n            updatedAt\n        }\n    }\n": typeof types.BoardEditedDocument,
-    "\n    mutation DeleteBoard($boardId: String!){\n        deleteBoard(boardId: $boardId)\n    }\n": typeof types.DeleteBoardDocument,
-    "\n    subscription BoardDeleted {\n        boardDeleted {\n            id\n            name\n        }\n    }\n": typeof types.BoardDeletedDocument,
     "\n    mutation AddNewColumn($columnInput: AddNewColumnInput!){\n        addNewColumn(columnInput: $columnInput)\n    }   \n": typeof types.AddNewColumnDocument,
     "\n    subscription ColumnAdded {\n        columnAdded {\n            boardId\n            title\n            id\n            order\n            tasks {\n                id\n                title\n                description\n                order\n                columnId\n                updatedAt\n            }\n        }\n    }\n\n": typeof types.ColumnAddedDocument,
     "\n    mutation DeleteColumn($columnId: String!){\n        deleteColumn(columnId: $columnId)\n    }\n": typeof types.DeleteColumnDocument,
@@ -41,6 +41,8 @@ type Documents = {
     "\n    subscription TaskCreated{\n        taskCreated{\n            columnId\n            description\n            id\n            order\n            title\n            updatedAt\n        }\n    }\n": typeof types.TaskCreatedDocument,
     "\n    mutation DeleteTask($taskId: String!){\n        deleteTask(taskId: $taskId)\n    }\n": typeof types.DeleteTaskDocument,
     "\n    subscription TaskDeleted {\n        taskDeleted {\n            columnId\n            boardUpdatedAt\n            tasks {\n                updatedAt\n                description\n                id\n                order\n                title\n            }\n        }\n    }\n": typeof types.TaskDeletedDocument,
+    "\n    mutation ChangeTasksOrderInOneColumn(\n        $newTasks: [ChangeTaskOrderInput!]!\n        $columnId: String!\n    ) {\n        changeTasksOrderInOneColumn(newTasks: $newTasks, columnId: $columnId)\n    }\n": typeof types.ChangeTasksOrderInOneColumnDocument,
+    "\n    subscription TasksOrderChangedInOneColumn {\n        tasksOrderChangedInOneColumn {\n            columnId\n            tasks {\n                id\n                order\n            }\n        }\n    }\n": typeof types.TasksOrderChangedInOneColumnDocument,
     "\n  query GetAllBoardTemplates {\n    getAllBoardTemplates {\n      id\n      name\n      description\n      columns {\n        title\n        order\n      }\n    }\n  }\n": typeof types.GetAllBoardTemplatesDocument,
 };
 const documents: Documents = {
@@ -49,13 +51,13 @@ const documents: Documents = {
     "\n    mutation CreateBoard($boardInput: CreateBoardInput!) {\n        createBoard(boardInput: $boardInput) {\n            id\n        }\n    }\n\n": types.CreateBoardDocument,
     "\n    query GetInitialBoard($boardId: String!) {\n        getBoardById(boardId: $boardId) {\n            boardType\n            name\n            description\n            id\n            createdAt\n            members{\n                user{\n                    avatarUrl\n                    email\n                    nickName\n                    id\n                }\n            }\n            owner{\n                avatarUrl\n                email\n                nickName\n                id\n            }\n            columns {\n                id\n                order\n                title\n                tasks {\n                    description\n                    id\n                    order\n                    title\n                    updatedAt\n                    columnId\n                }\n            }\n        }\n    }\n": types.GetInitialBoardDocument,
     "\n    mutation EditBoard($boardId: String!, $editBoardInput: EditBoardInput!) {\n        editBoard(editBoardInput: $editBoardInput, boardId: $boardId) {\n            id \n            name \n            description \n            updatedAt\n        }\n    }\n": types.EditBoardDocument,
+    "\n    subscription BoardEdited{\n        boardEdited{\n            description\n            id\n            name\n            updatedAt\n        }\n    }\n": types.BoardEditedDocument,
+    "\n    mutation DeleteBoard($boardId: String!){\n        deleteBoard(boardId: $boardId)\n    }\n": types.DeleteBoardDocument,
+    "\n    subscription BoardDeleted {\n        boardDeleted {\n            id\n            name\n        }\n    }\n": types.BoardDeletedDocument,
     "\n    mutation ChangeColumnTitle($newTitle: String!, $columnId: String!){\n        changeColumnTitle(newTitle: $newTitle, columnId: $columnId)\n    }\n": types.ChangeColumnTitleDocument,
     "\n    subscription ColumnTitleChanged{\n        columnTitleChanged{\n            id\n            title\n        }\n    }\n": types.ColumnTitleChangedDocument,
     "\n  mutation ChangeColumnsOrder($changeColumnInput: [ChangeColumnOrderInput!]!, $boardId: ID!){\n    changeColumnsOrder(changeColumnInput: $changeColumnInput, boardId: $boardId)\n  }\n": types.ChangeColumnsOrderDocument,
     "\n    subscription ColumnOrderChanged{\n        columnOrderChanged{\n            boardId\n            columns{\n                id\n                order\n            }\n        }\n    }\n\n": types.ColumnOrderChangedDocument,
-    "\n    subscription BoardEdited{\n        boardEdited{\n            description\n            id\n            name\n            updatedAt\n        }\n    }\n": types.BoardEditedDocument,
-    "\n    mutation DeleteBoard($boardId: String!){\n        deleteBoard(boardId: $boardId)\n    }\n": types.DeleteBoardDocument,
-    "\n    subscription BoardDeleted {\n        boardDeleted {\n            id\n            name\n        }\n    }\n": types.BoardDeletedDocument,
     "\n    mutation AddNewColumn($columnInput: AddNewColumnInput!){\n        addNewColumn(columnInput: $columnInput)\n    }   \n": types.AddNewColumnDocument,
     "\n    subscription ColumnAdded {\n        columnAdded {\n            boardId\n            title\n            id\n            order\n            tasks {\n                id\n                title\n                description\n                order\n                columnId\n                updatedAt\n            }\n        }\n    }\n\n": types.ColumnAddedDocument,
     "\n    mutation DeleteColumn($columnId: String!){\n        deleteColumn(columnId: $columnId)\n    }\n": types.DeleteColumnDocument,
@@ -71,6 +73,8 @@ const documents: Documents = {
     "\n    subscription TaskCreated{\n        taskCreated{\n            columnId\n            description\n            id\n            order\n            title\n            updatedAt\n        }\n    }\n": types.TaskCreatedDocument,
     "\n    mutation DeleteTask($taskId: String!){\n        deleteTask(taskId: $taskId)\n    }\n": types.DeleteTaskDocument,
     "\n    subscription TaskDeleted {\n        taskDeleted {\n            columnId\n            boardUpdatedAt\n            tasks {\n                updatedAt\n                description\n                id\n                order\n                title\n            }\n        }\n    }\n": types.TaskDeletedDocument,
+    "\n    mutation ChangeTasksOrderInOneColumn(\n        $newTasks: [ChangeTaskOrderInput!]!\n        $columnId: String!\n    ) {\n        changeTasksOrderInOneColumn(newTasks: $newTasks, columnId: $columnId)\n    }\n": types.ChangeTasksOrderInOneColumnDocument,
+    "\n    subscription TasksOrderChangedInOneColumn {\n        tasksOrderChangedInOneColumn {\n            columnId\n            tasks {\n                id\n                order\n            }\n        }\n    }\n": types.TasksOrderChangedInOneColumnDocument,
     "\n  query GetAllBoardTemplates {\n    getAllBoardTemplates {\n      id\n      name\n      description\n      columns {\n        title\n        order\n      }\n    }\n  }\n": types.GetAllBoardTemplatesDocument,
 };
 
@@ -111,6 +115,18 @@ export function graphql(source: "\n    mutation EditBoard($boardId: String!, $ed
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n    subscription BoardEdited{\n        boardEdited{\n            description\n            id\n            name\n            updatedAt\n        }\n    }\n"): (typeof documents)["\n    subscription BoardEdited{\n        boardEdited{\n            description\n            id\n            name\n            updatedAt\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation DeleteBoard($boardId: String!){\n        deleteBoard(boardId: $boardId)\n    }\n"): (typeof documents)["\n    mutation DeleteBoard($boardId: String!){\n        deleteBoard(boardId: $boardId)\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    subscription BoardDeleted {\n        boardDeleted {\n            id\n            name\n        }\n    }\n"): (typeof documents)["\n    subscription BoardDeleted {\n        boardDeleted {\n            id\n            name\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n    mutation ChangeColumnTitle($newTitle: String!, $columnId: String!){\n        changeColumnTitle(newTitle: $newTitle, columnId: $columnId)\n    }\n"): (typeof documents)["\n    mutation ChangeColumnTitle($newTitle: String!, $columnId: String!){\n        changeColumnTitle(newTitle: $newTitle, columnId: $columnId)\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -124,18 +140,6 @@ export function graphql(source: "\n  mutation ChangeColumnsOrder($changeColumnIn
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    subscription ColumnOrderChanged{\n        columnOrderChanged{\n            boardId\n            columns{\n                id\n                order\n            }\n        }\n    }\n\n"): (typeof documents)["\n    subscription ColumnOrderChanged{\n        columnOrderChanged{\n            boardId\n            columns{\n                id\n                order\n            }\n        }\n    }\n\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n    subscription BoardEdited{\n        boardEdited{\n            description\n            id\n            name\n            updatedAt\n        }\n    }\n"): (typeof documents)["\n    subscription BoardEdited{\n        boardEdited{\n            description\n            id\n            name\n            updatedAt\n        }\n    }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n    mutation DeleteBoard($boardId: String!){\n        deleteBoard(boardId: $boardId)\n    }\n"): (typeof documents)["\n    mutation DeleteBoard($boardId: String!){\n        deleteBoard(boardId: $boardId)\n    }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n    subscription BoardDeleted {\n        boardDeleted {\n            id\n            name\n        }\n    }\n"): (typeof documents)["\n    subscription BoardDeleted {\n        boardDeleted {\n            id\n            name\n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -196,6 +200,14 @@ export function graphql(source: "\n    mutation DeleteTask($taskId: String!){\n 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n    subscription TaskDeleted {\n        taskDeleted {\n            columnId\n            boardUpdatedAt\n            tasks {\n                updatedAt\n                description\n                id\n                order\n                title\n            }\n        }\n    }\n"): (typeof documents)["\n    subscription TaskDeleted {\n        taskDeleted {\n            columnId\n            boardUpdatedAt\n            tasks {\n                updatedAt\n                description\n                id\n                order\n                title\n            }\n        }\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation ChangeTasksOrderInOneColumn(\n        $newTasks: [ChangeTaskOrderInput!]!\n        $columnId: String!\n    ) {\n        changeTasksOrderInOneColumn(newTasks: $newTasks, columnId: $columnId)\n    }\n"): (typeof documents)["\n    mutation ChangeTasksOrderInOneColumn(\n        $newTasks: [ChangeTaskOrderInput!]!\n        $columnId: String!\n    ) {\n        changeTasksOrderInOneColumn(newTasks: $newTasks, columnId: $columnId)\n    }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    subscription TasksOrderChangedInOneColumn {\n        tasksOrderChangedInOneColumn {\n            columnId\n            tasks {\n                id\n                order\n            }\n        }\n    }\n"): (typeof documents)["\n    subscription TasksOrderChangedInOneColumn {\n        tasksOrderChangedInOneColumn {\n            columnId\n            tasks {\n                id\n                order\n            }\n        }\n    }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

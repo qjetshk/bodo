@@ -3,6 +3,7 @@ import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { AddNewColumnInput } from 'src/board/inputs/add-new-column.input';
 import { ChangeColumnOrderInput } from 'src/board/inputs/change-column-order.input';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { getOwnerAndMembersIds } from 'src/utils/get-owner-members-ids.util';
 
 @Injectable()
 export class ColumnService {
@@ -28,13 +29,6 @@ export class ColumnService {
             throw new NotFoundException("Колонка не найдена");
         }
 
-        const membersIds = currentColumn.board.members.map(member => member.user.id);
-
-        const membersAndOwnerIds = [
-            ...membersIds,
-            currentColumn.board.ownerId
-        ];
-
         if (currentColumn.title === newTitle) {
             throw new ConflictException('Вы не поменяли название колонки!');
         }
@@ -49,16 +43,23 @@ export class ColumnService {
             }
         });
 
-        await this.prismaService.board.update({
+        const board = await this.prismaService.board.update({
             where: { id: updatedColumn.boardId },
-            data: { updatedAt: new Date() }
+            data: { updatedAt: new Date() },
+            include: {
+                members: {
+                    include: {
+                        user: true
+                    }
+                }
+            }
         });
 
         await this.pubSub.publish('columnTitleChanged', {
             columnTitleChanged: {
                 id: updatedColumn.id,
                 title: updatedColumn.title,
-                membersAndOwnerIds
+                membersAndOwnerIds: getOwnerAndMembersIds<typeof board>(board)
             }
         });
     }
@@ -100,20 +101,13 @@ export class ColumnService {
                     }
                 }
             }
-        });
-
-        const membersIds = updatedBoard.members.map(member => member.user.id);
-
-        const membersAndOwnerIds = [
-            ...membersIds,
-            updatedBoard.ownerId
-        ];
+        });;
 
         await this.pubSub.publish("columnOrderChanged", {
             columnOrderChanged: {
                 boardId,
                 columns: updatedColumns,
-                membersAndOwnerIds
+                membersAndOwnerIds: getOwnerAndMembersIds<typeof updatedBoard>(updatedBoard)
             }
         });
 
@@ -154,13 +148,6 @@ export class ColumnService {
             }
         })
 
-        const membersIds = board.members.map(member => member.user.id);
-
-        const membersAndOwnerIds = [
-            ...membersIds,
-            board.ownerId
-        ];
-
         await this.pubSub.publish('columnAdded', {
             columnAdded: {
                 id: newColumn.id,
@@ -168,7 +155,7 @@ export class ColumnService {
                 order: newColumn.order,
                 boardId: newColumn.boardId,
                 tasks: newColumn.tasks,
-                membersAndOwnerIds
+                membersAndOwnerIds: getOwnerAndMembersIds<typeof board>(board)
             }
         })
 
@@ -231,13 +218,6 @@ export class ColumnService {
 
         updatedColumns.sort((a, b) => a.order - b.order);
 
-        const membersIds = board.members.map(member => member.user.id);
-
-        const membersAndOwnerIds = [
-            ...membersIds,
-            board.ownerId
-        ];
-
         await this.prismaService.board.update({
             where: { id: board.id },
             data: {
@@ -248,7 +228,7 @@ export class ColumnService {
         await this.pubSub.publish('columnDeleted', {
             columnDeleted: {
                 columns: updatedColumns,
-                membersAndOwnerIds
+                membersAndOwnerIds: getOwnerAndMembersIds<typeof board>(board)
             }
         })
 

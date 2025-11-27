@@ -81,6 +81,11 @@ input ChangeColumnOrderInput {
   order: Int!
 }
 
+input ChangeTaskOrderInput {
+  id: String!
+  order: Float!
+}
+
 type ChangedColumn {
   id: ID!
   order: Int!
@@ -89,6 +94,16 @@ type ChangedColumn {
 type ChangedColumnsOrder {
   boardId: ID!
   columns: [ChangedColumn!]!
+}
+
+type ChangedTaskOrder {
+  id: ID!
+  order: Int!
+}
+
+type ChangedTasksOrderInOneColumn {
+  columnId: ID!
+  tasks: [ChangedTaskOrder!]!
 }
 
 type Column {
@@ -193,6 +208,7 @@ type Mutation {
   addNewColumn(columnInput: AddNewColumnInput!): Boolean!
   changeColumnTitle(columnId: String!, newTitle: String!): Boolean!
   changeColumnsOrder(boardId: ID!, changeColumnInput: [ChangeColumnOrderInput!]!): Boolean!
+  changeTasksOrderInOneColumn(columnId: String!, newTasks: [ChangeTaskOrderInput!]!): Boolean!
   createBoard(boardInput: CreateBoardInput!): Board!
   createTask(taskInput: CreateTaskInput!): Boolean!
   declineInvitation(invitationId: String!): Boolean!
@@ -224,6 +240,7 @@ type Subscription {
   invitationDeclined: AcceptedOrDeclinedInvitation!
   taskCreated: CreatedTask!
   taskDeleted: DeletedTask!
+  tasksOrderChangedInOneColumn: ChangedTasksOrderInOneColumn!
 }
 
 type Task {

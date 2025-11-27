@@ -11,6 +11,7 @@ import {
   DragEndEvent,
   DragStartEvent,
   DragOverEvent,
+  closestCorners,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -24,7 +25,7 @@ import { CirclePlus } from "lucide-react";
 import { motion } from "motion/react";
 import { useMutation, useSubscription } from "@apollo/client/react";
 import { ADD_NEW_COLUMN, CHANGE_COLUMNS_ORDER, COLUMN_ADDED, COLUMN_DELETED, COLUMN_ORDER_CHANGED } from "@/apollo/requests/columns";
-import { TASK_CREATED } from "@/apollo/requests/tasks";
+import { CHANGE_TASKS_ORDER_IN_ONE_COLUMN, TASK_CREATED, TASK_DELETED, TASKS_ORDER_CHANGED_IN_ONE_COLUMN } from "@/apollo/requests/tasks";
 import { createPortal } from "react-dom";
 
 export default function Board({ board }: { board: Board }) {
@@ -37,26 +38,10 @@ export default function Board({ board }: { board: Board }) {
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
   const [changeOrder] = useMutation(CHANGE_COLUMNS_ORDER);
   const [addColumn] = useMutation(ADD_NEW_COLUMN);
+  const [changeTasksOrderInOneCol] = useMutation(CHANGE_TASKS_ORDER_IN_ONE_COLUMN)
 
   // --- Подписки ---
-  useSubscription(COLUMN_ORDER_CHANGED, {
-    onData: ({ data, client }) => {
-      const updated = data.data?.columnOrderChanged?.columns;
-      if (!updated) return;
-      setAllColumns(prev =>
-        prev
-          .map(c => ({ ...c, order: updated.find(u => u.id === c.id)?.order ?? c.order }))
-          .sort((a, b) => a.order - b.order)
-      );
 
-      client.cache.modify({
-        id: client.cache.identify({ __typename: 'Board', id: board.id }),
-        fields: {
-          updatedAt: () => new Date().toISOString()
-        }
-      })
-    },
-  });
 
   useSubscription(TASK_CREATED, {
     onData: ({ data, client }) => {
@@ -72,6 +57,68 @@ export default function Board({ board }: { board: Board }) {
       })
     },
   });
+
+  useSubscription(TASK_DELETED, {
+    onData: ({ data, client }) => {
+      const tasks = data.data?.taskDeleted.tasks
+      const columnId = data.data?.taskDeleted.columnId
+      console.log(tasks)
+
+      if (!tasks || !columnId) return
+
+      setAllTasks(prev => {
+        const newTasks = tasks.map(t => {
+          return { ...t, columnId } as TaskType
+        })
+        const otherTasks = prev.filter(c => c.columnId !== columnId)
+        return [...otherTasks, ...newTasks].sort((a, b) => a.order - b.order)
+      })
+
+      client.cache.modify({
+        id: client.cache.identify({ __typename: 'Board', id: board.id }),
+        fields: {
+          updatedAt: () => new Date().toISOString()
+        }
+      })
+
+    }
+  })
+
+  useSubscription(TASKS_ORDER_CHANGED_IN_ONE_COLUMN, {
+    onData: ({ data, client }) => {
+      const tasks = data.data?.tasksOrderChangedInOneColumn.tasks
+      const columnId = data.data?.tasksOrderChangedInOneColumn.columnId
+      console.log(tasks)
+
+      if (!tasks || !columnId) return
+
+      setAllTasks(prev => {
+        const tasksInColumn = prev.filter(task => task.columnId === columnId);
+        const otherTasks = prev.filter(task => task.columnId !== columnId);
+
+        const updatedOrders = new Map<string, number>();
+        tasks.forEach(({ id, order }) => {
+          updatedOrders.set(id, order);
+        });
+
+        const updatedTasksInColumn = tasksInColumn.map(task => {
+          const newOrder = updatedOrders.get(task.id);
+          return newOrder !== undefined ? { ...task, order: newOrder } : task;
+        });
+
+        updatedTasksInColumn.sort((a, b) => a.order - b.order);
+
+        return [...otherTasks, ...updatedTasksInColumn];
+      });
+
+      client.cache.modify({
+        id: client.cache.identify({ __typename: 'Board', id: board.id }),
+        fields: {
+          updatedAt: () => new Date().toISOString()
+        }
+      })
+    }
+  })
 
   useSubscription(COLUMN_ADDED, {
     onData: ({ data, client }) => {
@@ -96,6 +143,25 @@ export default function Board({ board }: { board: Board }) {
       const orderMap = new Map(updated.map((c) => [c.id, c.order]));
       setAllColumns(prev =>
         prev.filter(c => orderMap.has(c.id)).map(c => ({ ...c, order: orderMap.get(c.id)! })).sort((a, b) => a.order - b.order)
+      );
+
+      client.cache.modify({
+        id: client.cache.identify({ __typename: 'Board', id: board.id }),
+        fields: {
+          updatedAt: () => new Date().toISOString()
+        }
+      })
+    },
+  });
+
+  useSubscription(COLUMN_ORDER_CHANGED, {
+    onData: ({ data, client }) => {
+      const updated = data.data?.columnOrderChanged?.columns;
+      if (!updated) return;
+      setAllColumns(prev =>
+        prev
+          .map(c => ({ ...c, order: updated.find(u => u.id === c.id)?.order ?? c.order }))
+          .sort((a, b) => a.order - b.order)
       );
 
       client.cache.modify({
@@ -154,7 +220,9 @@ export default function Board({ board }: { board: Board }) {
           if (tasks[oldIndex].columnId !== tasks[newIndex].columnId) {
             tasks[oldIndex] = { ...tasks[oldIndex], columnId: tasks[newIndex].columnId };
           }
-          return arrayMove(tasks, oldIndex, newIndex);
+          const newTasks = arrayMove(tasks, oldIndex, newIndex);
+          console.log(newTasks)
+          return newTasks
         } else {
           // дроп на пустую колонку
           if (tasks[oldIndex].columnId !== overColumnId) {
@@ -187,11 +255,37 @@ export default function Board({ board }: { board: Board }) {
         if (tasks[oldIndex].columnId !== tasks[newIndex].columnId) {
           tasks[oldIndex] = { ...tasks[oldIndex], columnId: tasks[newIndex].columnId };
         }
-        return arrayMove(tasks, oldIndex, newIndex);
+        const newTasks = arrayMove(tasks, oldIndex, newIndex)
+        const newTasksWithoutIt = newTasks.filter(t => t.columnId !== overTask.columnId)
+        const movedTasksWithNewOrders = newTasks.filter(t => t.columnId === overTask.columnId).map((t, i) => {
+          return { ...t, order: i }
+        })
+        changeTasksOrderInOneCol({
+          variables: {
+            columnId: overTask.columnId,
+            newTasks: movedTasksWithNewOrders.map(t => {
+              const { order, id } = t
+              return { id, order }
+            })
+          }
+        })
+        console.log(movedTasksWithNewOrders)
+        return [...newTasksWithoutIt, ...movedTasksWithNewOrders]
       } else if (overColumnId && tasks[oldIndex].columnId !== overColumnId) {
         // перемещение в пустую колонку
         tasks[oldIndex] = { ...tasks[oldIndex], columnId: overColumnId };
-        return tasks;
+
+        const newOtherColTasks = tasks.filter(t => t.columnId === activeTask.columnId).map((t, i) => {
+          return { ...t, order: i }
+        })
+        const newColTasks = tasks.filter(t => t.columnId === overColumnId).map((t, i) => {
+          return { ...t, order: i }
+        })
+        const newTasks = tasks.filter(t => t.columnId !== overColumnId && t.columnId !== activeTask.columnId)
+        //console.log(newTasks)
+        //console.log('new column tasks', newColTasks)
+        //console.log(newOtherColTasks)
+        return [...newTasks, ...newColTasks, ...newOtherColTasks]
       }
 
       return prev;

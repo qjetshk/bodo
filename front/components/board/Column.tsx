@@ -23,7 +23,7 @@ interface Props {
   boardId: string
 }
 
-export default function Column({ column, canDelete, tasks, boardId }: Props) {
+function Column({ column, canDelete, tasks, boardId }: Props) {
   const currentTasks = tasks;
   const tasksIds = useMemo(() => currentTasks.map(t => t.id), [currentTasks]);
 
@@ -106,3 +106,5 @@ export default function Column({ column, canDelete, tasks, boardId }: Props) {
     </Card>
   );
 }
+
+export default React.memo(Column)

@@ -7,6 +7,7 @@ import { EditBoardInput } from './inputs/edit-board.input';
 import { ChangeColumnOrderInput } from './inputs/change-column-order.input';
 import { AddNewColumnInput } from './inputs/add-new-column.input';
 import { ApolloGatewayDriver } from '@nestjs/apollo';
+import { getOwnerAndMembersIds } from 'src/utils/get-owner-members-ids.util';
 
 @Injectable()
 export class BoardService {
@@ -321,18 +322,11 @@ export class BoardService {
             throw new NotFoundException('Такой доски не существует!')
         }
 
-        const membersIds = deletedBoard.members.map(member => member.user.id);
-
-        const membersAndOwnerIds = [
-            ...membersIds,
-            deletedBoard.ownerId
-        ];
-
         await this.pubSub.publish('boardDeleted', {
             boardDeleted: {
                 id: deletedBoard.id,
                 name: deletedBoard.name,
-                membersAndOwnerIds
+                membersAndOwnerIds: getOwnerAndMembersIds<typeof deletedBoard>(deletedBoard)
             }
         })
 

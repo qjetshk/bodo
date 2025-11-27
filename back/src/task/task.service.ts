@@ -2,6 +2,9 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateTaskInput } from './inputs/create-task.input';
+import { ChangeTaskOrderInput } from './inputs/change-task-order.input';
+import { getOwnerAndMembersIds, getRecipientsIds } from 'src/utils/get-owner-members-ids.util';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TaskService {
@@ -51,14 +54,6 @@ export class TaskService {
             });
         });
 
-
-        const membersIds = newTask.column.board.members.map(member => member.user.id);
-
-        const membersAndOwnerIds = [
-            ...membersIds,
-            newTask.column.board.ownerId
-        ];
-
         const boardUpdatedAt = await this.prismaService.board.update({
             where: {
                 id: newTask.column.boardId
@@ -78,7 +73,7 @@ export class TaskService {
                 columnId: newTask.columnId,
                 description: newTask.description,
                 order: newTask.order,
-                membersAndOwnerIds,
+                membersAndOwnerIds: getOwnerAndMembersIds<typeof newTask.column.board>(newTask.column.board),
                 updatedAt: boardUpdatedAt.updatedAt
             }
         })
@@ -154,23 +149,84 @@ export class TaskService {
                 }
             })
 
-            const membersIds = newColumn.board.members.map(member => member.user.id);
-
-            const membersAndOwnerIds = [
-                ...membersIds,
-                newColumn.board.ownerId
-            ];
-
             await this.pubSub.publish('taskDeleted', {
                 taskDeleted: {
                     columnId,
                     boardUpdatedAt: boardUpdatedAt.updatedAt,
                     tasks: newColumn?.tasks,
-                    membersAndOwnerIds
+                    membersAndOwnerIds: getOwnerAndMembersIds<typeof newColumn.board>(newColumn.board)
                 }
             })
 
             return true
         })
+    }
+
+
+    async changeTasksOrderInOneColumn(newTasks: ChangeTaskOrderInput[], columnId: string, movedById: string) {
+        const column = await this.prismaService.column.findUnique({
+            where: {
+                id: columnId
+            }
+        })
+
+        if (!column) {
+            throw new NotFoundException('Такой колонки не существует!')
+        }
+
+        await this.prismaService.$transaction(async (tx) => {
+            for (const tasks of newTasks) {
+                await tx.task.update({
+                    where: {
+                        id: tasks.id
+                    },
+                    data: {
+                        order: tasks.order,
+                        columnId
+                    }
+                })
+            }
+        })
+
+        const updatedColumn = await this.prismaService.column.findUnique({
+            where: {
+                id: columnId
+            },
+            include: {
+                tasks: true
+            }
+        })
+
+        const board = await this.prismaService.board.update({
+            where: {
+                id: updatedColumn?.boardId
+            },
+            data: {
+                updatedAt: new Date()
+            },
+            include: {
+                members: {
+                    include: {
+                        user: true
+                    }
+                }
+            }
+        })
+
+        if (!board) {
+            throw new NotFoundException('Такой доски не существует!')
+        }
+
+        const recipientsIds = getRecipientsIds<typeof board>(board, movedById)
+
+        await this.pubSub.publish('tasksOrderChangedInOneColumn', {
+            tasksOrderChangedInOneColumn: {
+                columnId: updatedColumn?.id,
+                tasks: updatedColumn?.tasks,
+                recipientsIds
+            }
+        })
+
+        return true
     }
 }

@@ -1,9 +1,12 @@
 import { Args, Mutation, Resolver, Subscription } from '@nestjs/graphql';
 import { TaskService } from './task.service';
-import { Task, CreatedTask, DeletedTask } from './models/task.model';
+import { Task, CreatedTask, DeletedTask, ChangedTasksOrderInOneColumn } from './models/task.model';
 import { CreateTaskInput } from './inputs/create-task.input';
-import { Inject } from '@nestjs/common';
+import { Inject, UseGuards } from '@nestjs/common';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
+import { ChangeTaskOrderInput } from './inputs/change-task-order.input';
+import { GqlAuthGuard } from 'src/guards/gql-auth.guard';
+import { CurrentUserId } from 'src/decorators/get-id-from-token';
 
 @Resolver()
 export class TaskResolver {
@@ -38,4 +41,22 @@ export class TaskResolver {
   taskDeleted() {
     return this.pubSub.asyncIterator('taskDeleted')
   }
+
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => Boolean)
+  async changeTasksOrderInOneColumn(@Args('newTasks', { type: () => [ChangeTaskOrderInput] }) newTasks: ChangeTaskOrderInput[], @Args('columnId') columnId: string, @CurrentUserId() movedById: string) {
+    await this.taskService.changeTasksOrderInOneColumn(newTasks, columnId, movedById)
+    return true
+  }
+
+  @Subscription(() => ChangedTasksOrderInOneColumn, {
+    filter(payload, variables, context) {
+      return payload.tasksOrderChangedInOneColumn.recipientsIds.includes(context?.user.id)
+    },
+  })
+  tasksOrderChangedInOneColumn() {
+    return this.pubSub.asyncIterator('tasksOrderChangedInOneColumn')
+  }
+
 }
+ 
