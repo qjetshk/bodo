@@ -5,6 +5,8 @@ import { CreateTaskInput } from './inputs/create-task.input';
 import { ChangeTaskOrderInput } from './inputs/change-task-order.input';
 import { getOwnerAndMembersIds, getRecipientsIds } from 'src/utils/get-owner-members-ids.util';
 import { Prisma } from '@prisma/client';
+import { ChangedTasksOrderInColumn, DeletedTask, TaskMovedToAnotherColumn } from './models/task.model';
+import { ModelTypeWithRecepientsIds } from 'src/common/types/model-type-with-recepients-ids.type';
 
 @Injectable()
 export class TaskService {
@@ -224,9 +226,84 @@ export class TaskService {
                 columnId: updatedColumn?.id,
                 tasks: updatedColumn?.tasks,
                 recipientsIds
-            }
+            } as ModelTypeWithRecepientsIds<ChangedTasksOrderInColumn>
         })
 
         return true
+    }
+
+    async moveTaskToAnotherColumn(prevColTasks: ChangeTaskOrderInput[], curColTasks: ChangeTaskOrderInput[], movedById: string) {
+        const allTasks = [...prevColTasks, ...curColTasks];
+        await this.prismaService.$transaction(
+            async (prisma) => {
+                await Promise.all(
+                    allTasks.map((task) =>
+                        prisma.task.update({
+                            where: { id: task.id },
+                            data: {
+                                columnId: task.columnId,
+                                order: task.order,
+                            },
+                        }),
+                    ),
+                );
+            },
+        );
+
+        const prevColumnId = prevColTasks[0]?.columnId;
+        const currentColumnId = curColTasks[0]?.columnId;
+
+        const [prevColumn, currentColumn] = await Promise.all([
+            prevColumnId
+                ? this.prismaService.column.findUnique({
+                    where: { id: prevColumnId },
+                    include: {
+                        tasks: {
+                            include: { assignments: { include: { user: true } } },
+                            orderBy: { order: 'asc' }
+                        }
+                    }
+                })
+                : Promise.resolve(null),
+            this.prismaService.column.findUnique({
+                where: { id: currentColumnId },
+                include: {
+                    tasks: {
+                        include: { assignments: { include: { user: true } } },
+                        orderBy: { order: 'asc' }
+                    }
+                }
+            })
+        ]);
+
+        if (!currentColumn) {
+            throw new NotFoundException('Текущая колонка не существует!');
+        }
+
+        const board = await this.prismaService.board.update({
+            where: { id: currentColumn.boardId },
+            data: { updatedAt: new Date() },
+            include: { members: { include: { user: true } } }
+        });
+
+        const recipientsIds = getRecipientsIds(board, movedById);
+
+        await this.pubSub.publish('taskMovedToAnotherColumn', {
+            taskMovedToAnotherColumn: {
+                prevColumn: prevColumn
+                    ? {
+                        columnId: prevColumn.id,
+                        tasks: prevColumn.tasks.map(t => ({ id: t.id, order: t.order, columnId: t.columnId }))
+                    }
+                    : null,
+                currentColumn: {
+                    columnId: currentColumn.id,
+                    tasks: currentColumn.tasks.map(t => ({ id: t.id, order: t.order, columnId: t.columnId }))
+                },
+                recipientsIds
+            } as ModelTypeWithRecepientsIds<TaskMovedToAnotherColumn>
+        });
+
+        return true;
     }
 }

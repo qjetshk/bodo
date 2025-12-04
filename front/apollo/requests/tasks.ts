@@ -63,3 +63,37 @@ export const TASKS_ORDER_CHANGED_IN_ONE_COLUMN = graphql(`
         }
     }
 `)
+
+export const MOVE_TASK_TO_ANOTHER_COLUMN = graphql(`
+    mutation MoveTaskToAnotherColumn(
+        $curColTasks: [ChangeTaskOrderInput!]!
+        $prevColTasks: [ChangeTaskOrderInput!]!
+    ) {
+        moveTaskToAnotherColumn(
+            curColTasks: $curColTasks
+            prevColTasks: $prevColTasks
+        )
+    }
+`)
+
+export const TASK_MOVED_TO_ANOTHER_COLUMN = graphql(`
+    subscription TaskMovedToAnotherColumn {
+        taskMovedToAnotherColumn {
+            currentColumn {
+                columnId
+                tasks {
+                    id
+                    order
+                }
+            }
+            prevColumn {
+                columnId
+                tasks {
+                    id
+                    order
+                    columnId
+                }
+            }
+        }
+    }
+`)

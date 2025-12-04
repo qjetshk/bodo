@@ -82,6 +82,7 @@ input ChangeColumnOrderInput {
 }
 
 input ChangeTaskOrderInput {
+  columnId: String
   id: String!
   order: Float!
 }
@@ -97,11 +98,12 @@ type ChangedColumnsOrder {
 }
 
 type ChangedTaskOrder {
+  columnId: String
   id: ID!
   order: Int!
 }
 
-type ChangedTasksOrderInOneColumn {
+type ChangedTasksOrderInColumn {
   columnId: ID!
   tasks: [ChangedTaskOrder!]!
 }
@@ -217,6 +219,7 @@ type Mutation {
   deleteTask(taskId: String!): Boolean!
   editBoard(boardId: String!, editBoardInput: EditBoardInput!): UpdatedBoard
   findMembers(member: FindMemberInput!): [User!]!
+  moveTaskToAnotherColumn(curColTasks: [ChangeTaskOrderInput!]!, prevColTasks: [ChangeTaskOrderInput!]!): Boolean!
 }
 
 type Query {
@@ -240,7 +243,8 @@ type Subscription {
   invitationDeclined: AcceptedOrDeclinedInvitation!
   taskCreated: CreatedTask!
   taskDeleted: DeletedTask!
-  tasksOrderChangedInOneColumn: ChangedTasksOrderInOneColumn!
+  taskMovedToAnotherColumn: TaskMovedToAnotherColumn!
+  tasksOrderChangedInOneColumn: ChangedTasksOrderInColumn!
 }
 
 type Task {
@@ -263,6 +267,11 @@ type TaskAssignment {
   taskId: String!
   user: User!
   userId: String!
+}
+
+type TaskMovedToAnotherColumn {
+  currentColumn: ChangedTasksOrderInColumn!
+  prevColumn: ChangedTasksOrderInColumn!
 }
 
 type UpdatedBoard {

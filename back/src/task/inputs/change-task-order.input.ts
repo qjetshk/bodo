@@ -7,4 +7,7 @@ export class ChangeTaskOrderInput {
 
     @Field()
     order: number
+
+    @Field({nullable: true})
+    columnId?: string
 }

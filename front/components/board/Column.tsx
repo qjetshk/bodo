@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Ellipsis } from 'lucide-react'
 import ConfirmDelete from "../ConfirmDelete";
 import { CHANGE_COLUMN_TITLE, COLUMN_TITLE_CHANGED, DELETE_COLUMN } from "@/apollo/requests/columns";
+import { updateBoardTimeCache } from "@/utils/update-board-time.util";
 
 interface Props {
   column: ColumnWithoutTasks;
@@ -44,12 +45,7 @@ function Column({ column, canDelete, tasks, boardId }: Props) {
         id: client.cache.identify({ __typename: 'Column', id: updatedColumn.id }),
         fields: { title: () => updatedColumn.title }
       });
-      client.cache.modify({
-        id: client.cache.identify({ __typename: 'Board', id: boardId }),
-        fields: {
-          updatedAt: () => new Date().toISOString()
-        }
-      })
+      updateBoardTimeCache(client, boardId)
     }
   });
 

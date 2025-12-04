@@ -78,15 +78,27 @@ export class ChangedTaskOrder {
 
   @Field(() => Int)
   order: number;
+
+  @Field({nullable: true})
+  columnId?: string
 }
 
 
 @ObjectType()
-export class ChangedTasksOrderInOneColumn {
+export class ChangedTasksOrderInColumn {
   @Field(() => ID)
   columnId: string;
 
   @Field(() => [ChangedTaskOrder])
   tasks: ChangedTaskOrder[];
+}
+
+@ObjectType()
+export class TaskMovedToAnotherColumn {
+  @Field(() => ChangedTasksOrderInColumn)
+  prevColumn: ChangedTasksOrderInColumn
+
+  @Field(() => ChangedTasksOrderInColumn)
+  currentColumn: ChangedTasksOrderInColumn
 }
 

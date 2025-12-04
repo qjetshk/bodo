@@ -17,6 +17,7 @@ import { RootState } from "@/store/store";
 import { USER_ACCEPT_INVITATION, USER_DECLINE_INVITATION } from "@/apollo/requests/invitation";
 import { toast } from "sonner";
 import { useCurrentUser } from "@/hooks/use-user";
+import { updateBoardTimeCache } from "@/utils/update-board-time.util";
 
 const BoardPage = () => {
   const { id } = useParams();
@@ -55,12 +56,7 @@ const BoardPage = () => {
         return { ...prev, members: newMembers }
       })
 
-      client.cache.modify({
-        id: client.cache.identify({__typename: 'Board', id: board.id}),
-        fields: {
-          updatedAt: () => new Date().toISOString()
-        }
-      })
+      updateBoardTimeCache(client, board.id)
     }
   })
 

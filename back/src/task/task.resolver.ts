@@ -1,16 +1,17 @@
 import { Args, Mutation, Resolver, Subscription } from '@nestjs/graphql';
 import { TaskService } from './task.service';
-import { Task, CreatedTask, DeletedTask, ChangedTasksOrderInOneColumn } from './models/task.model';
+import { Task, CreatedTask, DeletedTask, ChangedTasksOrderInColumn, TaskMovedToAnotherColumn } from './models/task.model';
 import { CreateTaskInput } from './inputs/create-task.input';
 import { Inject, UseGuards } from '@nestjs/common';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { ChangeTaskOrderInput } from './inputs/change-task-order.input';
 import { GqlAuthGuard } from 'src/guards/gql-auth.guard';
 import { CurrentUserId } from 'src/decorators/get-id-from-token';
+import { ModelTypeWithRecepientsIds } from 'src/common/types/model-type-with-recepients-ids.type';
 
 @Resolver()
 export class TaskResolver {
-  constructor(private readonly taskService: TaskService, @Inject('PUB_SUB') private readonly pubSub: RedisPubSub) {}
+  constructor(private readonly taskService: TaskService, @Inject('PUB_SUB') private readonly pubSub: RedisPubSub) { }
 
   @Mutation(() => Boolean)
   async createTask(@Args('taskInput') taskInput: CreateTaskInput) {
@@ -49,7 +50,7 @@ export class TaskResolver {
     return true
   }
 
-  @Subscription(() => ChangedTasksOrderInOneColumn, {
+  @Subscription(() => ChangedTasksOrderInColumn, {
     filter(payload, variables, context) {
       return payload.tasksOrderChangedInOneColumn.recipientsIds.includes(context?.user.id)
     },
@@ -58,5 +59,21 @@ export class TaskResolver {
     return this.pubSub.asyncIterator('tasksOrderChangedInOneColumn')
   }
 
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => Boolean)
+  async moveTaskToAnotherColumn(@Args('prevColTasks', { type: () => [ChangeTaskOrderInput] }) prevColTasks: ChangeTaskOrderInput[], @Args('curColTasks', { type: () => [ChangeTaskOrderInput] }) curColTasks: ChangeTaskOrderInput[], @CurrentUserId() movedById: string) {
+    await this.taskService.moveTaskToAnotherColumn(prevColTasks, curColTasks, movedById)
+    return true
+  }
+
+  @Subscription(() => TaskMovedToAnotherColumn, {
+    filter(payload, variables, context) {
+      const taskMovedToAnotherColumn: ModelTypeWithRecepientsIds<TaskMovedToAnotherColumn> = payload.taskMovedToAnotherColumn
+      return taskMovedToAnotherColumn.recipientsIds.includes(context?.user.id)
+    },
+  })
+  taskMovedToAnotherColumn() {
+    return this.pubSub.asyncIterator('taskMovedToAnotherColumn')
+  }
+
 }
- 
