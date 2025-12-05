@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   DndContext,
   MouseSensor,
@@ -17,6 +17,7 @@ import {
   SortableContext,
   arrayMove,
   horizontalListSortingStrategy,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import Column from "./Column";
 import Task from "./Task";
@@ -29,7 +30,7 @@ import { CHANGE_TASKS_ORDER_IN_ONE_COLUMN, MOVE_TASK_TO_ANOTHER_COLUMN, TASK_CRE
 import { createPortal } from "react-dom";
 import { updateBoardTimeCache } from "@/utils/update-board-time.util";
 
-export default function Board({ board }: { board: Board }) {
+export default function Board({ board, isSidebarOpened, isMobile }: { board: Board, isSidebarOpened: boolean, isMobile: boolean }) {
   const [allColumns, setAllColumns] = useState<ColumnWithoutTasks[]>(board.columns);
   const [allTasks, setAllTasks] = useState<TaskType[]>(board.columns.flatMap(c => c.tasks));
   const [activeColumn, setActiveColumn] = useState<ColumnWithoutTasks | null>(null);
@@ -41,6 +42,24 @@ export default function Board({ board }: { board: Board }) {
   const [addColumn] = useMutation(ADD_NEW_COLUMN);
   const [changeTasksOrderInOneCol] = useMutation(CHANGE_TASKS_ORDER_IN_ONE_COLUMN)
   const [moveTaskToAnotherColumn] = useMutation(MOVE_TASK_TO_ANOTHER_COLUMN)
+
+  const [isGridActive, setIsGridActive] = useState(false);
+
+  useEffect(() => {
+    const checkGrid = () => {
+      const isLg = window.matchMedia('(min-width: 1024px)').matches;
+      const actuallyGrid = !isLg && (isMobile || isSidebarOpened);
+      setIsGridActive(actuallyGrid);
+    };
+
+    checkGrid(); // инициализация
+
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+    const handler = () => checkGrid();
+    mediaQuery.addEventListener('change', handler);
+
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, [isMobile, isSidebarOpened]);
 
   // --- Подписки ---
 
@@ -122,7 +141,7 @@ export default function Board({ board }: { board: Board }) {
         const taskMap = new Map<string, TaskType>(prev.map(task => [task.id, { ...task }]));
 
         // Обновляем задачи, которые ушли из prevColumn (теперь они в другой колонке или ушли)
-        if (prevColumn.columnId) { 
+        if (prevColumn.columnId) {
           for (const taskUpdate of prevColumn.tasks) {
             const existingTask = taskMap.get(taskUpdate.id);
             if (existingTask) {
@@ -236,8 +255,10 @@ export default function Board({ board }: { board: Board }) {
             tasks[oldIndex] = { ...tasks[oldIndex], columnId: tasks[newIndex].columnId };
           }
           const newTasks = arrayMove(tasks, oldIndex, newIndex);
-
-          console.log(newTasks)
+          const curTasks = newTasks.filter(t => t.columnId === tasks[newIndex].columnId)
+          const prevTasks = newTasks.filter(t => t.columnId !== tasks[newIndex].columnId)
+          console.log(curTasks)
+          console.log(prevTasks)
           return newTasks
         } else {
           // дроп на пустую колонку
@@ -344,10 +365,10 @@ export default function Board({ board }: { board: Board }) {
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragOver={handleDragOver}>
-      <div className="flex gap-4 overflow-x-auto p-4 pb-10 max-w-screen">
-        <SortableContext items={columnIds} strategy={horizontalListSortingStrategy}>
+      <div className={`${isSidebarOpened && !isMobile ? 'grid' : 'flex'} ${isMobile && 'grid'} lg:flex gap-4 overflow-x-auto p-4 pb-10 max-w-screen`}>
+        <SortableContext items={columnIds} strategy={isGridActive ? verticalListSortingStrategy : horizontalListSortingStrategy}>
           {allColumns.map((col, i) => (
-            <motion.div key={col.id} className="flex-1 min-w-[300px]" style={{ maxWidth: `${100 / allColumns.length}%` }}
+            <motion.div key={col.id} className={` ${isSidebarOpened && !isMobile ? 'max-w-none!' : 'flex-1'} ${isMobile ? '' : 'min-w-[300px]'} w-full  max-w-none!`} style={{ maxWidth: `${100 / allColumns.length}%` }}
               initial={{ y: 10, opacity: 0, filter: "blur(5px)" }}
               animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
               transition={{ duration: 0.3, delay: i * 0.15 }}
@@ -359,7 +380,7 @@ export default function Board({ board }: { board: Board }) {
 
         {allColumns.length < 10 && (
           <motion.div onClick={addNewColumn} style={{ maxWidth: `${100 / allColumns.length}%` }}
-            className="border-3 border-dashed opacity-65 hover:opacity-95 transition-all border-neutral-700 text-neutral-400 cursor-pointer hover:text-neutral-300 bg-neutral-900 rounded-xl max-h-[700px] flex justify-center items-center min-h-50 min-w-[300px]"
+            className="border-3 border-dashed max-w-none! opacity-65 hover:opacity-95 transition-all border-neutral-700 text-neutral-400 cursor-pointer hover:text-neutral-300 bg-neutral-900 rounded-xl max-h-[700px] flex justify-center items-center min-h-50 min-w-[300px]"
             initial={{ opacity: 0, filter: "blur(5px)" }}
             animate={{ opacity: 1, filter: "blur(0px)" }}
             transition={{ duration: 0.3, delay: addingNewColumn ? allColumns.length * 0.15 : 0 }}

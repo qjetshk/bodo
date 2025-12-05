@@ -16,6 +16,7 @@ import { Ellipsis } from 'lucide-react'
 import ConfirmDelete from "../ConfirmDelete";
 import { CHANGE_COLUMN_TITLE, COLUMN_TITLE_CHANGED, DELETE_COLUMN } from "@/apollo/requests/columns";
 import { updateBoardTimeCache } from "@/utils/update-board-time.util";
+import { useIsTouchDevice } from "@/hooks/is-touch-device";
 
 interface Props {
   column: ColumnWithoutTasks;
@@ -32,6 +33,7 @@ function Column({ column, canDelete, tasks, boardId }: Props) {
   const [isNewTaskFormOpen, setIsNewTaskFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [title, setTitle] = useState(column.title);
+  const isTouchDevice = useIsTouchDevice()
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [deleteCol] = useMutation(DELETE_COLUMN);
@@ -80,10 +82,10 @@ function Column({ column, canDelete, tasks, boardId }: Props) {
 
         {!isEditing &&
           <DropdownMenu>
-            <DropdownMenuTrigger asChild className="absolute top-3.5 right-3.5 cursor-pointer"><Ellipsis /></DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild className={`${isTouchDevice && 'text-neutral-500'} absolute top-3.5 right-3.5 cursor-pointer`}><Ellipsis /></DropdownMenuTrigger>
             <DropdownMenuContent className="dark">
-              <DropdownMenuItem onClick={() => setIsEditing(true)} className="cursor-pointer hover:text-neutral-400 transition-colors"><PencilLine />Редактировать</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsNewTaskFormOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors"><CirclePlus />Добавить задачу</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsEditing(true)} className={`${isTouchDevice ? 'text-neutral-400' : 'hover:text-neutral-400'} cursor-pointer  transition-colors`}><PencilLine />Редактировать</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsNewTaskFormOpen(true)} className={`${isTouchDevice ? 'text-neutral-400' : 'hover:text-neutral-400'} cursor-pointer transition-colors`}><CirclePlus />Добавить задачу</DropdownMenuItem>
               <DropdownMenuItem disabled={!canDelete} onClick={() => setIsDeleteOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors hover:bg-red-700/15!"><Trash2 />Удалить колонку</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

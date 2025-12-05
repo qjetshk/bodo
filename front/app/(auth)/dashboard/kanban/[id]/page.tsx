@@ -122,14 +122,14 @@ const BoardPage = () => {
   }
 
   return (
-    <motion.section className="px-5 py-5"
+    <motion.section className="sm:px-5 px-0 py-5 "
       initial={{ y: 5, opacity: 0, filter: 'blur(10px)' }}
       animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
       transition={{ duration: 0.5 }}
     >
       <Card className={`bg-transparent mx-auto transition-all duration-200 ease-linear
           ${isSidebarOpened ? 'max-w-[calc(100vw-336px)]' : 'max-w-[calc(100vw-132px)]'} 
-          ${isMobile && 'max-w-[calc(100vw-80px)]'}
+          ${isMobile && 'max-w-[calc(100vw)]'}
         `} >
         <CardHeader className="flex gap-2 items-center justify-between px-15 ">
           <div className="2xl:max-w-[80%] xl:max-w-[75%] lg:max-w-[65%] md:max-w-[80%] max-w-[85%]">
@@ -155,8 +155,8 @@ const BoardPage = () => {
             </Dialog>
           </div>
         </CardHeader>
-        <CardContent className="">
-          <Board board={boardData} />
+        <CardContent className="px-0 sm:px-6">
+          <Board isMobile={isMobile} isSidebarOpened={isSidebarOpened} board={boardData} />
         </CardContent>
 
       </Card>
