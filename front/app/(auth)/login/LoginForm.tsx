@@ -10,6 +10,7 @@ import { useLoginMutation } from "@/store/auth";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { apolloClient } from "@/apollo/client";
+import { Card } from "@/components/ui/card";
 
 type LoginRequest = Omit<RegisterLoginForm, "nickName">;
 
@@ -27,7 +28,6 @@ export const LoginForm: React.FC = () => {
   const [login, { isLoading }] = useLoginMutation();
 
   const onSubmit: SubmitHandler<LoginRequest> = async (formData) => {
-    console.log(formData);
     try {
       await login(formData).unwrap();
       apolloClient.resetStore()
@@ -46,6 +46,7 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
+    <Card className="dark bg-neutral-950 p-0 border-0">
     <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-2xl text-center font-unbounded">Вход</h1>
       <div>
@@ -82,13 +83,13 @@ export const LoginForm: React.FC = () => {
 
       <Button
         type="submit"
-        variant={"secondary"}
+        variant={"default"}
         className="text-lg h-auto w-full"
       >
         Войти
       </Button>
 
-      <Button disabled className="w-full">
+      <Button variant={"secondary"} disabled className="w-full">
         Войти через Google
       </Button>
 
@@ -99,5 +100,6 @@ export const LoginForm: React.FC = () => {
         </Link>
       </span>
     </form>
+    </Card>
   );
 };

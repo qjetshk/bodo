@@ -3,19 +3,17 @@ import { User } from "@/types/auth.type";
 
 export const useCurrentUser = () => {
   const [user, setUser] = useState<User | null>(null);
-
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) setUser(JSON.parse(storedUser));
-
-    const handleStorage = () => {
-      const updatedUser = localStorage.getItem("user");
-      setUser(updatedUser ? JSON.parse(updatedUser) : null);
-    };
-
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    const raw = localStorage.getItem("user");
+    if (!raw) return;
+    try {
+      const parsed: User = JSON.parse(raw);
+      setUser(parsed);
+    } catch (err) {
+      console.error("Ошибка при парсинге user:", err, raw);
+      setUser(null);
+    }
   }, []);
 
-  return { user };
+  return {user};
 };

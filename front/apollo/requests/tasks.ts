@@ -66,14 +66,19 @@ export const TASKS_ORDER_CHANGED_IN_ONE_COLUMN = graphql(`
 
 export const MOVE_TASK_TO_ANOTHER_COLUMN = graphql(`
     mutation MoveTaskToAnotherColumn(
-        $curColTasks: [ChangeTaskOrderInput!]!
-        $prevColTasks: [ChangeTaskOrderInput!]!
+        $movedTaskId: String!
+        $newIndex: Int!
+        $prevColumnId: String!
+        $curColumnId: String!
     ) {
         moveTaskToAnotherColumn(
-            curColTasks: $curColTasks
-            prevColTasks: $prevColTasks
+            curColumnId: $curColumnId
+            movedTaskId: $movedTaskId
+            prevColumnId: $prevColumnId
+            newIndex: $newIndex
         )
     }
+
 `)
 
 export const TASK_MOVED_TO_ANOTHER_COLUMN = graphql(`

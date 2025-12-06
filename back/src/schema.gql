@@ -219,7 +219,7 @@ type Mutation {
   deleteTask(taskId: String!): Boolean!
   editBoard(boardId: String!, editBoardInput: EditBoardInput!): UpdatedBoard
   findMembers(member: FindMemberInput!): [User!]!
-  moveTaskToAnotherColumn(curColTasks: [ChangeTaskOrderInput!]!, prevColTasks: [ChangeTaskOrderInput!]!): Boolean!
+  moveTaskToAnotherColumn(curColumnId: String!, movedTaskId: String!, newIndex: Int!, prevColumnId: String!): Boolean!
 }
 
 type Query {

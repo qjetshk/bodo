@@ -232,56 +232,45 @@ export class TaskService {
         return true
     }
 
-    async moveTaskToAnotherColumn(prevColTasks: ChangeTaskOrderInput[], curColTasks: ChangeTaskOrderInput[], movedById: string) {
-        const allTasks = [...prevColTasks, ...curColTasks];
-        await this.prismaService.$transaction(
-            async (prisma) => {
-                await Promise.all(
-                    allTasks.map((task) =>
-                        prisma.task.update({
-                            where: { id: task.id },
-                            data: {
-                                columnId: task.columnId,
-                                order: task.order,
-                            },
-                        }),
-                    ),
-                );
-            },
-        );
-
-        const prevColumnId = prevColTasks[0]?.columnId;
-        const currentColumnId = curColTasks[0]?.columnId;
-
-        const [prevColumn, currentColumn] = await Promise.all([
-            prevColumnId
-                ? this.prismaService.column.findUnique({
-                    where: { id: prevColumnId },
-                    include: {
-                        tasks: {
-                            include: { assignments: { include: { user: true } } },
-                            orderBy: { order: 'asc' }
-                        }
-                    }
-                })
-                : Promise.resolve(null),
-            this.prismaService.column.findUnique({
-                where: { id: currentColumnId },
+    async moveTaskToAnotherColumn(movedTaskId: string, newIndex: number, movedById: string, prevColumnId: string, curColumnId: string) {
+        console.log(movedTaskId)
+        const [prevTasks, curTasks, movedTask] = await Promise.all([
+            this.prismaService.task.findMany({ where: { columnId: prevColumnId }, orderBy: { order: 'asc' } }),
+            this.prismaService.task.findMany({ where: { columnId: curColumnId }, orderBy: { order: 'asc' } }),
+            this.prismaService.task.findUnique({
+                where: { id: movedTaskId },
                 include: {
-                    tasks: {
-                        include: { assignments: { include: { user: true } } },
-                        orderBy: { order: 'asc' }
+                    column: {
+                        include: {
+                            board: true
+                        }
                     }
                 }
             })
         ]);
 
-        if (!currentColumn) {
-            throw new NotFoundException('Текущая колонка не существует!');
-        }
+        const newPrevTasks = prevTasks.filter(t => t.id !== movedTaskId);
+
+        const moved = { ...movedTask, columnId: curColumnId };
+        const newCurTasks = [
+            ...curTasks.slice(0, newIndex),
+            moved,
+            ...curTasks.slice(newIndex)
+        ];
+
+        newPrevTasks.forEach((t, i) => t.order = i);
+        newCurTasks.forEach((t, i) => t.order = i);
+
+        await this.prismaService.$transaction([
+            ...newPrevTasks.map(t => this.prismaService.task.update({ where: { id: t.id }, data: { order: t.order } })),
+            ...newCurTasks.map(t => this.prismaService.task.update({
+                where: { id: t.id },
+                data: { order: t.order, columnId: t.columnId }
+            }))
+        ]);
 
         const board = await this.prismaService.board.update({
-            where: { id: currentColumn.boardId },
+            where: { id: movedTask?.column.boardId },
             data: { updatedAt: new Date() },
             include: { members: { include: { user: true } } }
         });
@@ -290,19 +279,19 @@ export class TaskService {
 
         await this.pubSub.publish('taskMovedToAnotherColumn', {
             taskMovedToAnotherColumn: {
-                prevColumn: prevColumn
-                    ? {
-                        columnId: prevColumn.id,
-                        tasks: prevColumn.tasks.map(t => ({ id: t.id, order: t.order, columnId: t.columnId }))
-                    }
-                    : null,
+                prevColumn: {
+                    columnId: prevColumnId,
+                    tasks: newPrevTasks.map(t => ({ id: t.id, order: t.order, columnId: t.columnId }))
+                },
                 currentColumn: {
-                    columnId: currentColumn.id,
-                    tasks: currentColumn.tasks.map(t => ({ id: t.id, order: t.order, columnId: t.columnId }))
+                    columnId: curColumnId,
+                    tasks: newCurTasks.map(t => ({ id: t.id, order: t.order, columnId: t.columnId }))
                 },
                 recipientsIds
             } as ModelTypeWithRecepientsIds<TaskMovedToAnotherColumn>
         });
+
+
 
         return true;
     }

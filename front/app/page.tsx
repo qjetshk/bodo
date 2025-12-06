@@ -110,7 +110,12 @@ export default function Home() {
           }}
           viewport={{ once: true }}
         >
-          <footer className="flex gap-2.5 mx-auto items-center mt-25 mb-15 flex-wrap justify-center">
+          <div className="pt-15">
+              <Link href={'/feedback'}>
+                <Button className="block mx-auto text-md" size={"lg"} variant={'secondary'}>Напишите свои пожелания!</Button>
+              </Link>
+          </div>
+          <footer className="flex gap-2.5 mx-auto items-center mt-20 mb-15 flex-wrap justify-center">
             <span className="font-unbounded font-bold text-3xl">
               See project on:
             </span>

@@ -24,7 +24,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { User } from "@/types/auth.type";
 import { useLogoutMutation } from "@/store/auth";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -35,8 +34,9 @@ import Account from "../Account";
 import { useState } from "react";
 import { useSubscription } from "@apollo/client/react";
 import { GET_BOARD_INVITATION } from "@/apollo/requests/invitation";
+import { useCurrentUser } from "@/hooks/use-user";
 
-export function NavUser({ user }: { user: User }) {
+export function NavUser() {
   const { isMobile } = useSidebar();
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -44,6 +44,7 @@ export function NavUser({ user }: { user: User }) {
 
   const [logout] = useLogoutMutation();
   const router = useRouter();
+  const { user } = useCurrentUser()
 
   const handleLogout = async () => {
     try {
@@ -58,9 +59,7 @@ export function NavUser({ user }: { user: User }) {
   };
 
   useSubscription(GET_BOARD_INVITATION, {
-    onData: ({ data }) => {
-      const boardInvitation = data.data?.invitationCreated;
-
+    onData: () => {
       toast.success("У Вас новое приглашение!", {
         action: {
           label: "Посмотреть",
@@ -81,14 +80,14 @@ export function NavUser({ user }: { user: User }) {
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatarUrl} alt={user.nickName} />
+                  <AvatarImage src={user?.avatarUrl} alt={user?.nickName} />
                   <AvatarFallback className="rounded-lg">
                     {getAvatarFallback()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{`@${user.nickName}`}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate font-medium">{`@${user?.nickName}`}</span>
+                  <span className="truncate text-xs">{user?.email}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
               </SidebarMenuButton>
@@ -103,14 +102,14 @@ export function NavUser({ user }: { user: User }) {
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={user.avatarUrl} alt={user.nickName} />
+                    <AvatarImage src={user?.avatarUrl} alt={user?.nickName} />
                     <AvatarFallback className="rounded-lg">
                       {getAvatarFallback()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{`@${user.nickName}`}</span>
-                    <span className="truncate text-xs">{user.email}</span>
+                    <span className="truncate font-medium">{`@${user?.nickName}`}</span>
+                    <span className="truncate text-xs">{user?.email}</span>
                   </div>
                 </div>
               </DropdownMenuLabel>

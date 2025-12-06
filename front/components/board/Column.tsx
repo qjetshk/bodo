@@ -82,7 +82,7 @@ function Column({ column, canDelete, tasks, boardId }: Props) {
 
         {!isEditing &&
           <DropdownMenu>
-            <DropdownMenuTrigger asChild className={`${isTouchDevice && 'text-neutral-500'} absolute top-3.5 right-3.5 cursor-pointer`}><Ellipsis /></DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild className={`${isTouchDevice && 'text-neutral-500!'} absolute top-3.5 right-3.5 cursor-pointer`}><Ellipsis /></DropdownMenuTrigger>
             <DropdownMenuContent className="dark">
               <DropdownMenuItem onClick={() => setIsEditing(true)} className={`${isTouchDevice ? 'text-neutral-400' : 'hover:text-neutral-400'} cursor-pointer  transition-colors`}><PencilLine />Редактировать</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setIsNewTaskFormOpen(true)} className={`${isTouchDevice ? 'text-neutral-400' : 'hover:text-neutral-400'} cursor-pointer transition-colors`}><CirclePlus />Добавить задачу</DropdownMenuItem>

@@ -40,8 +40,19 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
   const [changeOrder] = useMutation(CHANGE_COLUMNS_ORDER);
   const [addColumn] = useMutation(ADD_NEW_COLUMN);
-  const [changeTasksOrderInOneCol] = useMutation(CHANGE_TASKS_ORDER_IN_ONE_COLUMN)
-  const [moveTaskToAnotherColumn] = useMutation(MOVE_TASK_TO_ANOTHER_COLUMN)
+  const [changeTasksOrderInOneCol] = useMutation(CHANGE_TASKS_ORDER_IN_ONE_COLUMN, {
+    onCompleted(data, clientOptions) {
+      console.log(data.changeTasksOrderInOneColumn)
+    },
+    onError(error, clientOptions) {
+      console.log(error)
+    },
+  })
+  const [moveTaskToAnotherColumn] = useMutation(MOVE_TASK_TO_ANOTHER_COLUMN, {
+    onCompleted(data, clientOptions) {
+      console.log(data.moveTaskToAnotherColumn)
+    },
+  })
 
   const [isGridActive, setIsGridActive] = useState(false);
 
@@ -216,10 +227,16 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
+
     setActiveColumn(null);
     setActiveTask(null);
     if (!over) return;
 
+    //
+    // ======================================================
+    //               ПЕРЕМЕЩЕНИЕ КОЛОНОК
+    // ======================================================
+    //
     if (active.data.current?.type === "Column") {
       const activeId = active.id.toString();
       const overId = over.id.toString();
@@ -229,47 +246,141 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
         const oldIndex = cols.findIndex(c => c.id === activeId);
         const newIndex = cols.findIndex(c => c.id === overId);
         if (oldIndex === -1 || newIndex === -1) return cols;
-        const moved = arrayMove(cols, oldIndex, newIndex).map((c, i) => ({ ...c, order: i }));
-        changeOrder({ variables: { boardId: board.id, changeColumnInput: moved.map(c => ({ id: c.id, order: c.order })) } });
+
+        const moved = arrayMove(cols, oldIndex, newIndex)
+          .map((c, i) => ({ ...c, order: i }));
+
+        // --- ТВОЯ ИСХОДНАЯ МУТАЦИЯ ---
+        changeOrder({
+          variables: {
+            boardId: board.id,
+            changeColumnInput: moved.map(c => ({ id: c.id, order: c.order }))
+          }
+        });
+
         return moved;
       });
+
       return;
     }
 
+    //
+    // ======================================================
+    //               ПЕРЕМЕЩЕНИЕ ТАСКОВ
+    // ======================================================
+    //
     if (active.data.current?.type === "Task") {
       const activeTask = active.data.current.task;
       if (!activeTask) return;
 
       const overTask = over.data.current?.task ?? null;
       const overColumnId = over.data.current?.columnId ?? over.id;
+      const prevColumnId = activeTask.columnId;
+      console.log(prevColumnId)
+      console.log(overColumnId)
 
       setAllTasks(prev => {
         const tasks = [...prev];
         const oldIndex = tasks.findIndex(t => t.id === activeTask.id);
         if (oldIndex === -1) return prev;
 
+        //
+        // -------- ПЕРЕМЕЩЕНИЕ НА ДРУГОЙ ТАСК --------
+        //
         if (overTask) {
           const newIndex = tasks.findIndex(t => t.id === overTask.id);
-          if (newIndex === -1 || oldIndex === newIndex) return prev;
-          if (tasks[oldIndex].columnId !== tasks[newIndex].columnId) {
-            tasks[oldIndex] = { ...tasks[oldIndex], columnId: tasks[newIndex].columnId };
+          if (newIndex === -1) return prev;
+
+          const task = tasks[oldIndex];
+
+          // сохраняем колонки ДО изменений
+          const prevColumnId = task.columnId;
+          const newColumnId = tasks[newIndex].columnId;
+
+          const isMovingToAnotherColumn = prevColumnId !== newColumnId;
+
+          // 1) Делаем копию массива, чтобы потом arrayMove работал правильно
+          const tempTasks = [...tasks];
+
+          // 2) Если колонка меняется — сначала только меняем columnId
+          if (isMovingToAnotherColumn) {
+            tempTasks[oldIndex] = { ...task, columnId: newColumnId };
           }
-          const newTasks = arrayMove(tasks, oldIndex, newIndex);
-          const curTasks = newTasks.filter(t => t.columnId === tasks[newIndex].columnId)
-          const prevTasks = newTasks.filter(t => t.columnId !== tasks[newIndex].columnId)
-          console.log(curTasks)
-          console.log(prevTasks)
-          return newTasks
-        } else {
-          // дроп на пустую колонку
-          if (tasks[oldIndex].columnId !== overColumnId) {
-            tasks[oldIndex] = { ...tasks[oldIndex], columnId: overColumnId };
-          }
-          return tasks;
+
+          // 3) Выполняем перемещение
+          const newTasks = arrayMove(tempTasks, oldIndex, newIndex);
+
+          // 4) Теперь спокойно считаем prev + current
+          const prevTasks = newTasks
+            .filter(t => t.columnId === prevColumnId)
+            .map((t, i) => ({ ...t, order: i }));
+
+          const curTasks = newTasks
+            .filter(t => t.columnId === newColumnId)
+            .map((t, i) => ({ ...t, order: i }));
+
+          console.log("prevTasks:", prevTasks);
+          console.log("curTasks:", curTasks);
+          // --- ТВОЯ ИСХОДНАЯ МУТАЦИЯ ---
+          changeTasksOrderInOneCol({
+            variables: {
+              // основная колонка (куда переместили)
+              columnId: newColumnId,
+              newTasks: curTasks.map(({ id, order }) => ({ id, order })),
+
+              // вторичная колонка (откуда забрали)
+              /* sourceColumnId: isColumnChanged ? sourceColumnId : null,
+              sourceTasks: sourceTasks
+                ? sourceTasks.map(({ id, order }) => ({ id, order }))
+                : null,
+
+              movedTaskId: activeTask.id */
+            }
+          });
+
+          return newTasks;
         }
+
+        //
+        // -------- ПЕРЕМЕЩЕНИЕ НА ПУСТУЮ КОЛОНКУ --------
+        //
+        if (prevColumnId !== overColumnId) {
+
+          // меняем колонку у таски
+          tasks[oldIndex] = { ...tasks[oldIndex], columnId: overColumnId };
+
+          // таски в старой колонке
+          const newOtherColTasks = tasks
+            .filter(t => t.columnId === prevColumnId)
+            .map((t, i) => ({ ...t, order: i }));
+
+          // таски в новой колонке (таска уже перемещена)
+          const newColTasks = tasks
+            .filter(t => t.columnId === overColumnId)
+            .map((t, i) => ({ ...t, order: i }));
+
+          // определяем newIndex корректно: это order перемещённой таски в новой колонке
+          const movedTaskOrder = newColTasks.find(t => t.id === activeTask.id)!.order;
+
+          // вызываем мутацию
+          /*           moveTaskToAnotherColumn({
+                      variables: {
+                        movedTaskId: activeTask.id,
+                        prevColumnId,
+                        curColumnId: overColumnId,
+                        newIndex: movedTaskOrder
+                      }
+                    }); */
+
+          return [...tasks];
+        }
+
+        return prev;
       });
     }
-  }, [board.id, changeOrder]);
+
+  }, [board.id, changeOrder, changeTasksOrderInOneCol, moveTaskToAnotherColumn]);
+
 
   const handleDragOver = useCallback((event: DragOverEvent) => {
     const { active, over } = event;
@@ -286,68 +397,31 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
       const oldIndex = tasks.findIndex(t => t.id === activeTask.id);
       if (oldIndex === -1) return prev;
 
+      // --- ПЕРЕТАСКИВАНИЕ НА ДРУГОЙ ТАСК ---
       if (overTask) {
         const newIndex = tasks.findIndex(t => t.id === overTask.id);
         if (newIndex === -1 || oldIndex === newIndex) return prev;
+
+        // временно меняем columnId (VISUAL ONLY)
         if (tasks[oldIndex].columnId !== tasks[newIndex].columnId) {
           tasks[oldIndex] = { ...tasks[oldIndex], columnId: tasks[newIndex].columnId };
         }
-        const newTasks = arrayMove(tasks, oldIndex, newIndex)
-        const newTasksWithoutIt = newTasks.filter(t => t.columnId !== overTask.columnId)
-        const movedTasksWithNewOrders = newTasks.filter(t => t.columnId === overTask.columnId).map((t, i) => {
-          return { ...t, order: i }
-        })
-        changeTasksOrderInOneCol({
-          variables: {
-            columnId: overTask.columnId,
-            newTasks: movedTasksWithNewOrders.map(t => {
-              const { order, id } = t
-              return { id, order }
-            })
-          }
-        })
-        console.log(movedTasksWithNewOrders)
-        return [...newTasksWithoutIt, ...movedTasksWithNewOrders]
-      } else if (overColumnId && tasks[oldIndex].columnId !== overColumnId) {
-        // перемещение в пустую колонку
-        tasks[oldIndex] = { ...tasks[oldIndex], columnId: overColumnId };
 
-        const newOtherColTasks = tasks.filter(t => t.columnId === activeTask.columnId).map((t, i) => {
-          return { ...t, order: i }
-        })
-        const newColTasks = tasks.filter(t => t.columnId === overColumnId).map((t, i) => {
-          return { ...t, order: i }
-        })
-        const newTasks = tasks.filter(t => t.columnId !== overColumnId && t.columnId !== activeTask.columnId)
-        //console.log(newTasks)
-        console.log('new column tasks', newColTasks)
-        console.log(newOtherColTasks)
-
-        moveTaskToAnotherColumn({
-          variables: {
-            curColTasks: newColTasks.map(t => {
-              return {
-                id: t.id,
-                order: t.order,
-                columnId: t.columnId
-              }
-            }),
-            prevColTasks: newOtherColTasks.map(t => {
-              return {
-                id: t.id,
-                order: t.order,
-                columnId: t.columnId
-              }
-            }),
-          }
-        })
-        console.log('moving task to another column')
-        return [...newTasks, ...newColTasks, ...newOtherColTasks]
+        // визуальный move
+        return arrayMove(tasks, oldIndex, newIndex);
       }
 
-      return prev;
+      // --- ПЕРЕМЕЩЕНИЕ НА ПУСТУЮ КОЛОНКУ ---
+      if (tasks[oldIndex].columnId !== overColumnId) {
+        // временно подменяем колонку (VISUAL ONLY)
+        tasks[oldIndex] = { ...tasks[oldIndex], columnId: overColumnId };
+      }
+
+      return tasks;
     });
+
   }, []);
+
 
   const addNewColumn = useCallback(() => {
     addColumn({ variables: { columnInput: { boardId: board.id, title: `Новая колонка ${allColumns.length + 1}` } } });

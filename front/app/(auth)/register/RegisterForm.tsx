@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRegisterMutation } from "@/store/auth";
 import { toast } from "sonner";
+import { Card } from "@/components/ui/card";
 
 export const RegisterForm: React.FC = () => {
   const {
@@ -41,73 +42,75 @@ export const RegisterForm: React.FC = () => {
   };
 
   return (
-    <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
-      <h1 className="text-2xl text-center font-unbounded">Регистрация</h1>
+    <Card className="dark bg-neutral-950 p-0 border-0">
+      <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
+        <h1 className="text-2xl text-center font-unbounded">Регистрация</h1>
 
-      <div>
-        {errors.nickName && (
-          <span className="text-sm text-red-400">
-            {errors.nickName.message}
-          </span>
-        )}
-        <Input
-          {...registerInput("nickName")}
-          placeholder="Введите логин"
-          type="text"
-          className={
-            errors.nickName &&
-            "border-red-400 placeholder:text-red-400 focus-visible:border-red-400! text-red-400"
-          }
-        />
-      </div>
+        <div>
+          {errors.nickName && (
+            <span className="text-sm text-red-400">
+              {errors.nickName.message}
+            </span>
+          )}
+          <Input
+            {...registerInput("nickName")}
+            placeholder="Введите логин"
+            type="text"
+            className={
+              errors.nickName &&
+              "border-red-400 placeholder:text-red-400 focus-visible:border-red-400! text-red-400"
+            }
+          />
+        </div>
 
-      <div>
-        {errors.email && (
-          <span className="text-sm text-red-400">{errors.email.message}</span>
-        )}
-        <Input
-          {...registerInput("email")}
-          placeholder="Введите email"
-          type="email"
-          className={
-            errors.email &&
-            "border-red-400 placeholder:text-red-400 focus-visible:border-red-400! text-red-400"
-          }
-        />
-      </div>
+        <div>
+          {errors.email && (
+            <span className="text-sm text-red-400">{errors.email.message}</span>
+          )}
+          <Input
+            {...registerInput("email")}
+            placeholder="Введите email"
+            type="email"
+            className={
+              errors.email &&
+              "border-red-400 placeholder:text-red-400 focus-visible:border-red-400! text-red-400"
+            }
+          />
+        </div>
 
-      <div>
-        {errors.password && (
-          <span className="text-sm text-red-400">
-            {errors.password.message}
-          </span>
-        )}
-        <Input
-          {...registerInput("password")}
-          placeholder="Введите пароль"
-          type="password"
-          className={
-            errors.password &&
-            "border-red-400 placeholder:text-red-400 focus-visible:border-red-400! text-red-400"
-          }
-        />
-      </div>
+        <div>
+          {errors.password && (
+            <span className="text-sm text-red-400">
+              {errors.password.message}
+            </span>
+          )}
+          <Input
+            {...registerInput("password")}
+            placeholder="Введите пароль"
+            type="password"
+            className={
+              errors.password &&
+              "border-red-400 placeholder:text-red-400 focus-visible:border-red-400! text-red-400"
+            }
+          />
+        </div>
 
-      <Button
-        type="submit"
-        variant={"secondary"}
-        className="text-lg h-auto w-full"
-        disabled={isLoading}
-      >
-        Зарегистрироваться
-      </Button>
+        <Button
+          type="submit"
+          variant={"default"}
+          className="text-lg h-auto w-full"
+          disabled={isLoading}
+        >
+          Зарегистрироваться
+        </Button>
 
-      <span className="text-sm text-center">
-        Уже есть аккаунт?{" "}
-        <Link className="text-neutral-500" href="/login">
-          Войдите!
-        </Link>
-      </span>
-    </form>
+        <span className="text-sm text-center">
+          Уже есть аккаунт?{" "}
+          <Link className="text-neutral-500" href="/login">
+            Войдите!
+          </Link>
+        </span>
+      </form>
+    </Card>
   );
 };

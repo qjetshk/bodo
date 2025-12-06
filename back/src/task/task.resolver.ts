@@ -1,4 +1,4 @@
-import { Args, Mutation, Resolver, Subscription } from '@nestjs/graphql';
+import { Args, Int, Mutation, Resolver, Subscription } from '@nestjs/graphql';
 import { TaskService } from './task.service';
 import { Task, CreatedTask, DeletedTask, ChangedTasksOrderInColumn, TaskMovedToAnotherColumn } from './models/task.model';
 import { CreateTaskInput } from './inputs/create-task.input';
@@ -61,8 +61,8 @@ export class TaskResolver {
 
   @UseGuards(GqlAuthGuard)
   @Mutation(() => Boolean)
-  async moveTaskToAnotherColumn(@Args('prevColTasks', { type: () => [ChangeTaskOrderInput] }) prevColTasks: ChangeTaskOrderInput[], @Args('curColTasks', { type: () => [ChangeTaskOrderInput] }) curColTasks: ChangeTaskOrderInput[], @CurrentUserId() movedById: string) {
-    await this.taskService.moveTaskToAnotherColumn(prevColTasks, curColTasks, movedById)
+  async moveTaskToAnotherColumn(@Args('movedTaskId') movedTaskId: string, @Args('newIndex', { type: () => Int }) newIndex: number, @CurrentUserId() movedById: string, @Args('prevColumnId') prevColumnId: string, @Args('curColumnId') curColumnId: string) {
+    await this.taskService.moveTaskToAnotherColumn(movedTaskId, newIndex, prevColumnId, movedById, curColumnId)
     return true
   }
 

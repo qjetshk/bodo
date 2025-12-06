@@ -1,27 +1,10 @@
-import {
-  AuthResponse,
-  LoginRequest,
-  RegisterRequest,
-  User,
-} from "@/types/auth.type";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";;
+import { AuthResponse, LoginRequest, RegisterRequest, User } from "@/types/auth.type";
+import baseQueryWithRefresh from "@/utils/base-query.util";
 
 export const auth = createApi({
   reducerPath: "auth",
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${process.env.NEXT_PUBLIC_BACK_URL}/api/auth`,
-    credentials: 'include',
-
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      headers.set("Content-Type", "application/json");
-      return headers;
-    },
-  }),
-
+  baseQuery: baseQueryWithRefresh,
   tagTypes: ["Auth"],
   endpoints: (b) => ({
     register: b.mutation<AuthResponse, RegisterRequest>({
@@ -32,7 +15,6 @@ export const auth = createApi({
       }),
       invalidatesTags: ["Auth"],
     }),
-
     login: b.mutation<AuthResponse, LoginRequest>({
       query: (data) => ({
         url: "login",
@@ -51,13 +33,8 @@ export const auth = createApi({
         }
       },
     }),
-
     logout: b.mutation<void, void>({
-      query: () => ({
-        url: "/logout",
-        method: "POST",
-        
-      }),
+      query: () => ({ url: "/logout", method: "POST" }),
       invalidatesTags: ["Auth"],
       async onQueryStarted(_, { queryFulfilled }) {
         try {
@@ -69,7 +46,6 @@ export const auth = createApi({
         }
       },
     }),
-
     getMe: b.query<User, void>({
       query: () => "/@me",
       providesTags: ["Auth"],
@@ -77,9 +53,4 @@ export const auth = createApi({
   }),
 });
 
-export const {
-  useRegisterMutation,
-  useLoginMutation,
-  useGetMeQuery,
-  useLogoutMutation,
-} = auth;
+export const { useRegisterMutation, useLoginMutation, useGetMeQuery, useLogoutMutation } = auth;

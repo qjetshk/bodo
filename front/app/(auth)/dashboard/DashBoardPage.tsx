@@ -27,7 +27,7 @@ const DashBoard = () => {
             </div>
         )
     } else {
-        return data?.getAllUserBoards?.length ? <RecentBoards boards={sortedBoards} /> : <HelloPage />
+        return data?.getAllUserBoards?.length ? <RecentBoards boards={[...data.getAllUserBoards]} /> : <HelloPage />
     }
 
 }

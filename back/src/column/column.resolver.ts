@@ -1,10 +1,12 @@
 import { Args, ID, Mutation, Resolver, Subscription } from '@nestjs/graphql';
 import { ColumnService } from './column.service';
-import { Inject } from '@nestjs/common';
+import { Inject, UseGuards } from '@nestjs/common';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { AddNewColumnInput } from 'src/board/inputs/add-new-column.input';
 import { ChangedColumnsOrder, ColumnAdded, ColumnDeleted, UpdatedColumn } from 'src/board/models/column.model';
 import { ChangeColumnOrderInput } from 'src/board/inputs/change-column-order.input';
+import { GqlAuthGuard } from 'src/guards/gql-auth.guard';
+import { CurrentUserId } from 'src/decorators/get-id-from-token';
 
 @Resolver()
 export class ColumnResolver {
@@ -55,20 +57,22 @@ export class ColumnResolver {
     return this.pubSub.asyncIterator('columnTitleChanged');
   }
 
+  @UseGuards(GqlAuthGuard)
   @Mutation(() => Boolean)
   async changeColumnsOrder(
     @Args('changeColumnInput', { type: () => [ChangeColumnOrderInput] })
     changeColumnInput: ChangeColumnOrderInput[],
     @Args('boardId', { type: () => ID })
-    boardId: string
+    boardId: string,
+    @CurrentUserId() movedById: string
   ) {
-    await this.columnService.changeColumnsOrder(changeColumnInput, boardId);
+    await this.columnService.changeColumnsOrder(changeColumnInput, boardId, movedById);
     return true;
   }
 
   @Subscription(() => ChangedColumnsOrder, {
     filter(payload, variables, context) {
-      return payload.columnOrderChanged.membersAndOwnerIds.includes(context?.user.id)
+      return payload.columnOrderChanged.recipientsIds.includes(context?.user.id)
     },
   })
   columnOrderChanged() {

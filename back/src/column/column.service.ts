@@ -3,7 +3,7 @@ import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { AddNewColumnInput } from 'src/board/inputs/add-new-column.input';
 import { ChangeColumnOrderInput } from 'src/board/inputs/change-column-order.input';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { getOwnerAndMembersIds } from 'src/utils/get-owner-members-ids.util';
+import { getOwnerAndMembersIds, getRecipientsIds } from 'src/utils/get-owner-members-ids.util';
 
 @Injectable()
 export class ColumnService {
@@ -65,7 +65,7 @@ export class ColumnService {
     }
 
 
-    async changeColumnsOrder(columns: ChangeColumnOrderInput[], boardId: string) {
+    async changeColumnsOrder(columns: ChangeColumnOrderInput[], boardId: string, movedById: string) {
         const currentBoard = await this.prismaService.board.findUnique({
             where: { id: boardId }
         })
@@ -107,7 +107,7 @@ export class ColumnService {
             columnOrderChanged: {
                 boardId,
                 columns: updatedColumns,
-                membersAndOwnerIds: getOwnerAndMembersIds<typeof updatedBoard>(updatedBoard)
+                recipientsIds: getRecipientsIds<typeof updatedBoard>(updatedBoard, movedById)
             }
         });
 

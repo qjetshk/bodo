@@ -10,10 +10,12 @@ import { DELETE_TASK } from '@/apollo/requests/tasks'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { useIsTouchDevice } from '@/hooks/is-touch-device'
 
 const Task = ({ task }: { task: TaskType }) => {
     const [isOpen, setIsOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+    const isTouchDevice = useIsTouchDevice()
 
     const {
         setNodeRef,
@@ -65,7 +67,7 @@ const Task = ({ task }: { task: TaskType }) => {
             </Card>
             {!isDragging &&
                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild className="absolute top-1.5 right-3 cursor-pointer">
+                    <DropdownMenuTrigger asChild className={`${isTouchDevice && 'text-neutral-600!'} absolute top-1.5 right-3 cursor-pointer`}>
                         <Ellipsis size={18}/>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="dark">
