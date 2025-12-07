@@ -165,7 +165,7 @@ export class TaskService {
     }
 
 
-    async changeTasksOrderInOneColumn(newTasks: ChangeTaskOrderInput[], columnId: string, movedById: string) {
+    async changeTasksOrder(newTasks: ChangeTaskOrderInput[], columnId: string, movedById: string) {
         const column = await this.prismaService.column.findUnique({
             where: {
                 id: columnId
@@ -211,6 +211,11 @@ export class TaskService {
                     include: {
                         user: true
                     }
+                },
+                columns: {
+                    include: {
+                        tasks: true
+                    }
                 }
             }
         })
@@ -219,12 +224,20 @@ export class TaskService {
             throw new NotFoundException('Такой доски не существует!')
         }
 
+        const tasks = board.columns.flatMap(c =>
+            c.tasks.map(t => ({
+                id: t.id,
+                order: t.order,
+                columnId: c.id   
+            }))
+        );
+
         const recipientsIds = getRecipientsIds<typeof board>(board, movedById)
 
         await this.pubSub.publish('tasksOrderChangedInOneColumn', {
             tasksOrderChangedInOneColumn: {
                 columnId: updatedColumn?.id,
-                tasks: updatedColumn?.tasks,
+                tasks,
                 recipientsIds
             } as ModelTypeWithRecepientsIds<ChangedTasksOrderInColumn>
         })

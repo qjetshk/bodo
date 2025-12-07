@@ -2493,7 +2493,7 @@
             "deprecationReason": null
           },
           {
-            "name": "changeTasksOrderInOneColumn",
+            "name": "changeTasksOrder",
             "description": null,
             "args": [
               {

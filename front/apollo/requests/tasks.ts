@@ -43,12 +43,12 @@ export const TASK_DELETED = graphql(`
     }
 `)
 
-export const CHANGE_TASKS_ORDER_IN_ONE_COLUMN = graphql(`
-    mutation ChangeTasksOrderInOneColumn(
+export const CHANGE_TASKS_ORDER = graphql(`
+    mutation ChangeTasksOrder(
         $newTasks: [ChangeTaskOrderInput!]!
         $columnId: String!
     ) {
-        changeTasksOrderInOneColumn(newTasks: $newTasks, columnId: $columnId)
+        changeTasksOrder(newTasks: $newTasks, columnId: $columnId)
     }
 `)
 
@@ -59,6 +59,7 @@ export const TASKS_ORDER_CHANGED_IN_ONE_COLUMN = graphql(`
             tasks {
                 id
                 order
+                columnId
             }
         }
     }

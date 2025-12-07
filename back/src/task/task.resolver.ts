@@ -45,8 +45,8 @@ export class TaskResolver {
 
   @UseGuards(GqlAuthGuard)
   @Mutation(() => Boolean)
-  async changeTasksOrderInOneColumn(@Args('newTasks', { type: () => [ChangeTaskOrderInput] }) newTasks: ChangeTaskOrderInput[], @Args('columnId') columnId: string, @CurrentUserId() movedById: string) {
-    await this.taskService.changeTasksOrderInOneColumn(newTasks, columnId, movedById)
+  async changeTasksOrder(@Args('newTasks', { type: () => [ChangeTaskOrderInput] }) newTasks: ChangeTaskOrderInput[], @Args('columnId') columnId: string, @CurrentUserId() movedById: string) {
+    await this.taskService.changeTasksOrder(newTasks, columnId, movedById)
     return true
   }
 

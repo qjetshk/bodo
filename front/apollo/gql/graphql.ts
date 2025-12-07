@@ -7,6 +7,7 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type InputMaybe<T> = Maybe<T>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string; }
@@ -240,7 +241,7 @@ export type Mutation = {
   addNewColumn: Scalars['Boolean']['output'];
   changeColumnTitle: Scalars['Boolean']['output'];
   changeColumnsOrder: Scalars['Boolean']['output'];
-  changeTasksOrderInOneColumn: Scalars['Boolean']['output'];
+  changeTasksOrder: Scalars['Boolean']['output'];
   createBoard: Board;
   createTask: Scalars['Boolean']['output'];
   declineInvitation: Scalars['Boolean']['output'];
@@ -275,7 +276,7 @@ export type MutationChangeColumnsOrderArgs = {
 };
 
 
-export type MutationChangeTasksOrderInOneColumnArgs = {
+export type MutationChangeTasksOrderArgs = {
   columnId: Scalars['String']['input'];
   newTasks: Array<ChangeTaskOrderInput>;
 };
@@ -579,18 +580,18 @@ export type TaskDeletedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 export type TaskDeletedSubscription = { __typename?: 'Subscription', taskDeleted: { __typename?: 'DeletedTask', columnId: string, boardUpdatedAt: any, tasks: Array<{ __typename?: 'CreatedTask', updatedAt: any, description: string, id: string, order: number, title: string }> } };
 
-export type ChangeTasksOrderInOneColumnMutationVariables = Exact<{
+export type ChangeTasksOrderMutationVariables = Exact<{
   newTasks: Array<ChangeTaskOrderInput> | ChangeTaskOrderInput;
   columnId: Scalars['String']['input'];
 }>;
 
 
-export type ChangeTasksOrderInOneColumnMutation = { __typename?: 'Mutation', changeTasksOrderInOneColumn: boolean };
+export type ChangeTasksOrderMutation = { __typename?: 'Mutation', changeTasksOrder: boolean };
 
 export type TasksOrderChangedInOneColumnSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TasksOrderChangedInOneColumnSubscription = { __typename?: 'Subscription', tasksOrderChangedInOneColumn: { __typename?: 'ChangedTasksOrderInColumn', columnId: string, tasks: Array<{ __typename?: 'ChangedTaskOrder', id: string, order: number }> } };
+export type TasksOrderChangedInOneColumnSubscription = { __typename?: 'Subscription', tasksOrderChangedInOneColumn: { __typename?: 'ChangedTasksOrderInColumn', columnId: string, tasks: Array<{ __typename?: 'ChangedTaskOrder', id: string, order: number, columnId?: string | null }> } };
 
 export type MoveTaskToAnotherColumnMutationVariables = Exact<{
   movedTaskId: Scalars['String']['input'];
@@ -640,9 +641,612 @@ export const CreateTaskDocument = {"kind":"Document","definitions":[{"kind":"Ope
 export const TaskCreatedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"TaskCreated"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"taskCreated"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"columnId"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"order"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<TaskCreatedSubscription, TaskCreatedSubscriptionVariables>;
 export const DeleteTaskDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteTask"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"taskId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteTask"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"taskId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"taskId"}}}]}]}}]} as unknown as DocumentNode<DeleteTaskMutation, DeleteTaskMutationVariables>;
 export const TaskDeletedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"TaskDeleted"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"taskDeleted"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"columnId"}},{"kind":"Field","name":{"kind":"Name","value":"boardUpdatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"tasks"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"order"}},{"kind":"Field","name":{"kind":"Name","value":"title"}}]}}]}}]}}]} as unknown as DocumentNode<TaskDeletedSubscription, TaskDeletedSubscriptionVariables>;
-export const ChangeTasksOrderInOneColumnDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ChangeTasksOrderInOneColumn"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"newTasks"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ChangeTaskOrderInput"}}}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"columnId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"changeTasksOrderInOneColumn"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"newTasks"},"value":{"kind":"Variable","name":{"kind":"Name","value":"newTasks"}}},{"kind":"Argument","name":{"kind":"Name","value":"columnId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"columnId"}}}]}]}}]} as unknown as DocumentNode<ChangeTasksOrderInOneColumnMutation, ChangeTasksOrderInOneColumnMutationVariables>;
-export const TasksOrderChangedInOneColumnDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"TasksOrderChangedInOneColumn"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tasksOrderChangedInOneColumn"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"columnId"}},{"kind":"Field","name":{"kind":"Name","value":"tasks"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"order"}}]}}]}}]}}]} as unknown as DocumentNode<TasksOrderChangedInOneColumnSubscription, TasksOrderChangedInOneColumnSubscriptionVariables>;
+export const ChangeTasksOrderDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ChangeTasksOrder"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"newTasks"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ChangeTaskOrderInput"}}}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"columnId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"changeTasksOrder"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"newTasks"},"value":{"kind":"Variable","name":{"kind":"Name","value":"newTasks"}}},{"kind":"Argument","name":{"kind":"Name","value":"columnId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"columnId"}}}]}]}}]} as unknown as DocumentNode<ChangeTasksOrderMutation, ChangeTasksOrderMutationVariables>;
+export const TasksOrderChangedInOneColumnDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"TasksOrderChangedInOneColumn"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tasksOrderChangedInOneColumn"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"columnId"}},{"kind":"Field","name":{"kind":"Name","value":"tasks"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"order"}},{"kind":"Field","name":{"kind":"Name","value":"columnId"}}]}}]}}]}}]} as unknown as DocumentNode<TasksOrderChangedInOneColumnSubscription, TasksOrderChangedInOneColumnSubscriptionVariables>;
 export const MoveTaskToAnotherColumnDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"MoveTaskToAnotherColumn"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"movedTaskId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"newIndex"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"prevColumnId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"curColumnId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"moveTaskToAnotherColumn"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"curColumnId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"curColumnId"}}},{"kind":"Argument","name":{"kind":"Name","value":"movedTaskId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"movedTaskId"}}},{"kind":"Argument","name":{"kind":"Name","value":"prevColumnId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"prevColumnId"}}},{"kind":"Argument","name":{"kind":"Name","value":"newIndex"},"value":{"kind":"Variable","name":{"kind":"Name","value":"newIndex"}}}]}]}}]} as unknown as DocumentNode<MoveTaskToAnotherColumnMutation, MoveTaskToAnotherColumnMutationVariables>;
 export const TaskMovedToAnotherColumnDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"TaskMovedToAnotherColumn"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"taskMovedToAnotherColumn"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"currentColumn"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"columnId"}},{"kind":"Field","name":{"kind":"Name","value":"tasks"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"order"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"prevColumn"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"columnId"}},{"kind":"Field","name":{"kind":"Name","value":"tasks"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"order"}},{"kind":"Field","name":{"kind":"Name","value":"columnId"}}]}}]}}]}}]}}]} as unknown as DocumentNode<TaskMovedToAnotherColumnSubscription, TaskMovedToAnotherColumnSubscriptionVariables>;
 export const GetAllBoardTemplatesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAllBoardTemplates"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getAllBoardTemplates"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"columns"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"order"}}]}}]}}]}}]} as unknown as DocumentNode<GetAllBoardTemplatesQuery, GetAllBoardTemplatesQueryVariables>;
 /** All built-in and custom scalars, mapped to their actual values */
+export type Scalars = {
+  ID: { input: string; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
+  /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
+  DateTime: { input: any; output: any; }
+};
+
+export type AcceptedOrDeclinedInvitation = {
+  __typename?: 'AcceptedOrDeclinedInvitation';
+  boardId: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  invitedById: Scalars['String']['output'];
+  member: BoardMember;
+};
+
+export type AddNewColumnInput = {
+  boardId: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
+
+export type Board = {
+  __typename?: 'Board';
+  boardTemplate?: Maybe<BoardTemplate>;
+  boardTemplateId?: Maybe<Scalars['String']['output']>;
+  boardType: Scalars['Boolean']['output'];
+  columns: Array<Column>;
+  createdAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  members: Array<BoardMember>;
+  name: Scalars['String']['output'];
+  owner: User;
+  ownerId: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type BoardDeleted = {
+  __typename?: 'BoardDeleted';
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type BoardEdited = {
+  __typename?: 'BoardEdited';
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  members: Array<User>;
+  name?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type BoardInvitation = {
+  __typename?: 'BoardInvitation';
+  board: Board;
+  boardId: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['String']['output'];
+  invitedBy: User;
+  invitedById: Scalars['String']['output'];
+  status: InvitationStatus;
+  updatedAt: Scalars['DateTime']['output'];
+  user: User;
+  userId: Scalars['String']['output'];
+};
+
+export type BoardMember = {
+  __typename?: 'BoardMember';
+  board: Board;
+  boardId: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  role: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  user: User;
+  userId: Scalars['String']['output'];
+};
+
+export type BoardTemplate = {
+  __typename?: 'BoardTemplate';
+  boards: Array<Board>;
+  columns: Array<ColumnTemplate>;
+  createdAt: Scalars['DateTime']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type ChangeColumnOrderInput = {
+  id: Scalars['ID']['input'];
+  order: Scalars['Int']['input'];
+};
+
+export type ChangeTaskOrderInput = {
+  columnId?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['String']['input'];
+  order: Scalars['Float']['input'];
+};
+
+export type ChangedColumn = {
+  __typename?: 'ChangedColumn';
+  id: Scalars['ID']['output'];
+  order: Scalars['Int']['output'];
+};
+
+export type ChangedColumnsOrder = {
+  __typename?: 'ChangedColumnsOrder';
+  boardId: Scalars['ID']['output'];
+  columns: Array<ChangedColumn>;
+};
+
+export type ChangedTaskOrder = {
+  __typename?: 'ChangedTaskOrder';
+  columnId?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  order: Scalars['Int']['output'];
+};
+
+export type ChangedTasksOrderInColumn = {
+  __typename?: 'ChangedTasksOrderInColumn';
+  columnId: Scalars['ID']['output'];
+  tasks: Array<ChangedTaskOrder>;
+};
+
+export type Column = {
+  __typename?: 'Column';
+  board: Board;
+  boardId: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  order: Scalars['Int']['output'];
+  tasks: Array<Task>;
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type ColumnAdded = {
+  __typename?: 'ColumnAdded';
+  boardId: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
+  tasks: Array<Task>;
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type ColumnDeleted = {
+  __typename?: 'ColumnDeleted';
+  columns: Array<ColumnAdded>;
+};
+
+export type ColumnTemplate = {
+  __typename?: 'ColumnTemplate';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  order: Scalars['Int']['output'];
+  template: BoardTemplate;
+  templateId: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type Comment = {
+  __typename?: 'Comment';
+  author: User;
+  authorId: Scalars['String']['output'];
+  content: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  task: Task;
+  taskId: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type CreateBoardInput = {
+  boardTemplateId: Scalars['String']['input'];
+  boardType: Scalars['Boolean']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  membersToAdd?: InputMaybe<Array<Scalars['String']['input']>>;
+  name: Scalars['String']['input'];
+};
+
+export type CreateTaskInput = {
+  columnId: Scalars['String']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  title: Scalars['String']['input'];
+};
+
+export type CreatedTask = {
+  __typename?: 'CreatedTask';
+  columnId: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  order: Scalars['Int']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type DeletedTask = {
+  __typename?: 'DeletedTask';
+  boardUpdatedAt: Scalars['DateTime']['output'];
+  columnId: Scalars['String']['output'];
+  tasks: Array<CreatedTask>;
+};
+
+export type EditBoardInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  membersToAdd?: InputMaybe<Array<Scalars['String']['input']>>;
+  name: Scalars['String']['input'];
+};
+
+export type FindMemberInput = {
+  email?: InputMaybe<Scalars['String']['input']>;
+  nickName?: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum InvitationStatus {
+  Accepted = 'ACCEPTED',
+  Declined = 'DECLINED',
+  Pending = 'PENDING'
+}
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  acceptInvitation: Board;
+  addNewColumn: Scalars['Boolean']['output'];
+  changeColumnTitle: Scalars['Boolean']['output'];
+  changeColumnsOrder: Scalars['Boolean']['output'];
+  changeTasksOrder: Scalars['Boolean']['output'];
+  createBoard: Board;
+  createTask: Scalars['Boolean']['output'];
+  declineInvitation: Scalars['Boolean']['output'];
+  deleteBoard: Scalars['Boolean']['output'];
+  deleteColumn: Scalars['Boolean']['output'];
+  deleteTask: Scalars['Boolean']['output'];
+  editBoard?: Maybe<UpdatedBoard>;
+  findMembers: Array<User>;
+  moveTaskToAnotherColumn: Scalars['Boolean']['output'];
+};
+
+
+export type MutationAcceptInvitationArgs = {
+  invitationId: Scalars['String']['input'];
+};
+
+
+export type MutationAddNewColumnArgs = {
+  columnInput: AddNewColumnInput;
+};
+
+
+export type MutationChangeColumnTitleArgs = {
+  columnId: Scalars['String']['input'];
+  newTitle: Scalars['String']['input'];
+};
+
+
+export type MutationChangeColumnsOrderArgs = {
+  boardId: Scalars['ID']['input'];
+  changeColumnInput: Array<ChangeColumnOrderInput>;
+};
+
+
+export type MutationChangeTasksOrderArgs = {
+  columnId: Scalars['String']['input'];
+  newTasks: Array<ChangeTaskOrderInput>;
+};
+
+
+export type MutationCreateBoardArgs = {
+  boardInput: CreateBoardInput;
+};
+
+
+export type MutationCreateTaskArgs = {
+  taskInput: CreateTaskInput;
+};
+
+
+export type MutationDeclineInvitationArgs = {
+  invitationId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteBoardArgs = {
+  boardId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteColumnArgs = {
+  columnId: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteTaskArgs = {
+  taskId: Scalars['String']['input'];
+};
+
+
+export type MutationEditBoardArgs = {
+  boardId: Scalars['String']['input'];
+  editBoardInput: EditBoardInput;
+};
+
+
+export type MutationFindMembersArgs = {
+  member: FindMemberInput;
+};
+
+
+export type MutationMoveTaskToAnotherColumnArgs = {
+  curColumnId: Scalars['String']['input'];
+  movedTaskId: Scalars['String']['input'];
+  newIndex: Scalars['Int']['input'];
+  prevColumnId: Scalars['String']['input'];
+};
+
+export type Query = {
+  __typename?: 'Query';
+  getAllBoardTemplates: Array<BoardTemplate>;
+  getAllUserBoardInvitation: Array<BoardInvitation>;
+  getAllUserBoards: Array<Board>;
+  getAllUserInvations: Array<BoardInvitation>;
+  getBoardById: Board;
+  hello: Scalars['String']['output'];
+};
+
+
+export type QueryGetBoardByIdArgs = {
+  boardId: Scalars['String']['input'];
+};
+
+export type Subscription = {
+  __typename?: 'Subscription';
+  boardDeleted: BoardDeleted;
+  boardEdited: BoardEdited;
+  columnAdded: ColumnAdded;
+  columnDeleted: ColumnDeleted;
+  columnOrderChanged: ChangedColumnsOrder;
+  columnTitleChanged: UpdatedColumn;
+  invitationAccepted: AcceptedOrDeclinedInvitation;
+  invitationCreated: BoardInvitation;
+  invitationDeclined: AcceptedOrDeclinedInvitation;
+  taskCreated: CreatedTask;
+  taskDeleted: DeletedTask;
+  taskMovedToAnotherColumn: TaskMovedToAnotherColumn;
+  tasksOrderChangedInOneColumn: ChangedTasksOrderInColumn;
+};
+
+export type Task = {
+  __typename?: 'Task';
+  assignments?: Maybe<Array<TaskAssignment>>;
+  column: Column;
+  columnId: Scalars['String']['output'];
+  comments?: Maybe<Array<Comment>>;
+  createdAt: Scalars['DateTime']['output'];
+  description: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  order: Scalars['Int']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type TaskAssignment = {
+  __typename?: 'TaskAssignment';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  task: Task;
+  taskId: Scalars['String']['output'];
+  user: User;
+  userId: Scalars['String']['output'];
+};
+
+export type TaskMovedToAnotherColumn = {
+  __typename?: 'TaskMovedToAnotherColumn';
+  currentColumn: ChangedTasksOrderInColumn;
+  prevColumn: ChangedTasksOrderInColumn;
+};
+
+export type UpdatedBoard = {
+  __typename?: 'UpdatedBoard';
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type UpdatedColumn = {
+  __typename?: 'UpdatedColumn';
+  id: Scalars['ID']['output'];
+  title: Scalars['String']['output'];
+};
+
+export type User = {
+  __typename?: 'User';
+  avatarUrl?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  email: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  nickName: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type GetAllUserBoardsForNavigationQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllUserBoardsForNavigationQuery = { __typename?: 'Query', getAllUserBoards: Array<{ __typename?: 'Board', id: string, name: string, description?: string | null, createdAt: any }> };
+
+export type GetAllUserBoardsForDashboardQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllUserBoardsForDashboardQuery = { __typename?: 'Query', getAllUserBoards: Array<{ __typename?: 'Board', id: string, name: string, description?: string | null, createdAt: any, updatedAt: any, owner: { __typename?: 'User', email: string, nickName: string, avatarUrl?: string | null }, members: Array<{ __typename?: 'BoardMember', user: { __typename?: 'User', avatarUrl?: string | null, nickName: string } }> }> };
+
+export type CreateBoardMutationVariables = Exact<{
+  boardInput: CreateBoardInput;
+}>;
+
+
+export type CreateBoardMutation = { __typename?: 'Mutation', createBoard: { __typename?: 'Board', id: string } };
+
+export type GetInitialBoardQueryVariables = Exact<{
+  boardId: Scalars['String']['input'];
+}>;
+
+
+export type GetInitialBoardQuery = { __typename?: 'Query', getBoardById: { __typename?: 'Board', boardType: boolean, name: string, description?: string | null, id: string, createdAt: any, members: Array<{ __typename?: 'BoardMember', user: { __typename?: 'User', avatarUrl?: string | null, email: string, nickName: string, id: string } }>, owner: { __typename?: 'User', avatarUrl?: string | null, email: string, nickName: string, id: string }, columns: Array<{ __typename?: 'Column', id: string, order: number, title: string, tasks: Array<{ __typename?: 'Task', description: string, id: string, order: number, title: string, updatedAt: any, columnId: string }> }> } };
+
+export type EditBoardMutationVariables = Exact<{
+  boardId: Scalars['String']['input'];
+  editBoardInput: EditBoardInput;
+}>;
+
+
+export type EditBoardMutation = { __typename?: 'Mutation', editBoard?: { __typename?: 'UpdatedBoard', id: string, name?: string | null, description?: string | null, updatedAt: any } | null };
+
+export type BoardEditedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BoardEditedSubscription = { __typename?: 'Subscription', boardEdited: { __typename?: 'BoardEdited', description?: string | null, id: string, name?: string | null, updatedAt: any } };
+
+export type DeleteBoardMutationVariables = Exact<{
+  boardId: Scalars['String']['input'];
+}>;
+
+
+export type DeleteBoardMutation = { __typename?: 'Mutation', deleteBoard: boolean };
+
+export type BoardDeletedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type BoardDeletedSubscription = { __typename?: 'Subscription', boardDeleted: { __typename?: 'BoardDeleted', id: string, name: string } };
+
+export type ChangeColumnTitleMutationVariables = Exact<{
+  newTitle: Scalars['String']['input'];
+  columnId: Scalars['String']['input'];
+}>;
+
+
+export type ChangeColumnTitleMutation = { __typename?: 'Mutation', changeColumnTitle: boolean };
+
+export type ColumnTitleChangedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ColumnTitleChangedSubscription = { __typename?: 'Subscription', columnTitleChanged: { __typename?: 'UpdatedColumn', id: string, title: string } };
+
+export type ChangeColumnsOrderMutationVariables = Exact<{
+  changeColumnInput: Array<ChangeColumnOrderInput> | ChangeColumnOrderInput;
+  boardId: Scalars['ID']['input'];
+}>;
+
+
+export type ChangeColumnsOrderMutation = { __typename?: 'Mutation', changeColumnsOrder: boolean };
+
+export type ColumnOrderChangedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ColumnOrderChangedSubscription = { __typename?: 'Subscription', columnOrderChanged: { __typename?: 'ChangedColumnsOrder', boardId: string, columns: Array<{ __typename?: 'ChangedColumn', id: string, order: number }> } };
+
+export type AddNewColumnMutationVariables = Exact<{
+  columnInput: AddNewColumnInput;
+}>;
+
+
+export type AddNewColumnMutation = { __typename?: 'Mutation', addNewColumn: boolean };
+
+export type ColumnAddedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ColumnAddedSubscription = { __typename?: 'Subscription', columnAdded: { __typename?: 'ColumnAdded', boardId: string, title: string, id: string, order: number, tasks: Array<{ __typename?: 'Task', id: string, title: string, description: string, order: number, columnId: string, updatedAt: any }> } };
+
+export type DeleteColumnMutationVariables = Exact<{
+  columnId: Scalars['String']['input'];
+}>;
+
+
+export type DeleteColumnMutation = { __typename?: 'Mutation', deleteColumn: boolean };
+
+export type ColumnDeletedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ColumnDeletedSubscription = { __typename?: 'Subscription', columnDeleted: { __typename?: 'ColumnDeleted', columns: Array<{ __typename?: 'ColumnAdded', id: string, order: number }> } };
+
+export type GetAllUserBoardInvitationQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllUserBoardInvitationQuery = { __typename?: 'Query', getAllUserBoardInvitation: Array<{ __typename?: 'BoardInvitation', id: string, createdAt: any, board: { __typename?: 'Board', name: string }, invitedBy: { __typename?: 'User', email: string, nickName: string, avatarUrl?: string | null } }> };
+
+export type AcceptInvitationMutationVariables = Exact<{
+  invitationId: Scalars['String']['input'];
+}>;
+
+
+export type AcceptInvitationMutation = { __typename?: 'Mutation', acceptInvitation: { __typename?: 'Board', id: string } };
+
+export type DeclineInvitationMutationVariables = Exact<{
+  invitationId: Scalars['String']['input'];
+}>;
+
+
+export type DeclineInvitationMutation = { __typename?: 'Mutation', declineInvitation: boolean };
+
+export type GetBoardInvitationSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetBoardInvitationSubscription = { __typename?: 'Subscription', invitationCreated: { __typename?: 'BoardInvitation', board: { __typename?: 'Board', name: string }, invitedBy: { __typename?: 'User', nickName: string } } };
+
+export type UserAcceptInvitationSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UserAcceptInvitationSubscription = { __typename?: 'Subscription', invitationAccepted: { __typename?: 'AcceptedOrDeclinedInvitation', id: string, invitedById: string, boardId: string, member: { __typename?: 'BoardMember', user: { __typename?: 'User', avatarUrl?: string | null, email: string, id: string, nickName: string } } } };
+
+export type UserDeclineInvitationSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UserDeclineInvitationSubscription = { __typename?: 'Subscription', invitationDeclined: { __typename?: 'AcceptedOrDeclinedInvitation', id: string, invitedById: string, boardId: string, member: { __typename?: 'BoardMember', user: { __typename?: 'User', avatarUrl?: string | null, email: string, id: string, nickName: string } } } };
+
+export type FindMembersMutationVariables = Exact<{
+  member: FindMemberInput;
+}>;
+
+
+export type FindMembersMutation = { __typename?: 'Mutation', findMembers: Array<{ __typename?: 'User', id: string, email: string, nickName: string, avatarUrl?: string | null }> };
+
+export type CreateTaskMutationVariables = Exact<{
+  taskInput: CreateTaskInput;
+}>;
+
+
+export type CreateTaskMutation = { __typename?: 'Mutation', createTask: boolean };
+
+export type TaskCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TaskCreatedSubscription = { __typename?: 'Subscription', taskCreated: { __typename?: 'CreatedTask', columnId: string, description: string, id: string, order: number, title: string, updatedAt: any } };
+
+export type DeleteTaskMutationVariables = Exact<{
+  taskId: Scalars['String']['input'];
+}>;
+
+
+export type DeleteTaskMutation = { __typename?: 'Mutation', deleteTask: boolean };
+
+export type TaskDeletedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TaskDeletedSubscription = { __typename?: 'Subscription', taskDeleted: { __typename?: 'DeletedTask', columnId: string, boardUpdatedAt: any, tasks: Array<{ __typename?: 'CreatedTask', updatedAt: any, description: string, id: string, order: number, title: string }> } };
+
+export type ChangeTasksOrderMutationVariables = Exact<{
+  newTasks: Array<ChangeTaskOrderInput> | ChangeTaskOrderInput;
+  columnId: Scalars['String']['input'];
+}>;
+
+
+export type ChangeTasksOrderMutation = { __typename?: 'Mutation', changeTasksOrder: boolean };
+
+export type TasksOrderChangedInOneColumnSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TasksOrderChangedInOneColumnSubscription = { __typename?: 'Subscription', tasksOrderChangedInOneColumn: { __typename?: 'ChangedTasksOrderInColumn', columnId: string, tasks: Array<{ __typename?: 'ChangedTaskOrder', id: string, order: number, columnId?: string | null }> } };
+
+export type MoveTaskToAnotherColumnMutationVariables = Exact<{
+  movedTaskId: Scalars['String']['input'];
+  newIndex: Scalars['Int']['input'];
+  prevColumnId: Scalars['String']['input'];
+  curColumnId: Scalars['String']['input'];
+}>;
+
+
+export type MoveTaskToAnotherColumnMutation = { __typename?: 'Mutation', moveTaskToAnotherColumn: boolean };
+
+export type TaskMovedToAnotherColumnSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TaskMovedToAnotherColumnSubscription = { __typename?: 'Subscription', taskMovedToAnotherColumn: { __typename?: 'TaskMovedToAnotherColumn', currentColumn: { __typename?: 'ChangedTasksOrderInColumn', columnId: string, tasks: Array<{ __typename?: 'ChangedTaskOrder', id: string, order: number }> }, prevColumn: { __typename?: 'ChangedTasksOrderInColumn', columnId: string, tasks: Array<{ __typename?: 'ChangedTaskOrder', id: string, order: number, columnId?: string | null }> } } };
+
+export type GetAllBoardTemplatesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllBoardTemplatesQuery = { __typename?: 'Query', getAllBoardTemplates: Array<{ __typename?: 'BoardTemplate', id: string, name: string, description?: string | null, columns: Array<{ __typename?: 'ColumnTemplate', title: string, order: number }> }> };

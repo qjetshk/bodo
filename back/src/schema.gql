@@ -210,7 +210,7 @@ type Mutation {
   addNewColumn(columnInput: AddNewColumnInput!): Boolean!
   changeColumnTitle(columnId: String!, newTitle: String!): Boolean!
   changeColumnsOrder(boardId: ID!, changeColumnInput: [ChangeColumnOrderInput!]!): Boolean!
-  changeTasksOrderInOneColumn(columnId: String!, newTasks: [ChangeTaskOrderInput!]!): Boolean!
+  changeTasksOrder(columnId: String!, newTasks: [ChangeTaskOrderInput!]!): Boolean!
   createBoard(boardInput: CreateBoardInput!): Board!
   createTask(taskInput: CreateTaskInput!): Boolean!
   declineInvitation(invitationId: String!): Boolean!

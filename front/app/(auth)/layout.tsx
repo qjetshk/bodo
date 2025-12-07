@@ -12,7 +12,12 @@ export default function RootLayout({
 }>) {
   return (
     <ApolloProvider client={apolloClient}>
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}>
+        <div className={`bg-neutral-950 text-white `}>
+          {children}
+        </div>
+
+      </Provider>
     </ApolloProvider>
 
   );

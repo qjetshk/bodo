@@ -13,24 +13,6 @@ export default function Home() {
   return (
     <>
       <section className=" relative overflow-hidden">
-        <section className="_container h-full relative">
-          <MotionDiv
-            initial={{ y: 10, opacity: 0, filter: "blur(5px)" }}
-            animate={{
-              y: 0,
-              opacity: 1,
-              filter: "none",
-              transition: { duration: 0.3 },
-            }}
-          >
-            <header className="relative py-5 flex z-100 justify-between">
-              <Link href={"/"} className="font-bold text-3xl font-unbounded">
-                Bōdo
-              </Link>
-              <NavBar />
-            </header>
-          </MotionDiv>
-        </section>
         <div className="h-[500px]">
           <BgSection style="" textStyle="!p-0 !justify-center" />
         </div>
@@ -115,18 +97,7 @@ export default function Home() {
                 <Button className="block mx-auto text-md" size={"lg"} variant={'secondary'}>Напишите свои пожелания!</Button>
               </Link>
           </div>
-          <footer className="flex gap-2.5 mx-auto items-center mt-20 mb-15 flex-wrap justify-center">
-            <span className="font-unbounded font-bold text-3xl">
-              See project on:
-            </span>
-            <Link
-              target="_blank"
-              className="flex items-center"
-              href={"https://github.com/qjetshk/Bodo-Planner-Front"}
-            >
-              <Image src={"/github.svg"} alt="" width={185} height={40} />
-            </Link>
-          </footer>
+          
         </MotionDiv>
       </main>
     </>

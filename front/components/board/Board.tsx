@@ -26,7 +26,7 @@ import { CirclePlus } from "lucide-react";
 import { motion } from "motion/react";
 import { useMutation, useSubscription } from "@apollo/client/react";
 import { ADD_NEW_COLUMN, CHANGE_COLUMNS_ORDER, COLUMN_ADDED, COLUMN_DELETED, COLUMN_ORDER_CHANGED } from "@/apollo/requests/columns";
-import { CHANGE_TASKS_ORDER_IN_ONE_COLUMN, MOVE_TASK_TO_ANOTHER_COLUMN, TASK_CREATED, TASK_DELETED, TASK_MOVED_TO_ANOTHER_COLUMN, TASKS_ORDER_CHANGED_IN_ONE_COLUMN } from "@/apollo/requests/tasks";
+import { CHANGE_TASKS_ORDER, MOVE_TASK_TO_ANOTHER_COLUMN, TASK_CREATED, TASK_DELETED, TASK_MOVED_TO_ANOTHER_COLUMN, TASKS_ORDER_CHANGED_IN_ONE_COLUMN } from "@/apollo/requests/tasks";
 import { createPortal } from "react-dom";
 import { updateBoardTimeCache } from "@/utils/update-board-time.util";
 
@@ -40,17 +40,12 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
   const [changeOrder] = useMutation(CHANGE_COLUMNS_ORDER);
   const [addColumn] = useMutation(ADD_NEW_COLUMN);
-  const [changeTasksOrderInOneCol] = useMutation(CHANGE_TASKS_ORDER_IN_ONE_COLUMN, {
+  const [changeTasksOrder] = useMutation(CHANGE_TASKS_ORDER, {
     onCompleted(data, clientOptions) {
-      console.log(data.changeTasksOrderInOneColumn)
+      console.log(data.changeTasksOrder)
     },
     onError(error, clientOptions) {
       console.log(error)
-    },
-  })
-  const [moveTaskToAnotherColumn] = useMutation(MOVE_TASK_TO_ANOTHER_COLUMN, {
-    onCompleted(data, clientOptions) {
-      console.log(data.moveTaskToAnotherColumn)
     },
   })
 
@@ -63,7 +58,7 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
       setIsGridActive(actuallyGrid);
     };
 
-    checkGrid(); // инициализация
+    checkGrid(); 
 
     const mediaQuery = window.matchMedia('(min-width: 1024px)');
     const handler = () => checkGrid();
@@ -71,8 +66,6 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
 
     return () => mediaQuery.removeEventListener('change', handler);
   }, [isMobile, isSidebarOpened]);
-
-  // --- Подписки ---
 
 
   useSubscription(TASK_CREATED, {
@@ -108,35 +101,43 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
 
   useSubscription(TASKS_ORDER_CHANGED_IN_ONE_COLUMN, {
     onData: ({ data, client }) => {
-      const tasks = data.data?.tasksOrderChangedInOneColumn.tasks
-      const columnId = data.data?.tasksOrderChangedInOneColumn.columnId
-      console.log(tasks)
+      const result = data.data?.tasksOrderChangedInOneColumn;
+      if (!result) return;
 
-      if (!tasks || !columnId) return
+      const updatedTasksFromServer = result.tasks;
 
       setAllTasks(prev => {
-        const tasksInColumn = prev.filter(task => task.columnId === columnId);
-        const otherTasks = prev.filter(task => task.columnId !== columnId);
+        const updates = new Map(
+          updatedTasksFromServer.map(t => [t.id, t])
+        );
 
-        const updatedOrders = new Map<string, number>();
-        tasks.forEach(({ id, order }) => {
-          updatedOrders.set(id, order);
+        // Обновляем только изменённые таски
+        const updated = prev.map(task => {
+          const update = updates.get(task.id);
+          if (!update) return task;
+
+          return {
+            ...task,
+            order: update.order,
+            columnId: update.columnId 
+          };
         });
 
-        const updatedTasksInColumn = tasksInColumn.map(task => {
-          const newOrder = updatedOrders.get(task.id);
-          return newOrder !== undefined ? { ...task, order: newOrder } : task;
+        // Сортируем внутри каждой колонки отдельно
+        const sorted = [...updated].sort((a, b) => {
+          if (a.columnId !== b.columnId) return 0;
+          return a.order - b.order;
         });
 
-        updatedTasksInColumn.sort((a, b) => a.order - b.order);
-
-        console.log([...otherTasks, ...updatedTasksInColumn])
-        return [...otherTasks, ...updatedTasksInColumn];
+        return sorted as TaskType[];
       });
 
-      updateBoardTimeCache(client, board.id)
+      updateBoardTimeCache(client, board.id);
     }
-  })
+  });
+
+
+
 
   useSubscription(TASK_MOVED_TO_ANOTHER_COLUMN, {
     onData: ({ data, client }) => {
@@ -218,7 +219,6 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
     },
   });
 
-  // --- Drag & Drop ---
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const type = event.active.data.current?.type;
     if (type === "Column") setActiveColumn(event.active.data.current?.column);
@@ -232,11 +232,7 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
     setActiveTask(null);
     if (!over) return;
 
-    //
-    // ======================================================
     //               ПЕРЕМЕЩЕНИЕ КОЛОНОК
-    // ======================================================
-    //
     if (active.data.current?.type === "Column") {
       const activeId = active.id.toString();
       const overId = over.id.toString();
@@ -250,7 +246,6 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
         const moved = arrayMove(cols, oldIndex, newIndex)
           .map((c, i) => ({ ...c, order: i }));
 
-        // --- ТВОЯ ИСХОДНАЯ МУТАЦИЯ ---
         changeOrder({
           variables: {
             boardId: board.id,
@@ -264,11 +259,7 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
       return;
     }
 
-    //
-    // ======================================================
     //               ПЕРЕМЕЩЕНИЕ ТАСКОВ
-    // ======================================================
-    //
     if (active.data.current?.type === "Task") {
       const activeTask = active.data.current.task;
       if (!activeTask) return;
@@ -284,102 +275,40 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
         const oldIndex = tasks.findIndex(t => t.id === activeTask.id);
         if (oldIndex === -1) return prev;
 
-        //
         // -------- ПЕРЕМЕЩЕНИЕ НА ДРУГОЙ ТАСК --------
-        //
         if (overTask) {
           const newIndex = tasks.findIndex(t => t.id === overTask.id);
           if (newIndex === -1) return prev;
 
-          const task = tasks[oldIndex];
-
-          // сохраняем колонки ДО изменений
-          const prevColumnId = task.columnId;
           const newColumnId = tasks[newIndex].columnId;
 
-          const isMovingToAnotherColumn = prevColumnId !== newColumnId;
-
-          // 1) Делаем копию массива, чтобы потом arrayMove работал правильно
           const tempTasks = [...tasks];
 
-          // 2) Если колонка меняется — сначала только меняем columnId
-          if (isMovingToAnotherColumn) {
-            tempTasks[oldIndex] = { ...task, columnId: newColumnId };
-          }
-
-          // 3) Выполняем перемещение
           const newTasks = arrayMove(tempTasks, oldIndex, newIndex);
-
-          // 4) Теперь спокойно считаем prev + current
-          const prevTasks = newTasks
-            .filter(t => t.columnId === prevColumnId)
-            .map((t, i) => ({ ...t, order: i }));
 
           const curTasks = newTasks
             .filter(t => t.columnId === newColumnId)
             .map((t, i) => ({ ...t, order: i }));
 
-          console.log("prevTasks:", prevTasks);
-          console.log("curTasks:", curTasks);
-          // --- ТВОЯ ИСХОДНАЯ МУТАЦИЯ ---
-          changeTasksOrderInOneCol({
+          changeTasksOrder({
             variables: {
-              // основная колонка (куда переместили)
               columnId: newColumnId,
-              newTasks: curTasks.map(({ id, order }) => ({ id, order })),
+              newTasks: curTasks.map(({ id, order, columnId }) => ({ id, order, columnId })),
 
-              // вторичная колонка (откуда забрали)
-              /* sourceColumnId: isColumnChanged ? sourceColumnId : null,
-              sourceTasks: sourceTasks
-                ? sourceTasks.map(({ id, order }) => ({ id, order }))
-                : null,
-
-              movedTaskId: activeTask.id */
             }
           });
 
           return newTasks;
         }
-
-        //
-        // -------- ПЕРЕМЕЩЕНИЕ НА ПУСТУЮ КОЛОНКУ --------
-        //
         if (prevColumnId !== overColumnId) {
-
-          // меняем колонку у таски
           tasks[oldIndex] = { ...tasks[oldIndex], columnId: overColumnId };
-
-          // таски в старой колонке
-          const newOtherColTasks = tasks
-            .filter(t => t.columnId === prevColumnId)
-            .map((t, i) => ({ ...t, order: i }));
-
-          // таски в новой колонке (таска уже перемещена)
-          const newColTasks = tasks
-            .filter(t => t.columnId === overColumnId)
-            .map((t, i) => ({ ...t, order: i }));
-
-          // определяем newIndex корректно: это order перемещённой таски в новой колонке
-          const movedTaskOrder = newColTasks.find(t => t.id === activeTask.id)!.order;
-
-          // вызываем мутацию
-          /*           moveTaskToAnotherColumn({
-                      variables: {
-                        movedTaskId: activeTask.id,
-                        prevColumnId,
-                        curColumnId: overColumnId,
-                        newIndex: movedTaskOrder
-                      }
-                    }); */
 
           return [...tasks];
         }
-
         return prev;
       });
     }
-
-  }, [board.id, changeOrder, changeTasksOrderInOneCol, moveTaskToAnotherColumn]);
+  }, [board.id, changeOrder, changeTasksOrder]);
 
 
   const handleDragOver = useCallback((event: DragOverEvent) => {
