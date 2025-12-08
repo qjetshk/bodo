@@ -11,7 +11,6 @@ import {
   DragEndEvent,
   DragStartEvent,
   DragOverEvent,
-  closestCorners,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -26,7 +25,7 @@ import { CirclePlus } from "lucide-react";
 import { motion } from "motion/react";
 import { useMutation, useSubscription } from "@apollo/client/react";
 import { ADD_NEW_COLUMN, CHANGE_COLUMNS_ORDER, COLUMN_ADDED, COLUMN_DELETED, COLUMN_ORDER_CHANGED } from "@/apollo/requests/columns";
-import { CHANGE_TASKS_ORDER, MOVE_TASK_TO_ANOTHER_COLUMN, TASK_CREATED, TASK_DELETED, TASK_MOVED_TO_ANOTHER_COLUMN, TASKS_ORDER_CHANGED_IN_ONE_COLUMN } from "@/apollo/requests/tasks";
+import { CHANGE_TASKS_ORDER, TASK_CREATED, TASK_DELETED, TASKS_ORDER_CHANGED_IN_ONE_COLUMN } from "@/apollo/requests/tasks";
 import { createPortal } from "react-dom";
 import { updateBoardTimeCache } from "@/utils/update-board-time.util";
 
@@ -130,51 +129,6 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
         });
 
         return sorted as TaskType[];
-      });
-
-      updateBoardTimeCache(client, board.id);
-    }
-  });
-
-
-
-
-  useSubscription(TASK_MOVED_TO_ANOTHER_COLUMN, {
-    onData: ({ data, client }) => {
-      const prevColumn = data.data?.taskMovedToAnotherColumn.prevColumn;
-      const currentColumn = data.data?.taskMovedToAnotherColumn.currentColumn;
-      console.log(prevColumn)
-      console.log(currentColumn)
-
-      if (!prevColumn || !currentColumn) return;
-
-      setAllTasks(prev => {
-        // Создаём мапу задач по id для быстрого поиска
-        const taskMap = new Map<string, TaskType>(prev.map(task => [task.id, { ...task }]));
-
-        // Обновляем задачи, которые ушли из prevColumn (теперь они в другой колонке или ушли)
-        if (prevColumn.columnId) {
-          for (const taskUpdate of prevColumn.tasks) {
-            const existingTask = taskMap.get(taskUpdate.id);
-            if (existingTask) {
-              // Обновляем columnId и order
-              existingTask.columnId = prevColumn.columnId;
-              existingTask.order = taskUpdate.order;
-            }
-          }
-        }
-
-        // Обновляем задачи, которые пришли в currentColumn
-        for (const taskUpdate of currentColumn.tasks) {
-          const existingTask = taskMap.get(taskUpdate.id);
-          if (existingTask) {
-            existingTask.columnId = currentColumn.columnId;
-            existingTask.order = taskUpdate.order;
-          }
-        }
-
-        // Возвращаем обновлённый массив
-        return Array.from(taskMap.values());
       });
 
       updateBoardTimeCache(client, board.id);

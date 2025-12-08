@@ -59,21 +59,5 @@ export class TaskResolver {
     return this.pubSub.asyncIterator('tasksOrderChangedInOneColumn')
   }
 
-  @UseGuards(GqlAuthGuard)
-  @Mutation(() => Boolean)
-  async moveTaskToAnotherColumn(@Args('movedTaskId') movedTaskId: string, @Args('newIndex', { type: () => Int }) newIndex: number, @CurrentUserId() movedById: string, @Args('prevColumnId') prevColumnId: string, @Args('curColumnId') curColumnId: string) {
-    await this.taskService.moveTaskToAnotherColumn(movedTaskId, newIndex, prevColumnId, movedById, curColumnId)
-    return true
-  }
-
-  @Subscription(() => TaskMovedToAnotherColumn, {
-    filter(payload, variables, context) {
-      const taskMovedToAnotherColumn: ModelTypeWithRecepientsIds<TaskMovedToAnotherColumn> = payload.taskMovedToAnotherColumn
-      return taskMovedToAnotherColumn.recipientsIds.includes(context?.user.id)
-    },
-  })
-  taskMovedToAnotherColumn() {
-    return this.pubSub.asyncIterator('taskMovedToAnotherColumn')
-  }
 
 }

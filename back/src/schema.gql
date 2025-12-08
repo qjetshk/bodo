@@ -219,7 +219,6 @@ type Mutation {
   deleteTask(taskId: String!): Boolean!
   editBoard(boardId: String!, editBoardInput: EditBoardInput!): UpdatedBoard
   findMembers(member: FindMemberInput!): [User!]!
-  moveTaskToAnotherColumn(curColumnId: String!, movedTaskId: String!, newIndex: Int!, prevColumnId: String!): Boolean!
 }
 
 type Query {
@@ -243,7 +242,6 @@ type Subscription {
   invitationDeclined: AcceptedOrDeclinedInvitation!
   taskCreated: CreatedTask!
   taskDeleted: DeletedTask!
-  taskMovedToAnotherColumn: TaskMovedToAnotherColumn!
   tasksOrderChangedInOneColumn: ChangedTasksOrderInColumn!
 }
 
@@ -267,11 +265,6 @@ type TaskAssignment {
   taskId: String!
   user: User!
   userId: String!
-}
-
-type TaskMovedToAnotherColumn {
-  currentColumn: ChangedTasksOrderInColumn!
-  prevColumn: ChangedTasksOrderInColumn!
 }
 
 type UpdatedBoard {

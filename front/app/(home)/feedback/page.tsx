@@ -1,6 +1,14 @@
 import React from 'react'
 import FeedbackForm from './FeedbackForm'
 import { MotionDiv } from '@/components/MotionDiv'
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Bōdo - Обратная связь",
+  description: "Страница с формой обратной связи по проекту",
+  keywords: ["обратная связь", "отзыв", "оставить отзыв", "пожелание", "написать пожелание", "фидбек", "feedback"],
+  icons: "/logo.svg",
+};
 
 const FeedbackPage = () => {
     return (

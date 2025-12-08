@@ -1,12 +1,9 @@
 import { BgSection } from "@/components/bg/BgSection";
 import FeatureCard from "@/components/FeatureCard";
 import { MotionDiv } from "@/components/MotionDiv";
-import NavBar from "@/components/sidebar-nav-header/NavBar";
 import { Button } from "@/components/ui/button";
 import { FEATURES_CARDS } from "@/data/features-cards.data";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
-import Image from "next/image";
 
 
 export default function Home() {
@@ -92,9 +89,9 @@ export default function Home() {
           }}
           viewport={{ once: true }}
         >
-          <div className="pt-15">
+          <div className="pt-15 w-fit mx-auto">
               <Link href={'/feedback'}>
-                <Button className="block mx-auto text-md" size={"lg"} variant={'secondary'}>Напишите свои пожелания!</Button>
+                <Button className="text-md" size={"lg"} variant={'secondary'}>Напишите свои пожелания!</Button>
               </Link>
           </div>
           
