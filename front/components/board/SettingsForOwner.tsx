@@ -244,7 +244,7 @@ const SettingsForOwner = ({ board, isOpened }: Props) => {
                 </section>
 
                 <DialogFooter className='flex-col'>
-                    <div onClick={() => setIsDeleteOpen(true)} className='cursor-pointer p-1.5 rounded-lg w-fit hover:text-red-500/90 hover:bg-red-700/20 transition-colors text-neutral-600 absolute bottom-29 right-6 sm:bottom-6 sm:left-6'>
+                    <div onClick={() => setIsDeleteOpen(true)} className='cursor-pointer p-1.5 rounded-lg w-fit hover:text-red-500/90 hover:bg-red-700/20 transition-colors text-neutral-600 absolute bottom-43 right-6 sm:bottom-6 sm:left-6'>
                         <Trash2 />
                     </div>
                     <Tooltip>

@@ -10,7 +10,7 @@ import { Input } from "../ui/input";
 import { useMutation, useSubscription } from "@apollo/client/react";
 import Task from "./Task";
 import { Dialog } from "@radix-ui/react-dialog";
-import AddNewTask from "./AddNewTask";
+import AddNewTask, { Member } from "./AddNewTask";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Ellipsis } from 'lucide-react'
 import ConfirmDelete from "../ConfirmDelete";
@@ -23,9 +23,11 @@ interface Props {
   tasks: TaskType[]
   canDelete: boolean
   boardId: string
+  membersWithOwner: Member[]
+  isPrivate: boolean
 }
 
-function Column({ column, canDelete, tasks, boardId }: Props) {
+function Column({ membersWithOwner, isPrivate, column, canDelete, tasks, boardId }: Props) {
   const currentTasks = tasks;
   const tasksIds = useMemo(() => currentTasks.map(t => t.id), [currentTasks]);
 
@@ -99,7 +101,7 @@ function Column({ column, canDelete, tasks, boardId }: Props) {
         </SortableContext>
       </CardContent>
 
-      <Dialog open={isNewTaskFormOpen} onOpenChange={setIsNewTaskFormOpen}><AddNewTask isOpen={isNewTaskFormOpen} onOpenChange={setIsNewTaskFormOpen} columnId={column.id} /></Dialog>
+      <Dialog open={isNewTaskFormOpen} onOpenChange={setIsNewTaskFormOpen}><AddNewTask isPrivate={isPrivate} membersWithOwner={membersWithOwner} isOpen={isNewTaskFormOpen} onOpenChange={setIsNewTaskFormOpen} columnId={column.id} /></Dialog>
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}><ConfirmDelete deleteFn={deleteCol} onOpenChange={setIsDeleteOpen} payload={payload} isOpen={isDeleteOpen} title='Вы действительно хотите удалить эту колонку?' /></Dialog>
     </Card>
   );

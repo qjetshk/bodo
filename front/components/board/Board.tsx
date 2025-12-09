@@ -28,6 +28,7 @@ import { ADD_NEW_COLUMN, CHANGE_COLUMNS_ORDER, COLUMN_ADDED, COLUMN_DELETED, COL
 import { CHANGE_TASKS_ORDER, TASK_CREATED, TASK_DELETED, TASKS_ORDER_CHANGED_IN_ONE_COLUMN } from "@/apollo/requests/tasks";
 import { createPortal } from "react-dom";
 import { updateBoardTimeCache } from "@/utils/update-board-time.util";
+import { Member } from "./AddNewTask";
 
 export default function Board({ board, isSidebarOpened, isMobile }: { board: Board, isSidebarOpened: boolean, isMobile: boolean }) {
   const [allColumns, setAllColumns] = useState<ColumnWithoutTasks[]>(board.columns);
@@ -57,7 +58,7 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
       setIsGridActive(actuallyGrid);
     };
 
-    checkGrid(); 
+    checkGrid();
 
     const mediaQuery = window.matchMedia('(min-width: 1024px)');
     const handler = () => checkGrid();
@@ -118,7 +119,7 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
           return {
             ...task,
             order: update.order,
-            columnId: update.columnId 
+            columnId: update.columnId
           };
         });
 
@@ -330,7 +331,7 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
               animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
               transition={{ duration: 0.3, delay: i * 0.15 }}
             >
-              <Column boardId={board.id} column={col} tasks={tasksByColumn.get(col.id) ?? []} canDelete={allColumns.length > 2} />
+              <Column isPrivate={board.boardType} membersWithOwner={[board.owner, ...board.members.map(m => m.user)]} boardId={board.id} column={col} tasks={tasksByColumn.get(col.id) ?? []} canDelete={allColumns.length > 2} />
             </motion.div>
           ))}
         </SortableContext>
@@ -352,7 +353,7 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
 
       {createPortal(
         <DragOverlay>
-          {activeColumn && <Column boardId={board.id} column={activeColumn} tasks={allTasks.filter(t => t.columnId === activeColumn.id)} canDelete={allColumns.length > 2} />}
+          {activeColumn && <Column isPrivate={board.boardType} membersWithOwner={[board.owner, ...board.members.map(m => m.user)]} boardId={board.id} column={activeColumn} tasks={allTasks.filter(t => t.columnId === activeColumn.id)} canDelete={allColumns.length > 2} />}
           {activeTask && !activeColumn && <Task task={activeTask} />}
         </DragOverlay>,
         document.body

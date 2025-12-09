@@ -108,22 +108,29 @@ model Column {
 }
 
 model Task {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  order       Int
-  column      Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
-  columnId    String   @map("column_id")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  performer   User?   @relation(fields: [performerId], references: [id])
-  performerId String? @map("performer_id")
+  id           String     @id @default(cuid())
+  title        String
+  description  String?
+  order        Int
+  column       Column     @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  columnId     String     @map("column_id")
+  deadlineDate DateTime   @map("deadline_date")
+  priority     Priorities @default(HIGH)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
 
   assignments TaskAssignment[]
   comments    Comment[]
+  user        User?            @relation(fields: [userId], references: [id])
+  userId      String?
 
   @@map("tasks")
+}
+
+enum Priorities {
+  HIGH
+  MEDIUM
+  LOW
 }
 
 model TaskAssignment {
