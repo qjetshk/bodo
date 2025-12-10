@@ -52,15 +52,15 @@ export const GET_INITIAL_BOARD = graphql(`
             description
             id
             createdAt
-            members{
-                user{
+            members {
+                user {
                     avatarUrl
                     email
                     nickName
                     id
                 }
             }
-            owner{
+            owner {
                 avatarUrl
                 email
                 nickName
@@ -77,6 +77,23 @@ export const GET_INITIAL_BOARD = graphql(`
                     title
                     updatedAt
                     columnId
+                    priority
+                    deadlineDate
+                    assignments {
+                        user {
+                            avatarUrl
+                            email
+                            id
+                            nickName
+                        }
+                    }
+                    comments {
+                        author {
+                            avatarUrl
+                            nickName
+                            id
+                        }
+                    }
                 }
             }
         }

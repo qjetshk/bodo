@@ -3,6 +3,8 @@ import { Column } from 'src/board/models/column.model';
 import { TaskAssignment } from './task-assignment.model';
 import { Comment } from './comment.model';
 import { DateTimeResolver } from 'graphql-scalars';
+import { User } from 'src/users (members)/models/user.model';
+import { Priorities } from '../inputs/create-task.input';
 
 @ObjectType()
 export class Task {
@@ -12,8 +14,8 @@ export class Task {
   @Field()
   title: string;
 
-  @Field()
-  description: string;
+  @Field({ nullable: true })
+  description?: string;
 
   @Field(() => Int)
   order: number;
@@ -24,17 +26,23 @@ export class Task {
   @Field()
   columnId: string;
 
-  @Field(() => [TaskAssignment], { nullable: true })
-  assignments?: TaskAssignment[];
+  @Field(() => DateTimeResolver)
+  deadlineDate: Date;
 
-  @Field(() => [Comment], { nullable: true })
-  comments?: Comment[];
+  @Field(() => Priorities)
+  priority: Priorities;
 
   @Field(() => DateTimeResolver)
   createdAt: Date;
 
   @Field(() => DateTimeResolver)
   updatedAt: Date;
+
+  @Field(() => [TaskAssignment])
+  assignments: TaskAssignment[];
+
+  @Field(() => [Comment], {nullable: true})
+  comments?: Comment[];
 }
 
 @ObjectType()
@@ -64,11 +72,8 @@ export class DeletedTask {
   @Field()
   columnId: string
 
-  @Field(() => DateTimeResolver)
-  boardUpdatedAt: Date
-
-  @Field(() => [CreatedTask])
-  tasks: CreatedTask[]
+  @Field(() => String)
+  taskId: string
 }
 
 @ObjectType()
@@ -79,7 +84,7 @@ export class ChangedTaskOrder {
   @Field(() => Int)
   order: number;
 
-  @Field({nullable: true})
+  @Field({ nullable: true })
   columnId?: string
 }
 

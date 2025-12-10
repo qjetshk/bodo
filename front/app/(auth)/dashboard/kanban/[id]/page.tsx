@@ -131,7 +131,7 @@ const BoardPage = () => {
           ${isSidebarOpened ? 'max-w-[calc(100vw-336px)]' : 'max-w-[calc(100vw-132px)]'} 
           ${isMobile && 'max-w-[calc(100vw)]'}
         `} >
-        <CardHeader className="flex gap-2 items-center justify-between px-15 ">
+        <CardHeader className="flex gap-2 items-center justify-between px-7 sm:px-15 ">
           <div className="2xl:max-w-[80%] xl:max-w-[75%] lg:max-w-[65%] md:max-w-[80%] max-w-[85%]">
             <CardTitle className="font-medium font-unbounded break-all text-xl md:text-2xl ">{board?.name}</CardTitle>
             <CardDescription className="text-neutral-600 max-w-150">{board?.description}</CardDescription>

@@ -7,6 +7,7 @@ import { ru } from 'date-fns/locale'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getAvatarFallback } from '@/utils/avatar-fallback.util'
 import { ExternalLink } from 'lucide-react'
+import FirstThreeAvatars from '@/components/FirstThreeAvatars'
 
 interface Props {
     board: BoardsData
@@ -42,22 +43,11 @@ const RecentBoard = ({ board }: Props) => {
                                 <span className="truncate text-xs">{board.owner.email}</span>
                             </div>
                         </div>
-                        <div className='flex'>
-                            {firstThreeMembers.map((member, i) => (
-                                <div key={i} className={`z-${i} not-first:ml-[-15px] filter not-first:drop-shadow-[-3px_0_3px_rgba(0,0,0,0.15)]`}>
-                                    <Avatar className="h-8 w-8 rounded-full">
-                                        <AvatarImage src={member.user.avatarUrl ?? ''} alt={board.owner.nickName} />
-                                        <AvatarFallback className="rounded-lg">
-                                            {getAvatarFallback(member.user.nickName)}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                </div>
-                            ))}
-                        </div>
+                        <FirstThreeAvatars members={board.members}/>
                     </div>
                     <span className='text-sm text-neutral-500 mt-auto'>{timeAgo}</span>
                 </CardContent>
-                <ExternalLink className='text-neutral-600 w-5 h-5 absolute top-5 right-5'/>
+                <ExternalLink className='text-neutral-600 w-5 h-5 absolute top-5 right-5' />
             </Card>
         </Link>
     )

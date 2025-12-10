@@ -84,12 +84,14 @@ Table tasks {
   order Int [not null]
   column columns [not null]
   columnId String [not null]
+  deadlineDate DateTime [not null]
+  priority Priorities [not null, default: 'HIGH']
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  performer users
-  performerId String
   assignments task_assignments [not null]
   comments comments [not null]
+  user users
+  userId String
 }
 
 Table task_assignments {
@@ -143,6 +145,12 @@ Enum InvitationStatus {
   DECLINED
 }
 
+Enum Priorities {
+  HIGH
+  MEDIUM
+  LOW
+}
+
 Ref: boards.ownerId > users.id
 
 Ref: boards.boardTemplateId > board_templates.id
@@ -161,7 +169,7 @@ Ref: columns.boardId > boards.id [delete: Cascade]
 
 Ref: tasks.columnId > columns.id [delete: Cascade]
 
-Ref: tasks.performerId > users.id
+Ref: tasks.userId > users.id
 
 Ref: task_assignments.userId > users.id
 

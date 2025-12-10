@@ -1,6 +1,7 @@
 import { CREATE_TASK } from '@/apollo/requests/tasks'
 import { cn } from '@/lib/utils'
-import { NewTaskForm, Priorities } from '@/types/new-task-form.type'
+import { NewTaskForm } from '@/types/new-task-form.type'
+import { Priorities } from "@/apollo/gql/graphql"
 import { getAvatarFallback } from '@/utils/avatar-fallback.util'
 import { normalizeSpaces } from '@/utils/normalize-spaces.util'
 import { useMutation } from '@apollo/client/react'
@@ -22,6 +23,7 @@ import { Popover } from '../ui/popover'
 import { Textarea } from '../ui/textarea'
 import { Toggle } from '../ui/toggle'
 import { Tooltip, TooltipContent } from '../ui/tooltip'
+import { PRIORITIES, Priority } from '@/data/priorities.data'
 
 interface Props {
     columnId: string,
@@ -40,41 +42,9 @@ export type Member = {
 
 }
 
-type Priority = {
-    title: string
-    priority: Priorities
-    primaryColor: string
-    secondaryColor: string
-    isChecked: boolean
-    order: number
-}
 
-const priorities_: Priority[] = [
-    {
-        title: 'Высокий',
-        priority: Priorities.high,
-        primaryColor: 'bg-red-600!',
-        isChecked: true,
-        order: 0,
-        secondaryColor: 'bg-red-400'
-    },
-    {
-        title: 'Средний',
-        priority: Priorities.medium,
-        primaryColor: 'bg-orange-600!',
-        isChecked: false,
-        order: 1,
-        secondaryColor: 'bg-orange-500'
-    },
-    {
-        title: 'Низкий',
-        priority: Priorities.low,
-        primaryColor: 'bg-green-600!',
-        isChecked: false,
-        order: 2,
-        secondaryColor: 'bg-green-400'
-    },
-]
+
+
 
 const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpen }: Props) => {
 
@@ -82,7 +52,7 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
     const [commandOpen, setCommandOpen] = useState(false)
     const [membersNicknames, setMembersNicknames] = useState<string[]>([])
     const [members, setMembers] = useState<Member[] | undefined>(undefined)
-    const [priorities, setPriorities] = useState<Priority[]>(priorities_)
+    const [priorities, setPriorities] = useState<Priority[]>(PRIORITIES)
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -102,7 +72,7 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
             description: '',
             membersIds: [],
             deadlineDate: undefined,
-            priority: Priorities.high
+            priority: Priorities.High
         },
     })
 
@@ -116,9 +86,9 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
                 title: '',
                 membersIds: [],
                 deadlineDate: undefined,
-                priority: Priorities.high
+                priority: Priorities.High
             })
-            setPriorities(priorities_)
+            setPriorities(PRIORITIES)
         }
     })
 
@@ -128,9 +98,9 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
             title: '',
             membersIds: [],
             deadlineDate: undefined,
-            priority: Priorities.high
+            priority: Priorities.High
         })
-        setPriorities(priorities_)
+        setPriorities(PRIORITIES)
         setMembersNicknames([])
     }, [isOpen])
 
@@ -159,6 +129,9 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
                 taskInput: {
                     title: normalizeSpaces(formData.title),
                     description: formData?.description,
+                    deadlineDate: formData?.deadlineDate,
+                    priority: formData?.priority,
+                    membersIds: formData?.membersIds,
                     columnId
                 }
             }

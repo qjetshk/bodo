@@ -1,10 +1,6 @@
 import { z } from "zod";
+import { Priorities } from "@/apollo/gql/graphql"
 
-export enum Priorities {
-  high = 'HIGH',
-  medium = 'MEDIUM',
-  low = 'LOW'
-} 
 
 export const NewTaskForm = z
   .object({
@@ -14,7 +10,7 @@ export const NewTaskForm = z
       .max(2000, "Описание не должно быть больше 2000 символов!").optional(),
     deadlineDate: z.date().nonoptional(),
     membersIds: z.array(z.string()).optional(),
-    priority: z.enum(Priorities).nonoptional()
+    priority: z.nativeEnum(Priorities).nonoptional()
   })
 
 export type NewTaskForm = z.infer<typeof NewTaskForm>;

@@ -37,10 +37,27 @@ export class TaskService {
 
             return tx.task.create({
                 data: {
-                    ...taskInput,
-                    order: newOrder
+                    title: taskInput.title,
+                    description: taskInput.description,
+                    deadlineDate: taskInput.deadlineDate,
+                    priority: taskInput.priority,
+                    order: newOrder,
+                    columnId: taskInput.columnId,
+                    assignments: {
+                        create: (taskInput.membersIds ?? []).map(userId => ({ userId }))
+                    }
                 },
                 include: {
+                    assignments: {
+                        include: {
+                            user: true
+                        }
+                    },
+                    comments: {
+                        include: {
+                            author: true,
+                        }
+                    },
                     column: {
                         include: {
                             board: {
@@ -76,7 +93,12 @@ export class TaskService {
                 description: newTask.description,
                 order: newTask.order,
                 membersAndOwnerIds: getOwnerAndMembersIds<typeof newTask.column.board>(newTask.column.board),
-                updatedAt: boardUpdatedAt.updatedAt
+                updatedAt: newTask.updatedAt,
+                createdAt: newTask.createdAt,
+                assignments: newTask.assignments,
+                comments: newTask.comments,
+                deadlineDate: newTask.deadlineDate,
+                priority: newTask.priority
             }
         })
 
@@ -91,7 +113,8 @@ export class TaskService {
                     id: taskId
                 },
                 select: {
-                    columnId: true
+                    columnId: true,
+                    id: true
                 }
             })
 
@@ -130,7 +153,30 @@ export class TaskService {
                         }
                     },
                     tasks: {
-                        orderBy: { order: 'asc' }
+                        orderBy: { order: 'asc' },
+                        include: {
+                            assignments: {
+                                include: {
+                                    user: true
+                                }
+                            },
+                            comments: {
+                                include: {
+                                    author: true,
+                                }
+                            },
+                            column: {
+                                include: {
+                                    board: {
+                                        include: {
+                                            members: {
+                                                include: { user: true }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             })
@@ -153,9 +199,8 @@ export class TaskService {
 
             await this.pubSub.publish('taskDeleted', {
                 taskDeleted: {
-                    columnId,
-                    boardUpdatedAt: boardUpdatedAt.updatedAt,
-                    tasks: newColumn?.tasks,
+                    taskId: deletedTask.id,
+                    columnId: newColumn.id,
                     membersAndOwnerIds: getOwnerAndMembersIds<typeof newColumn.board>(newColumn.board)
                 }
             })
@@ -228,7 +273,7 @@ export class TaskService {
             c.tasks.map(t => ({
                 id: t.id,
                 order: t.order,
-                columnId: c.id   
+                columnId: c.id
             }))
         );
 

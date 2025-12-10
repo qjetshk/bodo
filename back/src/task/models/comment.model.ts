@@ -14,15 +14,6 @@ export class Comment {
   @Field(() => User)
   author: User;
 
-  @Field()
-  authorId: string;
-
-  @Field(() => Task)
-  task: Task;
-
-  @Field()
-  taskId: string;
-
   @Field(() => DateTimeResolver)
   createdAt: Date;
 

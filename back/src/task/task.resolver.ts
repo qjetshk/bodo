@@ -19,7 +19,7 @@ export class TaskResolver {
     return true
   }
 
-  @Subscription(() => CreatedTask, {
+  @Subscription(() => Task, {
     filter(payload, variables, context) {
       return payload.taskCreated.membersAndOwnerIds.includes(context?.user.id)
     },

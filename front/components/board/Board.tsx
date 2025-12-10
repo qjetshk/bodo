@@ -72,32 +72,34 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
     onData: ({ data, client }) => {
       const created = data.data?.taskCreated;
       if (!created) return;
-      setAllTasks(prev => prev.some(t => t.id === created.id) ? prev : [...prev, created as TaskType]);
+      setAllTasks(prev => prev.some(t => t.id === created.id) ? prev : [...prev, created]);
 
       updateBoardTimeCache(client, board.id)
     },
   });
 
   useSubscription(TASK_DELETED, {
-    onData: ({ data, client }) => {
-      const tasks = data.data?.taskDeleted.tasks
-      const columnId = data.data?.taskDeleted.columnId
-      console.log(tasks)
+  onData: ({ data, client }) => {
+    const deletedTask = data.data?.taskDeleted;
+    if (!deletedTask) return;
 
-      if (!tasks || !columnId) return
+    const { taskId, columnId } = deletedTask;
 
-      setAllTasks(prev => {
-        const newTasks = tasks.map(t => {
-          return { ...t, columnId } as TaskType
-        })
-        const otherTasks = prev.filter(c => c.columnId !== columnId)
-        return [...otherTasks, ...newTasks].sort((a, b) => a.order - b.order)
-      })
+    setAllTasks(prev => {
+      const columnTasks = prev.filter(t => t.columnId === columnId && t.id !== taskId);
+      const otherTasks = prev.filter(t => t.columnId !== columnId);
 
-      updateBoardTimeCache(client, board.id)
+      const reorderedTasks = columnTasks
+        .sort((a, b) => a.order - b.order)
+        .map((t, index) => ({ ...t, order: index }));
 
-    }
-  })
+      return [...otherTasks, ...reorderedTasks];
+    });
+
+    updateBoardTimeCache(client, board.id);
+  }
+});
+
 
   useSubscription(TASKS_ORDER_CHANGED_IN_ONE_COLUMN, {
     onData: ({ data, client }) => {
@@ -140,7 +142,7 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
     onData: ({ data, client }) => {
       const added = data.data?.columnAdded;
       if (!added) return;
-      setAllColumns(prev => [...prev, added as ColumnType].sort((a, b) => a.order - b.order));
+      setAllColumns(prev => [...prev, added as ColumnWithoutTasks].sort((a, b) => a.order - b.order));
       setAddingNewColumn(true);
 
       updateBoardTimeCache(client, board.id)

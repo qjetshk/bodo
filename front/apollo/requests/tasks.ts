@@ -8,14 +8,34 @@ export const CREATE_TASK = graphql(`
 `)
 
 export const TASK_CREATED = graphql(`
-    subscription TaskCreated{
-        taskCreated{
+    subscription TaskCreated {
+        taskCreated {
             columnId
             description
             id
             order
             title
             updatedAt
+            deadlineDate
+            priority
+            comments {
+                author {
+                    avatarUrl
+                    nickName
+                    id
+                }
+                content
+                id
+                content
+            }
+            assignments {
+                user {
+                    avatarUrl
+                    email
+                    id
+                    nickName
+                }
+            }
         }
     }
 `)
@@ -31,14 +51,7 @@ export const TASK_DELETED = graphql(`
     subscription TaskDeleted {
         taskDeleted {
             columnId
-            boardUpdatedAt
-            tasks {
-                updatedAt
-                description
-                id
-                order
-                title
-            }
+            taskId
         }
     }
 `)

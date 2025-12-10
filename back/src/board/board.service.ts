@@ -123,17 +123,12 @@ export class BoardService {
                             include: {
                                 assignments: {
                                     include: {
-                                        task: {
-                                            include: {
-                                                comments: {
-                                                    include: {
-                                                        author: true
-                                                    }
-                                                },
-
-                                            },
-
-                                        }
+                                        user: true
+                                    }
+                                },
+                                comments: {
+                                    include: {
+                                        author: true
                                     }
                                 }
                             }
@@ -150,6 +145,7 @@ export class BoardService {
         if (!board) {
             throw new NotFoundException('Такой доски не существует!')
         }
+
 
         const isOwner = board?.ownerId === userId;
         const isMember = board?.members?.some(member => member.userId === userId);

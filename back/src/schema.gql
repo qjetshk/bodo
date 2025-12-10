@@ -145,12 +145,9 @@ type ColumnTemplate {
 
 type Comment {
   author: User!
-  authorId: String!
   content: String!
   createdAt: DateTime!
   id: ID!
-  task: Task!
-  taskId: String!
   updatedAt: DateTime!
 }
 
@@ -164,17 +161,11 @@ input CreateBoardInput {
 
 input CreateTaskInput {
   columnId: String!
+  deadlineDate: DateTime!
   description: String
+  membersIds: [String!]
+  priority: Priorities!
   title: String!
-}
-
-type CreatedTask {
-  columnId: String!
-  description: String!
-  id: ID!
-  order: Int!
-  title: String!
-  updatedAt: DateTime!
 }
 
 """
@@ -183,9 +174,8 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 scalar DateTime
 
 type DeletedTask {
-  boardUpdatedAt: DateTime!
   columnId: String!
-  tasks: [CreatedTask!]!
+  taskId: String!
 }
 
 input EditBoardInput {
@@ -221,6 +211,12 @@ type Mutation {
   findMembers(member: FindMemberInput!): [User!]!
 }
 
+enum Priorities {
+  HIGH
+  LOW
+  MEDIUM
+}
+
 type Query {
   getAllBoardTemplates: [BoardTemplate!]!
   getAllUserBoardInvitation: [BoardInvitation!]!
@@ -240,20 +236,22 @@ type Subscription {
   invitationAccepted: AcceptedOrDeclinedInvitation!
   invitationCreated: BoardInvitation!
   invitationDeclined: AcceptedOrDeclinedInvitation!
-  taskCreated: CreatedTask!
+  taskCreated: Task!
   taskDeleted: DeletedTask!
   tasksOrderChangedInOneColumn: ChangedTasksOrderInColumn!
 }
 
 type Task {
-  assignments: [TaskAssignment!]
+  assignments: [TaskAssignment!]!
   column: Column!
   columnId: String!
   comments: [Comment!]
   createdAt: DateTime!
-  description: String!
+  deadlineDate: DateTime!
+  description: String
   id: ID!
   order: Int!
+  priority: Priorities!
   title: String!
   updatedAt: DateTime!
 }

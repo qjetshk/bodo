@@ -47,14 +47,6 @@ export const COLUMN_ADDED = graphql(`
             title
             id
             order
-            tasks {
-                id
-                title
-                description
-                order
-                columnId
-                updatedAt
-            }
         }
     }
 
