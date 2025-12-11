@@ -79,6 +79,7 @@ export const GET_INITIAL_BOARD = graphql(`
                     columnId
                     priority
                     deadlineDate
+                    createdAt
                     assignments {
                         user {
                             avatarUrl

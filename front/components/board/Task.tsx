@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Task as TaskType } from '@/types/board.type'
-import { Ellipsis, PencilLine, Trash2 } from 'lucide-react'
+import { Ellipsis, Maximize2, MessageCirclePlus, PencilLine, Trash2 } from 'lucide-react'
 import { Dialog } from '../ui/dialog'
 import EditTask from './EditTask'
 import ConfirmDelete from '../ConfirmDelete'
@@ -11,39 +11,20 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import { useIsTouchDevice } from '@/hooks/is-touch-device'
-import { PRIORITIES } from '@/data/priorities.data'
 import FirstThreeAvatars from '../FirstThreeAvatars'
 import { Member } from './AddNewTask'
+import TaskInfo from './TaskInfo'
+import { getDateColor, getPriorityColor } from '@/utils/get-colors.util'
+import { PRIORITIES } from '@/data/priorities.data'
+import AddComment from './AddTaskComment'
+import { commentsWord } from '@/utils/get-comments-words.util'
 
 const Task = ({ task, isPrivate, membersWithOwner }: { task: TaskType, isPrivate: boolean, membersWithOwner: Member[] }) => {
     const [isOpen, setIsOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+    const [isInfoOpen, setIsInfoOpen] = useState(false)
+    const [isCommentOpen, setIsCommentOpen] = useState(false)
     const isTouchDevice = useIsTouchDevice()
-
-    const getPriorityColor = () =>
-        PRIORITIES.find(p => p.priority === task.priority)?.secondaryColor ?? ''
-
-    const getDateColor = () => {
-        const now = new Date().getTime();
-        const deadline = new Date(task.deadlineDate).getTime();
-
-        const msInDay = 24 * 60 * 60 * 1000;
-        const diff = deadline - now;
-        if (diff <= 0) {
-            // Дедлайн прошёл
-            return 'text-red-600';
-        } else if (diff <= msInDay) {
-            // Меньше 24 часов
-            return 'text-red-400';
-        } else if (diff <= 3 * msInDay) {
-            // 1-3 дня
-            return 'text-yellow-400';
-        } else {
-            // Больше 3 дней
-            return 'text-green-400';
-        }
-    };
-
 
     const {
         setNodeRef,
@@ -94,12 +75,12 @@ const Task = ({ task, isPrivate, membersWithOwner }: { task: TaskType, isPrivate
                         {task.description ? <p className='text-neutral-400 font-mono break-all'>{task.description}</p> : <p className='text-center w-full text-neutral-600'>-- Без описания --</p>}
                     </div>
                     <div className='text-neutral-400 flex items-center justify-between mt-2'>
-                        <div className={`${getDateColor()} opacity-75`}>{new Date(task.deadlineDate).toLocaleDateString()}</div>
+                        <div className={`${getDateColor(task.deadlineDate)} opacity-75`}>{new Date(task.deadlineDate).toLocaleDateString()}</div>
                         <FirstThreeAvatars avatarSize={20} members={task.assignments} />
                     </div>
                     <div className='text-neutral-500 flex items-center justify-between'>
-                        {`${task.comments?.length ?? 0} комментариев`}
-                        <div className={`w-2 h-2 rounded-full ${getPriorityColor()}`} />
+                        {`${commentsWord(task.comments?.length ?? 0, true)}`}
+                        <div className={`w-2 h-2 rounded-full ${getPriorityColor(PRIORITIES, task)}`} />
                     </div>
                 </CardContent>
             </Card>
@@ -109,9 +90,17 @@ const Task = ({ task, isPrivate, membersWithOwner }: { task: TaskType, isPrivate
                         <Ellipsis size={18} />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="dark">
+                        <DropdownMenuItem onClick={() => setIsInfoOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors">
+                            <Maximize2 />
+                            Развернуть
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setIsOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors">
                             <PencilLine />
                             Редактировать
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setIsCommentOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors">
+                            <MessageCirclePlus />
+                            Оставить комментарий
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setIsDeleteOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors hover:bg-red-700/15!">
                             <Trash2 />
@@ -125,6 +114,12 @@ const Task = ({ task, isPrivate, membersWithOwner }: { task: TaskType, isPrivate
             </Dialog>
             <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
                 <ConfirmDelete onOpenChange={setIsDeleteOpen} deleteFn={deleteTask} payload={payload} isOpen={isDeleteOpen} title='Вы действительно хотите удалить эту задачу?' />
+            </Dialog>
+            <Dialog open={isInfoOpen} onOpenChange={setIsInfoOpen}>
+                <TaskInfo task={task} />
+            </Dialog>
+            <Dialog open={isCommentOpen} onOpenChange={setIsCommentOpen}>
+                <AddComment taskId={task.id} isOpen={isCommentOpen} onOpenChange={setIsCommentOpen}/>
             </Dialog>
         </div>
     )

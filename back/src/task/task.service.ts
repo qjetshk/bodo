@@ -8,6 +8,8 @@ import { Prisma } from '@prisma/client';
 import { ChangedTasksOrderInColumn, DeletedTask, TaskMovedToAnotherColumn } from './models/task.model';
 import { ModelTypeWithRecepientsIds } from 'src/common/types/model-type-with-recepients-ids.type';
 import { EditTaskInput } from './inputs/edit-task.input';
+import { CreatedCommentinput } from './inputs/create-comment.input';
+import { EditCommentinput } from './inputs/edit-comment.input';
 
 @Injectable()
 export class TaskService {
@@ -200,7 +202,7 @@ export class TaskService {
             }
         })
 
-        await this.pubSub.publish('taskEdited', { 
+        await this.pubSub.publish('taskEdited', {
             taskEdited: {
                 id: updatedTask.id,
                 title: updatedTask.title,
@@ -400,6 +402,230 @@ export class TaskService {
                 tasks,
                 recipientsIds
             } as ModelTypeWithRecepientsIds<ChangedTasksOrderInColumn>
+        })
+
+        return true
+    }
+
+    async createComment(commentInput: CreatedCommentinput) {
+        const comment = await this.prismaService.comment.create({
+            data: {
+                content: commentInput.content,
+                authorId: commentInput.authorId,
+                taskId: commentInput.taskId
+            }
+        })
+
+        if (!comment) {
+            throw new NotFoundException('Такого коммента не существует!')
+        }
+
+        const updatedTask = await this.prismaService.task.findUnique({
+            where: {
+                id: comment.taskId
+            },
+            include: {
+                assignments: {
+                    include: {
+                        user: true
+                    }
+                },
+                comments: {
+                    include: {
+                        author: true,
+                    }
+                },
+                column: {
+                    include: {
+                        board: {
+                            include: {
+                                members: {
+                                    include: { user: true }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+        if (!updatedTask) {
+            throw new NotFoundException('Такой таски не существует!');
+        }
+
+        await this.prismaService.board.update({
+            where: {
+                id: updatedTask.column.boardId
+            },
+            data: {
+                updatedAt: new Date()
+            }
+        })
+
+        await this.pubSub.publish('taskEdited', {
+            taskEdited: {
+                id: updatedTask.id,
+                title: updatedTask.title,
+                columnId: updatedTask.columnId,
+                description: updatedTask.description,
+                order: updatedTask.order,
+                membersAndOwnerIds: getOwnerAndMembersIds<typeof updatedTask.column.board>(updatedTask.column.board),
+                createdAt: updatedTask.createdAt,
+                updatedAt: updatedTask.updatedAt,
+                assignments: updatedTask.assignments,
+                comments: updatedTask.comments,
+                deadlineDate: updatedTask.deadlineDate,
+                priority: updatedTask.priority
+            }
+        })
+
+        return true
+    }
+
+    async editComment(commentInput: EditCommentinput) {
+        const updatedComment = await this.prismaService.comment.update({
+            where: {
+                id: commentInput.id
+            },
+            data: {
+                content: commentInput.content,
+            }
+        })
+
+        if (!updatedComment) {
+            throw new NotFoundException('Такого коммента не существует!')
+        }
+
+        const updatedTask = await this.prismaService.task.findUnique({
+            where: {
+                id: updatedComment.taskId
+            },
+            include: {
+                assignments: {
+                    include: {
+                        user: true
+                    }
+                },
+                comments: {
+                    include: {
+                        author: true,
+                    }
+                },
+                column: {
+                    include: {
+                        board: {
+                            include: {
+                                members: {
+                                    include: { user: true }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+        if (!updatedTask) {
+            throw new NotFoundException('Такой таски не существует!');
+        }
+
+        await this.prismaService.board.update({
+            where: {
+                id: updatedTask.column.boardId
+            },
+            data: {
+                updatedAt: new Date()
+            }
+        })
+
+        await this.pubSub.publish('taskEdited', {
+            taskEdited: {
+                id: updatedTask.id,
+                title: updatedTask.title,
+                columnId: updatedTask.columnId,
+                description: updatedTask.description,
+                order: updatedTask.order,
+                membersAndOwnerIds: getOwnerAndMembersIds<typeof updatedTask.column.board>(updatedTask.column.board),
+                createdAt: updatedTask.createdAt,
+                updatedAt: updatedTask,
+                assignments: updatedTask.assignments,
+                comments: updatedTask.comments,
+                deadlineDate: updatedTask.deadlineDate,
+                priority: updatedTask.priority
+            }
+        })
+
+        return true
+    }
+
+    async deleteComment(id: string) {
+        const deletedComment = await this.prismaService.comment.delete({
+            where: {
+                id
+            }
+        })
+
+        if (!deletedComment) {
+            throw new NotFoundException('Такого коммента не существует!')
+        }
+
+        const updatedTask = await this.prismaService.task.findUnique({
+            where: {
+                id: deletedComment.taskId
+            },
+            include: {
+                assignments: {
+                    include: {
+                        user: true
+                    }
+                },
+                comments: {
+                    include: {
+                        author: true,
+                    }
+                },
+                column: {
+                    include: {
+                        board: {
+                            include: {
+                                members: {
+                                    include: { user: true }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+        if (!updatedTask) {
+            throw new NotFoundException('Такой таски не существует!');
+        }
+
+        await this.prismaService.board.update({
+            where: {
+                id: updatedTask.column.boardId
+            },
+            data: {
+                updatedAt: new Date()
+            }
+        })
+
+        await this.pubSub.publish('taskEdited', {
+            taskEdited: {
+                id: updatedTask.id,
+                title: updatedTask.title,
+                columnId: updatedTask.columnId,
+                description: updatedTask.description,
+                order: updatedTask.order,
+                membersAndOwnerIds: getOwnerAndMembersIds<typeof updatedTask.column.board>(updatedTask.column.board),
+                updatedAt: updatedTask.updatedAt,
+                createdAt: updatedTask.createdAt,
+                assignments: updatedTask.assignments,
+                comments: updatedTask.comments,
+                deadlineDate: updatedTask.deadlineDate,
+                priority: updatedTask.priority
+            }
         })
 
         return true

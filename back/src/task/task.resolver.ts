@@ -9,6 +9,8 @@ import { GqlAuthGuard } from 'src/guards/gql-auth.guard';
 import { CurrentUserId } from 'src/decorators/get-id-from-token';
 import { ModelTypeWithRecepientsIds } from 'src/common/types/model-type-with-recepients-ids.type';
 import { EditTaskInput } from './inputs/edit-task.input';
+import { CreatedCommentinput } from './inputs/create-comment.input';
+import { EditCommentinput } from './inputs/edit-comment.input';
 
 @Resolver()
 export class TaskResolver {
@@ -75,5 +77,22 @@ export class TaskResolver {
     return this.pubSub.asyncIterator('tasksOrderChangedInOneColumn')
   }
 
+  @Mutation(() => Boolean)
+  async createComment(@Args('commentInput') commentInput: CreatedCommentinput) {
+    await this.taskService.createComment(commentInput)
+    return true
+  }
+
+  @Mutation(() => Boolean)
+  async editComment(@Args('commentInput') commentInput: EditCommentinput) {
+    await this.taskService.editComment(commentInput)
+    return true
+  }
+
+  @Mutation(() => Boolean)
+  async deleteComment(@Args('commentId') commentId: string) {
+    await this.taskService.deleteComment(commentId)
+    return true
+  }
 
 }

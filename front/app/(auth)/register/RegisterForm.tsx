@@ -56,6 +56,7 @@ export const RegisterForm: React.FC = () => {
             {...registerInput("nickName")}
             placeholder="Введите логин"
             type="text"
+            maxLength={30}
             className={
               errors.nickName &&
               "border-red-400 placeholder:text-red-400 focus-visible:border-red-400! text-red-400"

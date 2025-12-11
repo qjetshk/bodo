@@ -22,7 +22,6 @@ import { Toggle } from '../ui/toggle'
 import { cn } from '@/lib/utils'
 import { useMutation } from '@apollo/client/react'
 import { EDIT_TASK } from '@/apollo/requests/tasks'
-import { title } from 'process'
 import { toast } from 'sonner'
 
 interface Props {
@@ -84,9 +83,8 @@ const EditTask = ({ task, isOpen, isPrivate, membersWithOwner, onOpenChange }: P
     const wathedPriority = watch('priority')
 
     const isUpdated = useMemo(() => {
-        const desc = watchedDescription ?? ''
         const nameChanged = (normalizeSpaces(watchedTitle) !== task.title) && (watchedTitle.length > 0);
-        const descriptionChanged = (normalizeSpaces(watchedDescription ?? "") !== task.description) && (desc.length > 0);
+        const descriptionChanged = (normalizeSpaces(watchedDescription ?? "") !== task.description);
         const deadlineDateChanged = (new Date(wathedDeadlineDate).getTime() !== new Date(task.deadlineDate).getTime())
         const assignedIds = new Set(task.assignments.map(a => a.user.id));
         const memberIds = new Set(members?.map(m => m.id) || []);

@@ -1,0 +1,68 @@
+import React from 'react'
+import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog'
+import { Task } from '@/types/board.type'
+import { Button } from '../ui/button'
+import { getDateColor, getPriorityColor } from '@/utils/get-colors.util'
+import FirstThreeAvatars from '../FirstThreeAvatars'
+import { PRIORITIES } from '@/data/priorities.data'
+import DefaultUserPreview from '../DefaultUserPreview'
+import { Label } from '../ui/label'
+import TaskComment from './TaskComment'
+import { commentsWord } from '@/utils/get-comments-words.util'
+import { ScrollArea } from '../ui/scroll-area'
+
+const TaskInfo = ({ task }: { task: Task }) => {
+
+    function normalizeDate(input: any): Date {
+        return input instanceof Date ? input : new Date(input);
+    }
+
+    return (
+        <DialogContent className='dark'>
+            <DialogHeader>
+                <DialogTitle>{task.title}</DialogTitle>
+                <DialogDescription asChild>
+                    <ScrollArea className='max-h-50 pr-3'>
+                        {task.description ? <div>{task.description}</div> : <div className='text-center text-neutral-600'>-- Без описания --</div>}
+                    </ScrollArea>
+                </DialogDescription>
+            </DialogHeader>
+
+            <div className='text-neutral-400 flex items-center justify-between mt-2'>
+                <div className={`${getDateColor(task.deadlineDate)} opacity-75`}>дедлайн до: {new Date(task.deadlineDate).toLocaleDateString()}</div>
+                <div className={`w-3.5 h-3.5 rounded-full ${getPriorityColor(PRIORITIES, task)}`} />
+
+            </div>
+            {task.assignments && task.assignments.length ?
+                <div className='flex flex-col gap-2'>
+                    <Label className='text-neutral-400'>Исполнители задачи:</Label>
+                    <div className='flex gap-4 flex-wrap'>
+                        {task.assignments.map(a => (
+                            <DefaultUserPreview avatarUrl={a.user.avatarUrl ?? ''} email={a.user.email} nickName={a.user.nickName} key={a.user.id} />
+                        ))}
+                    </div>
+
+                </div> : <></>
+            }
+
+            <div className='text-neutral-500 flex items-center justify-between'>
+                {`${commentsWord(task.comments?.length ?? 0, true)}${task.comments?.length && task.comments.length > 0 ? ':' : ''}`}
+                <div className='text-neutral-700 text-sm select-none'>создана: {normalizeDate(task.createdAt).toLocaleDateString()}</div>
+            </div>
+            <ScrollArea className='max-h-60 pr-4'>
+                <div className='flex flex-col gap-3'>
+                    {task.comments?.map(c => (
+                        <TaskComment key={c.id} comment={c} />
+                    ))}
+                </div>
+            </ScrollArea>
+            <DialogFooter className='flex-col'>
+                <DialogClose asChild>
+                    <Button variant="outline">Закрыть</Button>
+                </DialogClose>
+            </DialogFooter>
+        </DialogContent>
+    )
+}
+
+export default TaskInfo

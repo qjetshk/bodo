@@ -79,9 +79,10 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
 
       if (!edited) return;
       setAllTasks(prev => {
-        const otherTasks = prev.filter(t => t.id !== edited.id)
+        const tasksinColumn = prev.filter(t => t.columnId === edited.columnId && t.id !== edited.id).sort((a, b) => a.order - b.order)
+        const otherTasks = prev.filter(t => t.columnId !== edited.columnId)
 
-        return [...otherTasks, edited].sort((a, b) => a.order - b.order)
+        return [...tasksinColumn, ...otherTasks, edited as TaskType].sort((a, b) => a.order - b.order)
       })
 
       updateBoardTimeCache(client, board.id)
@@ -363,7 +364,7 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
 
       {createPortal(
         <DragOverlay>
-          {activeColumn && <Column isPrivate={board.boardType} membersWithOwner={membersWithOwner} boardId={board.id} column={activeColumn} tasks={allTasks.filter(t => t.columnId === activeColumn.id)} canDelete={allColumns.length > 2} />}
+          {activeColumn && <Column isOverlay isPrivate={board.boardType} membersWithOwner={membersWithOwner} boardId={board.id} column={activeColumn} tasks={allTasks.filter(t => t.columnId === activeColumn.id)} canDelete={allColumns.length > 2} />}
           {activeTask && !activeColumn && <Task isPrivate={board.boardType} membersWithOwner={membersWithOwner} task={activeTask} />}
         </DragOverlay>,
         document.body

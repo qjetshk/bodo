@@ -54,6 +54,7 @@ export const TASK_EDITED = graphql(`
             order
             title
             updatedAt
+            createdAt
             columnId
             priority
             deadlineDate
@@ -116,3 +117,4 @@ export const TASKS_ORDER_CHANGED_IN_ONE_COLUMN = graphql(`
         }
     }
 `)
+

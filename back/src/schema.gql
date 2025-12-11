@@ -168,6 +168,12 @@ input CreateTaskInput {
   title: String!
 }
 
+input CreatedCommentinput {
+  authorId: String!
+  content: String!
+  taskId: String!
+}
+
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
@@ -182,6 +188,11 @@ input EditBoardInput {
   description: String
   membersToAdd: [String!]
   name: String!
+}
+
+input EditCommentinput {
+  content: String!
+  id: String!
 }
 
 input EditTaskInput {
@@ -211,12 +222,15 @@ type Mutation {
   changeColumnsOrder(boardId: ID!, changeColumnInput: [ChangeColumnOrderInput!]!): Boolean!
   changeTasksOrder(columnId: String!, newTasks: [ChangeTaskOrderInput!]!): Boolean!
   createBoard(boardInput: CreateBoardInput!): Board!
+  createComment(commentInput: CreatedCommentinput!): Boolean!
   createTask(taskInput: CreateTaskInput!): Boolean!
   declineInvitation(invitationId: String!): Boolean!
   deleteBoard(boardId: String!): Boolean!
   deleteColumn(columnId: String!): Boolean!
+  deleteComment(commentId: String!): Boolean!
   deleteTask(taskId: String!): Boolean!
   editBoard(boardId: String!, editBoardInput: EditBoardInput!): UpdatedBoard
+  editComment(commentInput: EditCommentinput!): Boolean!
   editTask(taskInput: EditTaskInput!): Boolean!
   findMembers(member: FindMemberInput!): [User!]!
 }

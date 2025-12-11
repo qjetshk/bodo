@@ -26,9 +26,10 @@ interface Props {
   boardId: string
   membersWithOwner: Member[]
   isPrivate: boolean
+  isOverlay?: boolean
 }
 
-function Column({ membersWithOwner, isPrivate, column, canDelete, tasks, boardId }: Props) {
+function Column({ membersWithOwner, isOverlay, isPrivate, column, canDelete, tasks, boardId }: Props) {
   const currentTasks = tasks;
   const tasksIds = useMemo(() => currentTasks.map(t => t.id), [currentTasks]);
 
@@ -99,9 +100,9 @@ function Column({ membersWithOwner, isPrivate, column, canDelete, tasks, boardId
         <SortableContext items={tasksIds} strategy={verticalListSortingStrategy}>
           {currentTasks.length > 0 ? currentTasks.map(task =>
             <motion.div key={task.id}
-              initial={{ opacity: 0, filter: 'blur(10px)' }}
+              initial={!isOverlay && { opacity: 0, filter: 'blur(10px)' }}
               animate={{ opacity: 1, filter: 'blur(0px)' }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.3 }}
             >
               <Task isPrivate={isPrivate} membersWithOwner={membersWithOwner} task={task} />
             </motion.div>
