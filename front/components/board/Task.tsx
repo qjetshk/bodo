@@ -13,8 +13,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useIsTouchDevice } from '@/hooks/is-touch-device'
 import { PRIORITIES } from '@/data/priorities.data'
 import FirstThreeAvatars from '../FirstThreeAvatars'
+import { Member } from './AddNewTask'
 
-const Task = ({ task }: { task: TaskType }) => {
+const Task = ({ task, isPrivate, membersWithOwner }: { task: TaskType, isPrivate: boolean, membersWithOwner: Member[] }) => {
     const [isOpen, setIsOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const isTouchDevice = useIsTouchDevice()
@@ -120,7 +121,7 @@ const Task = ({ task }: { task: TaskType }) => {
                 </DropdownMenu>
             }
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <EditTask isOpen={isOpen} task={task} />
+                <EditTask onOpenChange={setIsOpen} isPrivate={isPrivate} membersWithOwner={membersWithOwner} isOpen={isOpen} task={task} />
             </Dialog>
             <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
                 <ConfirmDelete onOpenChange={setIsDeleteOpen} deleteFn={deleteTask} payload={payload} isOpen={isDeleteOpen} title='Вы действительно хотите удалить эту задачу?' />

@@ -8,6 +8,7 @@ import { ChangeTaskOrderInput } from './inputs/change-task-order.input';
 import { GqlAuthGuard } from 'src/guards/gql-auth.guard';
 import { CurrentUserId } from 'src/decorators/get-id-from-token';
 import { ModelTypeWithRecepientsIds } from 'src/common/types/model-type-with-recepients-ids.type';
+import { EditTaskInput } from './inputs/edit-task.input';
 
 @Resolver()
 export class TaskResolver {
@@ -26,6 +27,21 @@ export class TaskResolver {
   })
   taskCreated() {
     return this.pubSub.asyncIterator('taskCreated')
+  }
+
+  @Mutation(() => Boolean)
+  async editTask(@Args("taskInput") taskInput: EditTaskInput) {
+    await this.taskService.editTask(taskInput)
+    return true
+  }
+
+  @Subscription(() => Task, {
+    filter(payload, variables, context) {
+      return payload.taskEdited.membersAndOwnerIds.includes(context?.user.id)
+    },
+  })
+  taskEdited() {
+    return this.pubSub.asyncIterator('taskEdited')
   }
 
   @Mutation(() => Boolean)

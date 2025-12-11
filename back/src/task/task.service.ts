@@ -7,6 +7,7 @@ import { getOwnerAndMembersIds, getRecipientsIds } from 'src/utils/get-owner-mem
 import { Prisma } from '@prisma/client';
 import { ChangedTasksOrderInColumn, DeletedTask, TaskMovedToAnotherColumn } from './models/task.model';
 import { ModelTypeWithRecepientsIds } from 'src/common/types/model-type-with-recepients-ids.type';
+import { EditTaskInput } from './inputs/edit-task.input';
 
 @Injectable()
 export class TaskService {
@@ -99,6 +100,120 @@ export class TaskService {
                 comments: newTask.comments,
                 deadlineDate: newTask.deadlineDate,
                 priority: newTask.priority
+            }
+        })
+
+        return true
+    }
+
+    async editTask(taskInput: EditTaskInput) {
+        const currentTask = await this.prismaService.task.findUnique({
+            where: { id: taskInput.id },
+            include: { assignments: true } // ← важно!
+        });
+
+        if (!currentTask) {
+            throw new NotFoundException('Такой таски не существует!');
+        }
+
+        // 2. Получаем текущие и новые ID пользователей
+        const currentMemberIds = new Set(currentTask.assignments.map(a => a.userId));
+        const newMemberIds = new Set(taskInput.membersIds || []);
+
+        // 3. Определяем, кого удалить и кого добавить
+        const toDelete = currentTask.assignments
+            .filter(a => !newMemberIds.has(a.userId))
+            .map(a => a.id);
+
+        const toCreate = Array.from(newMemberIds)
+            .filter(userId => !currentMemberIds.has(userId))
+            .map(userId => ({ userId }));
+
+        // 4. Выполняем обновление задачи + управление связями
+        await this.prismaService.$transaction([
+            // Сначала обновляем саму задачу
+            this.prismaService.task.update({
+                where: { id: taskInput.id },
+                data: {
+                    title: taskInput.title,
+                    description: taskInput.description,
+                    deadlineDate: taskInput.deadlineDate,
+                    priority: taskInput.priority,
+                    updatedAt: new Date(),
+                },
+            }),
+
+            // Удаляем старые связи
+            ...(toDelete.length > 0
+                ? [this.prismaService.taskAssignment.deleteMany({ where: { id: { in: toDelete } } })]
+                : []),
+
+            // Добавляем новые связи
+            ...(toCreate.length > 0
+                ? [this.prismaService.taskAssignment.createMany({
+                    data: toCreate.map(userId => ({ ...userId, taskId: taskInput.id }))
+                })]
+                : [])
+
+
+        ]);
+
+        const updatedTask = await this.prismaService.task.findUnique({
+            where: {
+                id: currentTask.id
+            },
+            include: {
+                assignments: {
+                    include: {
+                        user: true
+                    }
+                },
+                comments: {
+                    include: {
+                        author: true,
+                    }
+                },
+                column: {
+                    include: {
+                        board: {
+                            include: {
+                                members: {
+                                    include: { user: true }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+        if (!updatedTask) {
+            throw new NotFoundException('Такой таски не существует!');
+        }
+
+        await this.prismaService.board.update({
+            where: {
+                id: updatedTask.column.boardId
+            },
+            data: {
+                updatedAt: new Date()
+            }
+        })
+
+        await this.pubSub.publish('taskEdited', { 
+            taskEdited: {
+                id: updatedTask.id,
+                title: updatedTask.title,
+                columnId: updatedTask.columnId,
+                description: updatedTask.description,
+                order: updatedTask.order,
+                membersAndOwnerIds: getOwnerAndMembersIds<typeof updatedTask.column.board>(updatedTask.column.board),
+                updatedAt: updatedTask.updatedAt,
+                createdAt: updatedTask.createdAt,
+                assignments: updatedTask.assignments,
+                comments: updatedTask.comments,
+                deadlineDate: updatedTask.deadlineDate,
+                priority: updatedTask.priority
             }
         })
 

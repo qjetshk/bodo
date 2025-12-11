@@ -17,6 +17,7 @@ import ConfirmDelete from "../ConfirmDelete";
 import { CHANGE_COLUMN_TITLE, COLUMN_TITLE_CHANGED, DELETE_COLUMN } from "@/apollo/requests/columns";
 import { updateBoardTimeCache } from "@/utils/update-board-time.util";
 import { useIsTouchDevice } from "@/hooks/is-touch-device";
+import { motion } from 'motion/react'
 
 interface Props {
   column: ColumnWithoutTasks;
@@ -96,7 +97,16 @@ function Column({ membersWithOwner, isPrivate, column, canDelete, tasks, boardId
 
       <CardContent className={`${isDragging && "opacity-0"} flex flex-col gap-3 flex-1 px-4 max-h-[548px] h-full overflow-y-auto`}>
         <SortableContext items={tasksIds} strategy={verticalListSortingStrategy}>
-          {currentTasks.length > 0 ? currentTasks.map(task => <Task key={task.id} task={task} />) :
+          {currentTasks.length > 0 ? currentTasks.map(task =>
+            <motion.div key={task.id}
+              initial={{ opacity: 0, filter: 'blur(10px)' }}
+              animate={{ opacity: 1, filter: 'blur(0px)' }}
+              transition={{ duration: 0.4 }}
+            >
+              <Task isPrivate={isPrivate} membersWithOwner={membersWithOwner} task={task} />
+            </motion.div>
+
+          ) :
             <div className="text-center text-neutral-600">Здесь пока нет задач</div>}
         </SortableContext>
       </CardContent>

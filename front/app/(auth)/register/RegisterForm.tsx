@@ -42,7 +42,7 @@ export const RegisterForm: React.FC = () => {
   };
 
   return (
-    <Card className="dark bg-neutral-950 p-0 border-0">
+    <Card className="dark bg-neutral-950 lg:px-0 px-6 border-0">
       <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
         <h1 className="text-2xl text-center font-unbounded">Регистрация</h1>
 

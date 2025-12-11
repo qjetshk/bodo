@@ -88,6 +88,9 @@ export const GET_INITIAL_BOARD = graphql(`
                         }
                     }
                     comments {
+                        content
+                        id
+                        updatedAt
                         author {
                             avatarUrl
                             nickName

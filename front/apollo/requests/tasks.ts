@@ -40,6 +40,45 @@ export const TASK_CREATED = graphql(`
     }
 `)
 
+export const EDIT_TASK = graphql(`
+    mutation EditTask($taskInput: EditTaskInput!){
+        editTask(taskInput: $taskInput)
+    }
+`)
+
+export const TASK_EDITED = graphql(`
+    subscription TaskEdited {
+        taskEdited {
+            description
+            id
+            order
+            title
+            updatedAt
+            columnId
+            priority
+            deadlineDate
+            assignments {
+                user {
+                    avatarUrl
+                    email
+                    id
+                    nickName
+                }
+            }
+            comments {
+                content
+                id
+                updatedAt
+                author {
+                    avatarUrl
+                    nickName
+                    id
+                }
+            }
+        }
+    }
+`)
+
 
 export const DELETE_TASK = graphql(`
     mutation DeleteTask($taskId: String!){

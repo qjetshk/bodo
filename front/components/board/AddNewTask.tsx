@@ -43,9 +43,6 @@ export type Member = {
 }
 
 
-
-
-
 const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpen }: Props) => {
 
     const [calendarOpen, setCalendarOpen] = useState(false)

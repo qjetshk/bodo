@@ -184,6 +184,15 @@ input EditBoardInput {
   name: String!
 }
 
+input EditTaskInput {
+  deadlineDate: DateTime!
+  description: String
+  id: String!
+  membersIds: [String!]
+  priority: Priorities!
+  title: String!
+}
+
 input FindMemberInput {
   email: String
   nickName: String
@@ -208,6 +217,7 @@ type Mutation {
   deleteColumn(columnId: String!): Boolean!
   deleteTask(taskId: String!): Boolean!
   editBoard(boardId: String!, editBoardInput: EditBoardInput!): UpdatedBoard
+  editTask(taskInput: EditTaskInput!): Boolean!
   findMembers(member: FindMemberInput!): [User!]!
 }
 
@@ -238,6 +248,7 @@ type Subscription {
   invitationDeclined: AcceptedOrDeclinedInvitation!
   taskCreated: Task!
   taskDeleted: DeletedTask!
+  taskEdited: Task!
   tasksOrderChangedInOneColumn: ChangedTasksOrderInColumn!
 }
 

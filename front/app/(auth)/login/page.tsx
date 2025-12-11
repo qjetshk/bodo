@@ -31,7 +31,7 @@ export default function RegisterPage() {
             filter: "none",
             transition: { duration: 0.4 },
           }}
-          className="max-w-[300px] lg:mr-[15%] mx-auto w-[-webkit-fill-available] z-100"
+          className="max-w-[350px] lg:max-w-[300px] lg:px-0 px-5 lg:mr-[15%] mx-auto w-[-webkit-fill-available] z-100"
         >
           <LoginForm />
         </MotionDiv>

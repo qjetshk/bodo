@@ -25,7 +25,7 @@ import { CirclePlus } from "lucide-react";
 import { motion } from "motion/react";
 import { useMutation, useSubscription } from "@apollo/client/react";
 import { ADD_NEW_COLUMN, CHANGE_COLUMNS_ORDER, COLUMN_ADDED, COLUMN_DELETED, COLUMN_ORDER_CHANGED } from "@/apollo/requests/columns";
-import { CHANGE_TASKS_ORDER, TASK_CREATED, TASK_DELETED, TASKS_ORDER_CHANGED_IN_ONE_COLUMN } from "@/apollo/requests/tasks";
+import { CHANGE_TASKS_ORDER, TASK_CREATED, TASK_DELETED, TASK_EDITED, TASKS_ORDER_CHANGED_IN_ONE_COLUMN } from "@/apollo/requests/tasks";
 import { createPortal } from "react-dom";
 import { updateBoardTimeCache } from "@/utils/update-board-time.util";
 import { Member } from "./AddNewTask";
@@ -37,17 +37,12 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
   const [activeTask, setActiveTask] = useState<TaskType | null>(null);
   const [addingNewColumn, setAddingNewColumn] = useState(false);
 
+  const membersWithOwner = [board.owner, ...board.members.map(m => m.user)]
+
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
   const [changeOrder] = useMutation(CHANGE_COLUMNS_ORDER);
   const [addColumn] = useMutation(ADD_NEW_COLUMN);
-  const [changeTasksOrder] = useMutation(CHANGE_TASKS_ORDER, {
-    onCompleted(data, clientOptions) {
-      console.log(data.changeTasksOrder)
-    },
-    onError(error, clientOptions) {
-      console.log(error)
-    },
-  })
+  const [changeTasksOrder] = useMutation(CHANGE_TASKS_ORDER)
 
   const [isGridActive, setIsGridActive] = useState(false);
 
@@ -72,33 +67,48 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
     onData: ({ data, client }) => {
       const created = data.data?.taskCreated;
       if (!created) return;
-      setAllTasks(prev => prev.some(t => t.id === created.id) ? prev : [...prev, created]);
+      setAllTasks(prev => prev.some(t => t.id === created.id) ? prev : [...prev, created as TaskType]);
 
       updateBoardTimeCache(client, board.id)
     },
   });
 
+  useSubscription(TASK_EDITED, {
+    onData: ({ data, client }) => {
+      const edited = data.data?.taskEdited;
+
+      if (!edited) return;
+      setAllTasks(prev => {
+        const otherTasks = prev.filter(t => t.id !== edited.id)
+
+        return [...otherTasks, edited].sort((a, b) => a.order - b.order)
+      })
+
+      updateBoardTimeCache(client, board.id)
+    }
+  })
+
   useSubscription(TASK_DELETED, {
-  onData: ({ data, client }) => {
-    const deletedTask = data.data?.taskDeleted;
-    if (!deletedTask) return;
+    onData: ({ data, client }) => {
+      const deletedTask = data.data?.taskDeleted;
+      if (!deletedTask) return;
 
-    const { taskId, columnId } = deletedTask;
+      const { taskId, columnId } = deletedTask;
 
-    setAllTasks(prev => {
-      const columnTasks = prev.filter(t => t.columnId === columnId && t.id !== taskId);
-      const otherTasks = prev.filter(t => t.columnId !== columnId);
+      setAllTasks(prev => {
+        const columnTasks = prev.filter(t => t.columnId === columnId && t.id !== taskId);
+        const otherTasks = prev.filter(t => t.columnId !== columnId);
 
-      const reorderedTasks = columnTasks
-        .sort((a, b) => a.order - b.order)
-        .map((t, index) => ({ ...t, order: index }));
+        const reorderedTasks = columnTasks
+          .sort((a, b) => a.order - b.order)
+          .map((t, index) => ({ ...t, order: index }));
 
-      return [...otherTasks, ...reorderedTasks];
-    });
+        return [...otherTasks, ...reorderedTasks];
+      });
 
-    updateBoardTimeCache(client, board.id);
-  }
-});
+      updateBoardTimeCache(client, board.id);
+    }
+  });
 
 
   useSubscription(TASKS_ORDER_CHANGED_IN_ONE_COLUMN, {
@@ -224,8 +234,6 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
       const overTask = over.data.current?.task ?? null;
       const overColumnId = over.data.current?.columnId ?? over.id;
       const prevColumnId = activeTask.columnId;
-      console.log(prevColumnId)
-      console.log(overColumnId)
 
       setAllTasks(prev => {
         const tasks = [...prev];
@@ -333,7 +341,7 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
               animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
               transition={{ duration: 0.3, delay: i * 0.15 }}
             >
-              <Column isPrivate={board.boardType} membersWithOwner={[board.owner, ...board.members.map(m => m.user)]} boardId={board.id} column={col} tasks={tasksByColumn.get(col.id) ?? []} canDelete={allColumns.length > 2} />
+              <Column isPrivate={board.boardType} membersWithOwner={membersWithOwner} boardId={board.id} column={col} tasks={tasksByColumn.get(col.id) ?? []} canDelete={allColumns.length > 2} />
             </motion.div>
           ))}
         </SortableContext>
@@ -355,8 +363,8 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
 
       {createPortal(
         <DragOverlay>
-          {activeColumn && <Column isPrivate={board.boardType} membersWithOwner={[board.owner, ...board.members.map(m => m.user)]} boardId={board.id} column={activeColumn} tasks={allTasks.filter(t => t.columnId === activeColumn.id)} canDelete={allColumns.length > 2} />}
-          {activeTask && !activeColumn && <Task task={activeTask} />}
+          {activeColumn && <Column isPrivate={board.boardType} membersWithOwner={membersWithOwner} boardId={board.id} column={activeColumn} tasks={allTasks.filter(t => t.columnId === activeColumn.id)} canDelete={allColumns.length > 2} />}
+          {activeTask && !activeColumn && <Task isPrivate={board.boardType} membersWithOwner={membersWithOwner} task={activeTask} />}
         </DragOverlay>,
         document.body
       )}
