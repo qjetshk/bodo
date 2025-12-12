@@ -2,7 +2,7 @@
 export function BgImage() {
   return (
       <video
-        src={'/BG.mp4'}
+        src={'/mp4/BG.mp4'}
         autoPlay
         loop
         muted

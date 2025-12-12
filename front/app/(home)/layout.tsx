@@ -29,17 +29,21 @@ export default function HomeLayout({
 
             </section>
             {children}
-            <footer className=" flex gap-2.5 mx-auto items-center mt-20 mb-15 flex-wrap justify-center">
-                <span className="font-unbounded font-bold text-3xl">
-                    See project on:
-                </span>
-                <Link
-                    target="_blank"
-                    className="flex items-center"
-                    href={"https://github.com/qjetshk/Bodo-Planner-Front"}
-                >
-                    <Image src={"/github.svg"} alt="" width={185} height={40} />
-                </Link>
+            <footer className="  mx-auto  mt-20 mb-15 ">
+                <div className="flex gap-2.5 items-center flex-wrap justify-center">
+                    <span className="font-unbounded font-bold text-3xl">
+                        See project on:
+                    </span>
+                    <Link
+                        target="_blank"
+                        className="flex items-center"
+                        href={"https://github.com/qjetshk/Bodo-Planner-Front"}
+                    >
+                        <Image src={"/github.svg"} alt="" width={185} height={40} />
+                    </Link>
+                </div>
+
+                <p className="select-none text-center text-neutral-600">Copyright © 2025. All rights reserved.</p>
             </footer>
         </MotionDiv>
     );

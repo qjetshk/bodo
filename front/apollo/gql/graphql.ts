@@ -201,7 +201,6 @@ export type CreateTaskInput = {
 };
 
 export type CreatedCommentinput = {
-  authorId: Scalars['String']['input'];
   content: Scalars['String']['input'];
   taskId: Scalars['String']['input'];
 };

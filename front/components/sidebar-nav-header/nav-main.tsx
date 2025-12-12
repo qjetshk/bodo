@@ -95,7 +95,7 @@ export function NavMain({
             // Активный родитель - показываем выпадающий список
             return (
               <Collapsible
-                key={item.title}
+                key={item.url}
                 asChild
                 defaultOpen={isActive}
                 className="group/collapsible "
@@ -158,7 +158,7 @@ export function NavMain({
             item.isActive !== false && isLinkActive(item.url);
 
           return (
-            <SidebarMenuItem key={item.title}>
+            <SidebarMenuItem key={item.url}>
               {item.isActive === false ? (
                 // Неактивная простая ссылка
                 <SidebarMenuButton

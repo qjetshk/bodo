@@ -78,8 +78,8 @@ export class TaskResolver {
   }
 
   @Mutation(() => Boolean)
-  async createComment(@Args('commentInput') commentInput: CreatedCommentinput) {
-    await this.taskService.createComment(commentInput)
+  async createComment(@Args('commentInput') commentInput: CreatedCommentinput, @CurrentUserId() id: string) {
+    await this.taskService.createComment(commentInput, id)
     return true
   }
 

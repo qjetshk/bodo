@@ -34,13 +34,10 @@ import { ColumnModule } from './column/column.module';
           settings: { 'request.credentials': 'include' },
         },
         context: ({ req, extra }) => {
-          // extra приходит из onConnect
-          // extra.user должен содержать payload из JWT
           if (extra?.user) {
             return { user: extra.user };
           } 
 
-          // для обычных HTTP запросов
           return { req, jwtService };
         },
 
@@ -52,7 +49,7 @@ import { ColumnModule } from './column/column.module';
               const token = ctx.connectionParams?.Authorization?.replace('Bearer ', '');
               if (!token) {
                 console.log('No JWT provided in connectionParams');
-                return false; // подписка не активна
+                return false; 
               }
 
               try {

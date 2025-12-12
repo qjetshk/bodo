@@ -41,7 +41,7 @@ const EditTaskComment = ({ isOpen, onOpenChange, initialComment }: Props) => {
         })
     }
 
-    const isUpdated = comment !== initialComment.content
+    const isUpdated = comment !== initialComment.content && comment.length > 0
 
     useEffect(() => {
         setComment(initialComment.content)

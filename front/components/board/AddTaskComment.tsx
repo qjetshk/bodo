@@ -5,7 +5,6 @@ import { Textarea } from '../ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { useMutation } from '@apollo/client/react'
 import { toast } from 'sonner'
-import { useCurrentUser } from '@/hooks/use-user'
 import { CREATE_COMMENT } from '@/apollo/requests/task-comments'
 
 interface Props {
@@ -17,7 +16,6 @@ interface Props {
 const AddTaskComment = ({ isOpen, onOpenChange, taskId }: Props) => {
 
     const [comment, setComment] = useState('')
-    const { user } = useCurrentUser()
     const [createComment, { loading }] = useMutation(CREATE_COMMENT, {
         onCompleted(data, clientOptions) {
             setTimeout(() => {
@@ -34,7 +32,6 @@ const AddTaskComment = ({ isOpen, onOpenChange, taskId }: Props) => {
         createComment({
             variables: {
                 commentInput: {
-                    authorId: user?.id as string,
                     content: comment,
                     taskId
                 }

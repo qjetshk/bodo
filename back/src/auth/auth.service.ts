@@ -144,18 +144,6 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  /* private setCookie(res: Response, value: string, expires: Date) {
-    res.cookie('refreshToken', value, {
-      httpOnly: true,
-      domain: this.COOKIE_DOMAIN,
-      expires,
-      secure: !isDev(this.configService),
-      sameSite: !isDev(this.configService) ? 'none' : 'lax',
-    });
-  } */
-
-
-    // for codespaces in VsCode Desktop //127.0.0 ...
   private setCookie(res: Response, value: string, expires: Date) {
     res.cookie('refreshToken', value, {
       httpOnly: true,

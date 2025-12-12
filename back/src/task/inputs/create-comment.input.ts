@@ -6,8 +6,5 @@ export class CreatedCommentinput {
     content: string
 
     @Field()
-    authorId: string
-
-    @Field()
     taskId: string
 }

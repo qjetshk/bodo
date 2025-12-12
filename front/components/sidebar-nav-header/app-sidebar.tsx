@@ -20,6 +20,7 @@ import { setNavMain } from "@/store/nav-main";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { setIsMobile, setIsSidebarOpened } from "@/store/sidebar";
+import { motion } from 'motion/react'
 
 // This is sample data.
 const menu_data = MENU_BAR;
@@ -70,7 +71,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [isMobile])
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="pb-0">
         <Link
           href={"/"}
           className={`font-bold text-${isActive ? "2xl" : "lg"
@@ -78,11 +79,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         >
           {isActive ? "Bōdo" : "Bō"}
         </Link>
+        <motion.p
+          className={`select-none text-center text-neutral-600 text-[11px] mt-[-6px] ${isActive ? '' : 'hidden'} whitespace-nowrap`}
+          initial={{ opacity: 0, filter: 'blur(4px)' }}
+          animate={isActive ? { opacity: 1, filter: 'blur(0px)' } : { opacity: 0, filter: 'blur(4px)' }}
+          transition={{ duration: 0.2, delay: 0.3 }}
+        >
+          Copyright © 2025. All rights reserved.
+        </motion.p>
+
+
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} />
       </SidebarContent>
-      <SidebarFooter>{userData && <NavUser/>}</SidebarFooter>
+      <SidebarFooter>{userData && <NavUser />}</SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

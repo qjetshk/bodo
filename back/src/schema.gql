@@ -169,7 +169,6 @@ input CreateTaskInput {
 }
 
 input CreatedCommentinput {
-  authorId: String!
   content: String!
   taskId: String!
 }

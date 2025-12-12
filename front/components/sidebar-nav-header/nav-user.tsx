@@ -4,6 +4,7 @@ import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
+  CircleQuestionMark,
   LogOut,
   Sparkles,
 } from "lucide-react";
@@ -117,9 +118,9 @@ export function NavUser() {
               <DropdownMenuSeparator />
 
               <DropdownMenuGroup>
-                <DropdownMenuItem>
-                  <Sparkles />
-                  Upgrade to Pro
+                <DropdownMenuItem disabled>
+                  <CircleQuestionMark />
+                  ? ? ?
                 </DropdownMenuItem>
               </DropdownMenuGroup>
 

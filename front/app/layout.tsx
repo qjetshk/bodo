@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Unbounded } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { PostHogProvider } from "./providers/ph-provider";
+import { PostHogPageview } from "./providers/ph-page-view";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,12 +37,16 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body
-        className={`${
-          (geistSans.variable, geistMono.variable, unbounded.variable)
-        } bg-neutral-950 text-white `}
+        className={`${(geistSans.variable, geistMono.variable, unbounded.variable)
+          } bg-neutral-950 text-white `}
       >
-        {children}
-        <Toaster theme="dark" richColors position="top-center" />
+        <PostHogProvider>
+          <Suspense fallback={null}>
+            <PostHogPageview />
+          </Suspense>
+          {children}
+          <Toaster theme="dark" richColors position="top-center" />
+        </PostHogProvider>
       </body>
     </html>
   );

@@ -14,18 +14,25 @@ const FeatureCard = ({ title, desc, imageSrc, imageAlt, index }: Props) => {
 
   return (
     <div
-      className={`grid max-w-[1000px] gap-10 lg:gap-20 items-center justify-center grid-cols-1 ${
-        isEven ? "md:grid-cols-[300px_auto]" : "md:grid-cols-[auto_300px]"
-      }`}
+      className={`grid max-w-[1000px] gap-10 lg:gap-20 items-center justify-center grid-cols-1 ${isEven ? "md:grid-cols-[400px_auto]" : "md:grid-cols-[auto_400px]"
+        }`}
     >
-      <Image
-        alt={imageAlt || ""}
-        src={imageSrc}
-        width={300}
-        height={300}
-        unoptimized
-        className={`${isEven ? "md:order-0" : "md:order-1"} w-full h-auto`}
-      />
+      <div className={`relative md:w-[300px] lg:w-[400px] mx-auto w-[70vw] md:mx-0 aspect-square overflow-hidden ${isEven ? "md:order-0" : "md:order-1"} `}>
+        <video
+          src={imageSrc}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className={`${isEven ? "md:order-0" : "md:order-1"} 
+      absolute inset-0 
+      w-full h-full 
+      object-cover 
+      select-none 
+      pointer-events-none`}
+        />
+      </div>
+
 
       <div className="flex flex-col gap-5">
         <h2 className="font-medium text-3xl font-unbounded">{title}</h2>

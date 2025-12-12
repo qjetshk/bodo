@@ -407,11 +407,11 @@ export class TaskService {
         return true
     }
 
-    async createComment(commentInput: CreatedCommentinput) {
+    async createComment(commentInput: CreatedCommentinput, userId: string) {
         const comment = await this.prismaService.comment.create({
             data: {
                 content: commentInput.content,
-                authorId: commentInput.authorId,
+                authorId: userId,
                 taskId: commentInput.taskId
             }
         })
@@ -547,7 +547,7 @@ export class TaskService {
                 order: updatedTask.order,
                 membersAndOwnerIds: getOwnerAndMembersIds<typeof updatedTask.column.board>(updatedTask.column.board),
                 createdAt: updatedTask.createdAt,
-                updatedAt: updatedTask,
+                updatedAt: updatedTask.updatedAt,
                 assignments: updatedTask.assignments,
                 comments: updatedTask.comments,
                 deadlineDate: updatedTask.deadlineDate,

@@ -5,6 +5,7 @@ import {
   Kanban,
   BookOpen,
   Settings2,
+  CircleQuestionMark,
 } from "lucide-react";
 
 export interface NavSubItem {
@@ -30,9 +31,15 @@ export interface SidebarData {
 export const MENU_BAR: SidebarData = {
   navMain: [
     {
-      title: "Туду",
+      title: "? ? ?",
       url: "/todo",
-      icon: ListTodo,
+      icon: CircleQuestionMark,
+      isActive: false,
+    },
+    {
+      title: "? ? ?",
+      url: "/md",
+      icon: CircleQuestionMark,
       isActive: false,
     },
     {
