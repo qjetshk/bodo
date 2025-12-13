@@ -12,16 +12,17 @@ export const PUB_SUB = 'PUB_SUB';
     {
       provide: PUB_SUB,
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const options = {
-          host: configService.getOrThrow<string>('REDIS_HOST'),
-          port: configService.getOrThrow<number>('REDIS_PORT'),
+      useFactory: (config: ConfigService) => {
+        const redisUrl = config.getOrThrow<string>('REDIS_URL');
+
+        const redisOptions = {
           retryStrategy: (times: number) => Math.min(times * 100, 2000),
+          maxRetriesPerRequest: null,
         };
 
         return new RedisPubSub({
-          publisher: new Redis(options),
-          subscriber: new Redis(options),
+          publisher: new Redis(redisUrl, redisOptions),
+          subscriber: new Redis(redisUrl, redisOptions),
         });
       },
     },
