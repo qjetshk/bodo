@@ -1,43 +1,26 @@
-# Stage 1: сборка
-FROM node:22-alpine AS builder
+# Используем официальный Node образ
+FROM node:20-alpine
 
-# Устанавливаем совместимость libc
 RUN apk add --no-cache libc6-compat
 
-# Устанавливаем рабочую директорию
+# Рабочая директория
 WORKDIR /app
 
-# Копируем package.json и устанавливаем зависимости
-COPY package*.json ./
-RUN npm install
+# Устанавливаем зависимости
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Копируем весь исходный код
+# Копируем исходники
 COPY . .
 
-# Генерируем Prisma клиент
+# Генерация Prisma клиента (без подключения к БД)
 RUN npx prisma generate
 
-# Билдим TypeScript в папку dist (по умолчанию tsconfig.json: outDir = dist)
+# Сборка приложения
 RUN npm run build
 
-# Stage 2: продакшн
-FROM node:22-alpine AS prod
+# Запуск
+CMD ["node", "dist/src/main.js"]
 
-ENV NODE_ENV=production
-
-WORKDIR /app
-
-# Копируем package.json и устанавливаем только prod зависимости
-COPY package*.json ./
-RUN npm ci --omit=dev
-
-# Копируем скомпилированный код и Prisma schema из Stage 1
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules ./node_modules
-
-# Экспонируем порт приложения
+# Порт приложения
 EXPOSE 4200
-
-# Запуск приложения
-CMD ["node", "dist/main.js"]
