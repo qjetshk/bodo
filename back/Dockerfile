@@ -36,4 +36,4 @@ COPY --from=builder /app/node_modules ./node_modules
 EXPOSE 4200
 
 # Запуск приложения
-CMD ["node", "dist/main"]
+CMD ["node", "dist/main.js"]
