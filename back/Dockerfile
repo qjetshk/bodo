@@ -1,6 +1,8 @@
 # Stage 1: сборка
 FROM node:22-alpine AS builder
 
+RUN apk add --no-cache libc6-compat
+
 WORKDIR /app
 
 # Копируем и ставим все зависимости
@@ -15,7 +17,9 @@ RUN npx prisma generate
 RUN npm run build
 
 # Stage 2: продакшн
-FROM node:22-alpine
+FROM node:22-alpine AS prod
+
+ENV NODE_ENV=prod
 
 WORKDIR /app
 
@@ -32,4 +36,4 @@ COPY --from=builder /app/node_modules ./node_modules
 EXPOSE 4200
 
 # Запуск приложения
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/main"]
