@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start",
+    "build": "next build",
+    "start": "next start -p 3000",
     "lint": "eslint",
     "codegen": "graphql-codegen --config codegen.ts"
   },
@@ -37,7 +37,7 @@
     "graphql-ws": "^6.0.6",
     "lucide-react": "^0.544.0",
     "motion": "^12.23.22",
-    "next": "15.5.3",
+    "next": "15.5.7",
     "next-themes": "^0.4.6",
     "posthog-js": "^1.306.0",
     "react": "19.1.0",
