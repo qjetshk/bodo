@@ -13,7 +13,10 @@ import { EditCommentinput } from './inputs/edit-comment.input';
 
 @Injectable()
 export class TaskService {
-    constructor(private readonly prismaService: PrismaService, @Inject('PUB_SUB') private readonly pubSub: RedisPubSub) { }
+    constructor(private readonly prismaService: PrismaService, @Inject('PUB_SUB') private readonly pubSub: {
+    publish: RedisPubSub['publish'];
+    asyncIterator: RedisPubSub['asyncIterator'];
+  }) { }
 
     async createTask(taskInput: CreateTaskInput) {
         const currentColumn = await this.prismaService.column.findUnique({

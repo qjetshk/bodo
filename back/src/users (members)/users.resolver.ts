@@ -12,7 +12,10 @@ import { Board } from 'src/board/models/board.model';
 
 @Resolver()
 export class UsersResolver {
-  constructor(private readonly usersService: UsersService, @Inject('PUB_SUB') private readonly pubSub: RedisPubSub) { }
+  constructor(private readonly usersService: UsersService, @Inject('PUB_SUB') private readonly pubSub: {
+    publish: RedisPubSub['publish'];
+    asyncIterator: RedisPubSub['asyncIterator'];
+  }) { }
 
   @Mutation(() => [User])
   @UseGuards(GqlAuthGuard)

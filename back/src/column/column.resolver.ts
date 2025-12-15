@@ -10,7 +10,10 @@ import { CurrentUserId } from 'src/decorators/get-id-from-token';
 
 @Resolver()
 export class ColumnResolver {
-  constructor(private readonly columnService: ColumnService, @Inject('PUB_SUB') private readonly pubSub: RedisPubSub) { }
+  constructor(private readonly columnService: ColumnService, @Inject('PUB_SUB') private readonly pubSub: {
+    publish: RedisPubSub['publish'];
+    asyncIterator: RedisPubSub['asyncIterator'];
+  }) { }
 
   @Mutation(() => Boolean)
   async addNewColumn(@Args('columnInput') columnInput: AddNewColumnInput) {

@@ -7,7 +7,10 @@ import { getOwnerAndMembersIds, getRecipientsIds } from 'src/utils/get-owner-mem
 
 @Injectable()
 export class ColumnService {
-    constructor(private readonly prismaService: PrismaService, @Inject('PUB_SUB') private readonly pubSub: RedisPubSub) { }
+    constructor(private readonly prismaService: PrismaService, @Inject('PUB_SUB') private readonly pubSub: {
+    publish: RedisPubSub['publish'];
+    asyncIterator: RedisPubSub['asyncIterator'];
+  }) { }
 
     async changeColumnTitle(newTitle: string, columnId: string) {
         if (!newTitle || newTitle.trim().length === 0) {

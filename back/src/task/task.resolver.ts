@@ -14,7 +14,10 @@ import { EditCommentinput } from './inputs/edit-comment.input';
 
 @Resolver()
 export class TaskResolver {
-  constructor(private readonly taskService: TaskService, @Inject('PUB_SUB') private readonly pubSub: RedisPubSub) { }
+  constructor(private readonly taskService: TaskService, @Inject('PUB_SUB') private readonly pubSub: {
+    publish: RedisPubSub['publish'];
+    asyncIterator: RedisPubSub['asyncIterator'];
+  }) { }
 
   @Mutation(() => Boolean)
   async createTask(@Args('taskInput') taskInput: CreateTaskInput) {

@@ -5,7 +5,10 @@ import { RedisPubSub } from 'graphql-redis-subscriptions';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prismaService: PrismaService, @Inject('PUB_SUB') private readonly pubSub: RedisPubSub) { }
+  constructor(private readonly prismaService: PrismaService, @Inject('PUB_SUB') private readonly pubSub: {
+    publish: RedisPubSub['publish'];
+    asyncIterator: RedisPubSub['asyncIterator'];
+  }) { }
 
   async findMembers(input: FindMemberInput, currentUserId: string) {
     const members = await this.prismaService.user.findMany({

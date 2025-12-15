@@ -11,7 +11,10 @@ import { getOwnerAndMembersIds } from 'src/utils/get-owner-members-ids.util';
 
 @Injectable()
 export class BoardService {
-    constructor(private readonly prismaService: PrismaService, @Inject('PUB_SUB') private readonly pubSub: RedisPubSub) { }
+    constructor(private readonly prismaService: PrismaService, @Inject('PUB_SUB') private readonly pubSub: {
+        publish: RedisPubSub['publish'];
+        asyncIterator: RedisPubSub['asyncIterator'];
+    }) { }
 
     async createBoard(boardInput: CreateBoardInput, ownerId: string) {
         let columnsData: Prisma.ColumnCreateWithoutBoardInput[] = [];
@@ -298,7 +301,7 @@ export class BoardService {
         return updatedBoard
     }
 
-    
+
 
     async deleteBoard(boardId: string) {
         const deletedBoard = await this.prismaService.board.delete({
@@ -330,6 +333,6 @@ export class BoardService {
 
     }
 
-    
+
 
 }

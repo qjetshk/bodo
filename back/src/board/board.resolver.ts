@@ -14,7 +14,10 @@ import { AddNewColumnInput } from './inputs/add-new-column.input';
 
 @Resolver()
 export class BoardResolver {
-  constructor(private readonly boardService: BoardService, @Inject('PUB_SUB') private readonly pubSub: RedisPubSub) { }
+  constructor(private readonly boardService: BoardService, @Inject('PUB_SUB') private readonly pubSub: {
+    publish: RedisPubSub['publish'];
+    asyncIterator: RedisPubSub['asyncIterator'];
+  }) { }
 
   @UseGuards(GqlAuthGuard)
   @Mutation(() => Board)
@@ -69,5 +72,5 @@ export class BoardResolver {
   boardDeleted() {
     return this.pubSub.asyncIterator('boardDeleted')
   }
-  
+
 }
