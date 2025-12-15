@@ -37,7 +37,7 @@ export default function HomeLayout({
                     <Link
                         target="_blank"
                         className="flex items-center"
-                        href={"https://github.com/qjetshk/Bodo-Planner-Front"}
+                        href={"https://github.com/qjetshk/bodo"}
                     >
                         <Image src={"/github.svg"} alt="" width={185} height={40} />
                     </Link>
