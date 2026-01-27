@@ -319,7 +319,7 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
 
 
   const addNewColumn = useCallback(() => {
-    addColumn({ variables: { columnInput: { boardId: board.id, title: `Новая колонка ${allColumns.length + 1}` } } });
+    addColumn({ variables: { columnInput: { boardId: board.id, title: `New Column ${allColumns.length + 1}` } } });
   }, [addColumn, allColumns.length, board.id]);
 
   const columnIds = useMemo(() => allColumns.map(c => c.id), [allColumns]);
@@ -356,7 +356,7 @@ export default function Board({ board, isSidebarOpened, isMobile }: { board: Boa
           >
             <div className="flex gap-2 items-center">
               <CirclePlus size={20} />
-              <span>Новая колонка</span>
+              <span>New Column</span>
             </div>
           </motion.div>
         )}

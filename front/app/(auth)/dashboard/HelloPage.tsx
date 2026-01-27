@@ -9,10 +9,10 @@ const HelloPage = () => {
 
   return (
     <motion.main
-      initial={{ y: 10, opacity: 0}}
+      initial={{ y: 10, opacity: 0 }}
       animate={{
         y: 0,
-        opacity: 1, 
+        opacity: 1,
         transition: { duration: 0.5 },
       }}
       className="w-full h-[calc(100vh-105px)] flex justify-center items-center"
@@ -34,21 +34,20 @@ const HelloPage = () => {
           >
             👋
           </motion.span>
-          Привет, <span className="font-bold">@{nickName}</span>
+          Hello, <span className="font-bold">@{nickName}</span>
         </h1>
         <div className="flex flex-col text-lg md:text-xl">
-          <span>Добро пожаловать в твой рабочий кабинет!</span>
+          <span>Welcome to your workspace!</span>
           <span>
-            Здесь ты можешь управлять задачами и проектами вместе с командой.
+            Here you can manage tasks and projects together with your team.
           </span>
           <span>
-            Начни работу с{" "}
+            Start by{" "}
             <Link
               className="text-neutral-400 underline transition-colors hover:text-white"
               href={"/dashboard/kanban/new"}
             >
-              {" "}
-              создания канбан-доски
+              creating a Kanban board
             </Link>
           </span>
         </div>

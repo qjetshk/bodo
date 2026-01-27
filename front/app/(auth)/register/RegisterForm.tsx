@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import { RegisterLoginForm } from "@/types/login-reg-form.type";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,17 +26,17 @@ export const RegisterForm: React.FC = () => {
     console.log(formData);
     try {
       const result = await reg(formData).unwrap();
-      toast.success(result.message || "Регистрация прошла успешно!", {
+      toast.success(result.message || "Registration was successful!", {
         duration: 2000,
       });
     } catch (err: unknown) {
       if (typeof err === "object" && err !== null && "data" in err) {
         const apiError = err as { data?: { message?: string } };
-        toast.error(apiError.data?.message || "Ошибка при регистрации", {
+        toast.error(apiError.data?.message || "Error during registration", {
           duration: 2000,
         });
       } else {
-        toast.error("Ошибка при регистрации", { duration: 2000 });
+        toast.error("Error during registration", { duration: 2000 });
       }
     }
   };
@@ -44,7 +44,7 @@ export const RegisterForm: React.FC = () => {
   return (
     <Card className="dark bg-neutral-950 lg:px-0 px-6 border-0">
       <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
-        <h1 className="text-2xl text-center font-unbounded">Регистрация</h1>
+        <h1 className="text-2xl text-center font-unbounded">Registration</h1>
 
         <div>
           {errors.nickName && (
@@ -54,7 +54,7 @@ export const RegisterForm: React.FC = () => {
           )}
           <Input
             {...registerInput("nickName")}
-            placeholder="Введите логин"
+            placeholder="Enter your login"
             type="text"
             maxLength={30}
             className={
@@ -70,7 +70,7 @@ export const RegisterForm: React.FC = () => {
           )}
           <Input
             {...registerInput("email")}
-            placeholder="Введите email"
+            placeholder="Enter your email"
             type="email"
             className={
               errors.email &&
@@ -87,7 +87,7 @@ export const RegisterForm: React.FC = () => {
           )}
           <Input
             {...registerInput("password")}
-            placeholder="Введите пароль"
+            placeholder="Enter your password"
             type="password"
             className={
               errors.password &&
@@ -102,13 +102,13 @@ export const RegisterForm: React.FC = () => {
           className="text-lg h-auto w-full"
           disabled={isLoading}
         >
-          Зарегистрироваться
+          Sign up
         </Button>
 
         <span className="text-sm text-center">
-          Уже есть аккаунт?{" "}
+          Already have an account?{" "}
           <Link className="text-neutral-500" href="/login">
-            Войдите!
+            Sign in!
           </Link>
         </span>
       </form>

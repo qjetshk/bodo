@@ -88,9 +88,9 @@ function Column({ membersWithOwner, isOverlay, isPrivate, column, canDelete, tas
           <DropdownMenu>
             <DropdownMenuTrigger asChild className={`${isTouchDevice && 'text-neutral-500!'} absolute top-3.5 right-3.5 cursor-pointer`}><Ellipsis /></DropdownMenuTrigger>
             <DropdownMenuContent className="dark">
-              <DropdownMenuItem onClick={() => setIsEditing(true)} className={`${isTouchDevice ? 'text-neutral-400' : 'hover:text-neutral-400'} cursor-pointer  transition-colors`}><PencilLine />Редактировать</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsNewTaskFormOpen(true)} className={`${isTouchDevice ? 'text-neutral-400' : 'hover:text-neutral-400'} cursor-pointer transition-colors`}><CirclePlus />Добавить задачу</DropdownMenuItem>
-              <DropdownMenuItem disabled={!canDelete} onClick={() => setIsDeleteOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors hover:bg-red-700/15!"><Trash2 />Удалить колонку</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsEditing(true)} className={`${isTouchDevice ? 'text-neutral-400' : 'hover:text-neutral-400'} cursor-pointer  transition-colors`}><PencilLine />Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsNewTaskFormOpen(true)} className={`${isTouchDevice ? 'text-neutral-400' : 'hover:text-neutral-400'} cursor-pointer transition-colors`}><CirclePlus />Add a task</DropdownMenuItem>
+              <DropdownMenuItem disabled={!canDelete} onClick={() => setIsDeleteOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors hover:bg-red-700/15!"><Trash2 />Delete column</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         }
@@ -108,12 +108,12 @@ function Column({ membersWithOwner, isOverlay, isPrivate, column, canDelete, tas
             </motion.div>
 
           ) :
-            <div className="text-center text-neutral-600">Здесь пока нет задач</div>}
+            <div className="text-center text-neutral-600">There are no tasks here yet</div>}
         </SortableContext>
       </CardContent>
 
       <Dialog open={isNewTaskFormOpen} onOpenChange={setIsNewTaskFormOpen}><AddNewTask isPrivate={isPrivate} membersWithOwner={membersWithOwner} isOpen={isNewTaskFormOpen} onOpenChange={setIsNewTaskFormOpen} columnId={column.id} /></Dialog>
-      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}><ConfirmDelete deleteFn={deleteCol} onOpenChange={setIsDeleteOpen} payload={payload} isOpen={isDeleteOpen} title='Вы действительно хотите удалить эту колонку?' /></Dialog>
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}><ConfirmDelete deleteFn={deleteCol} onOpenChange={setIsDeleteOpen} payload={payload} isOpen={isDeleteOpen} title='Are you sure you want to delete this column?' /></Dialog>
     </Card>
   );
 }

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react'
 import { Card, CardContent, CardHeader } from '../ui/card'
 import { GetAllUserBoardInvitationQuery } from '@/apollo/gql/graphql'
@@ -19,25 +18,25 @@ const Notification = ({ notification }: Props) => {
 
   const router = useRouter()
 
-  const [acceptInvitation, { data: acceptedIvitation }] = useMutation(ACCEPT_INVITATION, {
+  const [acceptInvitation, { data: acceptedInvitation }] = useMutation(ACCEPT_INVITATION, {
     refetchQueries: [GET_ALL_USER_BOARDS_FOR_NAVIGATION]
   })
-  const [declineInvitation, {data: declinedIvitation}] = useMutation(DECLINE_INVITATION)
+  const [declineInvitation, { data: declinedInvitation }] = useMutation(DECLINE_INVITATION)
 
   useEffect(() => {
-    if (acceptedIvitation) {
-      toast.success(`Вы приняли приглашение @${notification.invitedBy.nickName}!`, { duration: 1500 })
+    if (acceptedInvitation) {
+      toast.success(`You accepted the invitation from @${notification.invitedBy.nickName}!`, { duration: 1500 })
       setTimeout(() => {
-        router.replace(`/dashboard/kanban/${acceptedIvitation.acceptInvitation.id}`)
+        router.replace(`/dashboard/kanban/${acceptedInvitation.acceptInvitation.id}`)
       }, 1500)
     }
-  }, [acceptedIvitation])
+  }, [acceptedInvitation])
 
   useEffect(() => {
-    if (declinedIvitation) {
-      toast.error(`Вы отклонили приглашение @${notification.invitedBy.nickName}!`, { duration: 1500 })
+    if (declinedInvitation) {
+      toast.error(`You declined the invitation from @${notification.invitedBy.nickName}!`, { duration: 1500 })
     }
-  }, [declinedIvitation])
+  }, [declinedInvitation])
 
   return (
     <Card className='p-2'>
@@ -54,7 +53,7 @@ const Notification = ({ notification }: Props) => {
           </div>
 
           <span className="whitespace-nowrap text-xs sm:text-sm">
-            пригласил вас в свою доску
+            invited you to their board
           </span>
 
           <span className="font-bold truncate max-w-[200px] text-xs sm:text-sm">
@@ -70,7 +69,7 @@ const Notification = ({ notification }: Props) => {
               },
               refetchQueries: [GET_ALL_USER_BOARD_INVITATIONS, GET_ALL_USER_BOARDS_FOR_NAVIGATION]
             })
-          }} className='text-xs! sm:text-sm!' size="sm">Принять</Button>
+          }} className='text-xs! sm:text-sm!' size="sm">Accept</Button>
           <Button onClick={() => {
             declineInvitation({
               variables: {
@@ -78,10 +77,10 @@ const Notification = ({ notification }: Props) => {
               },
               refetchQueries: [GET_ALL_USER_BOARD_INVITATIONS, GET_ALL_USER_BOARDS_FOR_NAVIGATION]
             })
-          }} className='text-xs! sm:text-sm!' variant="outline" size="sm">Отклонить</Button>
+          }} className='text-xs! sm:text-sm!' variant="outline" size="sm">Decline</Button>
         </div>
       </CardContent>
-    </Card >
+    </Card>
   )
 }
 

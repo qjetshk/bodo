@@ -7,17 +7,43 @@ import { Metadata } from "next";
 import { MoveLeft } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Bōdo - Войти",
-  description: "Войти в Bōdo Planner",
+  title: "Bōdo - Sign In",
+  description: "Sign in to Bōdo",
   keywords: [
-    "войти",
-    "авторизироваться",
-    "залогиниться",
-    "зайти",
-    "войти в аккаунт",
+    "sign in",
+    "log in",
+    "authenticate",
+    "login",
+    "sign in to account",
   ],
+  authors: [{ name: "Bōdo Team", url: "https://bodo-planner.com" }],
+  creator: "Bōdo Team",
   icons: "/logo.svg",
+  openGraph: {
+    title: "Bōdo - Sign In",
+    description: "Sign in to Bōdo",
+    url: "https://bodo-planner.com/login",
+    siteName: "Bōdo",
+    images: [
+      {
+        url: "https://bodo-planner.com/logo.svg",
+        width: 512,
+        height: 512,
+        alt: "Bōdo Logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Bōdo - Sign In",
+    description: "Sign in to Bōdo",
+    images: ["https://bodo-planner.com/logo.svg"],
+    creator: "@Bodo",
+  },
 };
+
 
 export default function RegisterPage() {
   return (

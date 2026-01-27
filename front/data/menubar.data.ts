@@ -12,7 +12,7 @@ export interface NavSubItem {
   title: string;
   url: string;
   isActive?: boolean;
-  description?: string
+  description?: string;
 }
 
 export interface NavMainItem {
@@ -43,70 +43,22 @@ export const MENU_BAR: SidebarData = {
       isActive: false,
     },
     {
-      title: "Канбан",
+      title: "Kanban",
       url: "/kanban",
       icon: Kanban,
       isMain: false,
       items: [
         {
-          title: "+ Новая доска",
+          title: "+ New Board",
           url: "/new",
-          description: "Создать новую доску"
+          description: "Create a new board",
         },
       ],
     },
-    /* {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      isActive: false,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    }, */
-    /* {
-      title: "Settings",
-      url: "settings",
-      icon: Settings2,
-      isActive: false,
-      items: [
-        {
-          title: "General",
-          url: "/general",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    }, */
   ],
 };
 
-//пример объекта
+// example object
 /* {
   user: {
     name: "shadcn",
@@ -116,16 +68,15 @@ export const MENU_BAR: SidebarData = {
   
   navMain: [
     {
-      title: "Туду",
+      title: "Todo",
       url: "/todo",
       icon: ListTodo,
       isActive: false
     },
     {
-      title: "Канбан",
+      title: "Kanban",
       url: "/kanban",
       icon: Kanban,
-      
     },
     {
       title: "Documentation",
@@ -176,6 +127,5 @@ export const MENU_BAR: SidebarData = {
       ],
     },
   ],
-
 };
- */
+*/

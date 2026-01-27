@@ -17,18 +17,15 @@ const AddTaskComment = ({ isOpen, onOpenChange, taskId }: Props) => {
 
     const [comment, setComment] = useState('')
     const [createComment, { loading }] = useMutation(CREATE_COMMENT, {
-        onCompleted(data, clientOptions) {
+        onCompleted() {
             setTimeout(() => {
-                toast.success('Ваш комментарий успешно добавлен!')
+                toast.success('Comment added successfully!')
                 onOpenChange(false)
-
             }, 150)
-
         },
     })
 
     const handleSubmit = () => {
-
         createComment({
             variables: {
                 commentInput: {
@@ -49,9 +46,9 @@ const AddTaskComment = ({ isOpen, onOpenChange, taskId }: Props) => {
         <form>
             <DialogContent className={`dark ${loading && 'bg-neutral-900'}`}>
                 <DialogHeader>
-                    <DialogTitle>Написать комменатарий</DialogTitle>
+                    <DialogTitle>Add Comment</DialogTitle>
                     <DialogDescription>
-                        Здесь вы можете написать комментарий к задаче
+                        Write a comment for this task
                     </DialogDescription>
                 </DialogHeader>
 
@@ -59,7 +56,7 @@ const AddTaskComment = ({ isOpen, onOpenChange, taskId }: Props) => {
                     maxLength={500}
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    placeholder='Ваш комментарий:'
+                    placeholder='Your comment'
                     className='max-h-50 min-h-30'
                 />
 
@@ -68,19 +65,20 @@ const AddTaskComment = ({ isOpen, onOpenChange, taskId }: Props) => {
                         <TooltipTrigger asChild>
                             <div>
                                 <Button onClick={handleSubmit} className='w-full' disabled={!isUpdated || loading}>
-                                    Оставить
+                                    Submit
                                 </Button>
                             </div>
                         </TooltipTrigger>
 
                         {!isUpdated && (
                             <TooltipContent side="top">
-                                <p className="max-w-50 truncate">Вы не написали комменатарий</p>
+                                <p className="max-w-50 truncate">Comment cannot be empty</p>
                             </TooltipContent>
                         )}
                     </Tooltip>
+
                     <DialogClose asChild>
-                        <Button variant="outline">Отмена</Button>
+                        <Button variant="outline">Cancel</Button>
                     </DialogClose>
                 </DialogFooter>
             </DialogContent>

@@ -45,25 +45,25 @@ export function NavUser() {
 
   const [logout] = useLogoutMutation();
   const router = useRouter();
-  const { user } = useCurrentUser()
+  const { user } = useCurrentUser();
 
   const handleLogout = async () => {
     try {
       await logout();
-      toast.success("Вы успешно вышли!", { duration: 1000 });
+      toast.success("You have successfully logged out!", { duration: 1000 });
       setTimeout(() => {
         router.push("/login");
       }, 1000);
     } catch (err) {
-      toast.error("Ошибка при выходе");
+      toast.error("Logout error");
     }
   };
 
   useSubscription(GET_BOARD_INVITATION, {
     onData: () => {
-      toast.success("У Вас новое приглашение!", {
+      toast.success("You have a new invitation!", {
         action: {
-          label: "Посмотреть",
+          label: "View",
           onClick: () => setIsNotificationsOpen(true),
         },
       });
@@ -134,7 +134,7 @@ export function NavUser() {
                   }}
                 >
                   <BadgeCheck />
-                  Аккаунт
+                  Account
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
@@ -144,7 +144,7 @@ export function NavUser() {
                   }}
                 >
                   <Bell />
-                  Уведомления
+                  Notifications
                 </DropdownMenuItem>
               </DropdownMenuGroup>
 
@@ -152,7 +152,7 @@ export function NavUser() {
 
               <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
                 <LogOut />
-                Выйти
+                Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

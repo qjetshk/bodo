@@ -8,9 +8,15 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { SidebarData } from "@/data/menubar.data";
 import { SidebarTrigger } from "../ui/sidebar";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "../ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "../ui/breadcrumb";
 
-// функция для построения breadcrumb 
+// function for building breadcrumbs
 const getPathInfo = (navMain: SidebarData["navMain"], pathname: string) => {
   const breadcrumbs: { title: string; url: string; isMain?: boolean }[] = [];
 
@@ -59,13 +65,13 @@ const DashBoardHeader = () => {
           <BreadcrumbList>
             <BreadcrumbItem>
               {isOnDashboardMainPage ? (
-                <BreadcrumbPage>Главная</BreadcrumbPage>
+                <BreadcrumbPage>Home</BreadcrumbPage>
               ) : (
                 <Link
                   href="/dashboard"
                   className="transition-colors hover:text-white"
                 >
-                  Главная
+                  Home
                 </Link>
               )}
             </BreadcrumbItem>
@@ -78,7 +84,9 @@ const DashBoardHeader = () => {
                   <BreadcrumbSeparator />
                   <BreadcrumbItem className="max-w-[40%] ">
                     {isLast ? (
-                      <BreadcrumbPage className="truncate">{crumb.title}</BreadcrumbPage>
+                      <BreadcrumbPage className="truncate">
+                        {crumb.title}
+                      </BreadcrumbPage>
                     ) : crumb.isMain === false ? (
                       <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
                     ) : (

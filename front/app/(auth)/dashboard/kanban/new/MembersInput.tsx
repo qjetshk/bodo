@@ -1,5 +1,4 @@
-"use client";
-
+'use client'
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,8 +24,8 @@ interface MembersInputProps {
   loading?: boolean;
   errors: FieldErrors;
   setValue: UseFormSetValue<any>;
-  formMembers: MemberType[]; // ← ОБЯЗАТЕЛЬНО!
-  maxMembers?: number; // добавим опциональный лимит
+  formMembers: MemberType[]; 
+  maxMembers?: number; 
   addedMembers?: Members,
   disabled?: boolean
 }
@@ -47,7 +46,7 @@ export function MembersInput({
   const [selectedMembers, setSelectedMembers] = useState<MemberType[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Закрытие дропдауна при клике вне
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -58,33 +57,33 @@ export function MembersInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Открытие дропдауна при вводе текста
+  // Open dropdown when typing
   useEffect(() => {
     setIsDropdownOpen(findMembersInput.length > 0);
   }, [findMembersInput]);
 
-  // Выбор участника с ограничением
+  // Select member with limit
   const selectMember = (member: MemberType) => {
     if (selectedMembers.length >= maxMembers) {
-      toast.error(`Можно добавить не более ${maxMembers} участников`, { duration: 1000 });
+      toast.error(`You can add up to ${maxMembers} members`, { duration: 1000 });
       return;
     }
     if (!selectedMembers.find((m) => m.id === member.id)) {
       const newMembers = [...selectedMembers, member];
       setSelectedMembers(newMembers);
-      setValue("membersToAdd", newMembers.map((m) => m.id)); // только id в форму
+      setValue("membersToAdd", newMembers.map((m) => m.id)); // only ids in the form
     }
     setFindMembersInput("");
   };
 
-  // Удаление выбранного участника
+  // Remove selected member
   const removeMember = (id: string) => {
     const newMembers = selectedMembers.filter((m) => m.id !== id);
     setSelectedMembers(newMembers);
     setValue("membersToAdd", newMembers.map((m) => m.id));
   };
 
-  // Фильтруем уже выбранных участников
+  // Filter out already selected members
   const filteredMembers = data?.findMembers?.filter(
     (m) => !selectedMembers.find((s) => s.id === m.id)
   );
@@ -95,15 +94,15 @@ export function MembersInput({
 
   return (
     <div className="relative w-full" ref={containerRef}>
-      {/* Ошибки */}
+      {/* Errors */}
       {errors.members?.message && typeof errors.members.message === "string" && (
         <p className="text-sm text-red-400 mb-1">{errors.members.message}</p>
       )}
 
-      {/* Инпут */}
+      {/* Input */}
       <Input
         disabled={disabled}
-        placeholder="Добавьте участников"
+        placeholder="Add members"
         value={findMembersInput}
         onChange={(e) => {
           setFindMembersInput(e.target.value);
@@ -111,7 +110,7 @@ export function MembersInput({
         }}
       />
 
-      {/* Дропдаун */}
+      {/* Dropdown */}
       {isDropdownOpen && (
         <div className="p-2 absolute top-full left-0 w-full bg-neutral-800 border rounded-lg mt-1 shadow-lg z-50 max-h-60 overflow-y-auto">
           {loading && <Skeleton className="block z-50 h-9 w-full rounded-[5px] bg-neutral-700" />}
@@ -126,7 +125,7 @@ export function MembersInput({
                 >
                   <Member user={{
                     ...member,
-                    avatarUrl: member.avatarUrl ?? undefined, // null -> undefined
+                    avatarUrl: member.avatarUrl ?? undefined, 
                   }} />
                 </button>
               ))}
@@ -134,21 +133,21 @@ export function MembersInput({
           ) : (
             !loading && (
               <div className="w-full text-center text-sm p-2 text-gray-500">
-                Ничего не найдено
+                Nothing found
               </div>
             )
           )}
         </div>
       )}
 
-      {/* Выбранные участники */}
+      {/* Selected members */}
       {selectedMembers.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-5">
           {selectedMembers.map((member) => (
             <div key={member.id} className="relative">
               <Member user={{
                 ...member,
-                avatarUrl: member.avatarUrl ?? undefined, // null -> undefined
+                avatarUrl: member.avatarUrl ?? undefined, 
               }} />
               <button
                 type="button"

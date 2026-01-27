@@ -16,7 +16,7 @@ function ConfirmDelete<T>({
   onOpenChange,
   deleteFn,
   payload,
-  title = "Удалить?",
+  title = "Confirm deletion?",
 }: Props<T>) {
 
   const [loading, setLoading] = useState(false)
@@ -27,11 +27,11 @@ function ConfirmDelete<T>({
       setLoading(true)
       await deleteFn(payload)
 
-      toast.success("Успешно удалено", {duration: 1500})
+      toast.success("Successfully deleted", {duration: 1500})
 
       onOpenChange(false)
     } catch (err) {
-      toast.error("Ошибка при удалении", {duration: 1500})
+      toast.error("Failed to delete", {duration: 1500})
     } finally {
       setLoading(false)
     }
@@ -47,12 +47,12 @@ function ConfirmDelete<T>({
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? "Удаление..." : "Удалить"}
+            {loading ? "Deleting..." : "Delete"}
           </Button>
 
           <DialogClose asChild>
             <Button variant="outline" disabled={loading}>
-              Отмена
+              Cancel
             </Button>
           </DialogClose>
         </DialogFooter>

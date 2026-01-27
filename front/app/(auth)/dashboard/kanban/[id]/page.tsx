@@ -139,7 +139,7 @@ const BoardPage = () => {
           <div className="flex gap-10 items-center">
             <div className="lg:flex hidden items-center gap-3">
               <DefaultUserPreview nickName={board?.owner.nickName ?? ''} email={board?.owner.email ?? ''} avatarUrl={board?.owner.avatarUrl ?? ''} />
-              {user && user.id === board?.owner.id && <span className="text-neutral-500">(ВЫ)</span>}
+              {user && user.id === board?.owner.id && <span className="text-neutral-500">(YOU)</span>}
             </div>
 
 

@@ -54,7 +54,7 @@ const TaskComment = ({ comment }: { comment: Comment }) => {
                 <EditTaskComment initialComment={comment} isOpen={isEditOpen} onOpenChange={setIsEditOpen} />
             </Dialog>
             <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-                <ConfirmDelete isOpen={isDeleteOpen} onOpenChange={setIsDeleteOpen} deleteFn={deleteComment} title='Вы действительно хотите удалить этот комментарий?' payload={payload} />
+                <ConfirmDelete isOpen={isDeleteOpen} onOpenChange={setIsDeleteOpen} deleteFn={deleteComment} title='Are you sure you want to delete this comment?' payload={payload} />
             </Dialog>
         </Card>
     )

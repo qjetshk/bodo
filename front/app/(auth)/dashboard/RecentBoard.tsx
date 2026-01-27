@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Link from 'next/link'
 import React from 'react'
 import { formatDistanceToNow } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { ru, enUS } from 'date-fns/locale'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getAvatarFallback } from '@/utils/avatar-fallback.util'
 import { ExternalLink } from 'lucide-react'
@@ -18,7 +18,7 @@ type BoardsData = GetAllUserBoardsForDashboardQuery['getAllUserBoards'][number]
 const RecentBoard = ({ board }: Props) => {
     const timeAgo = formatDistanceToNow(new Date(board.updatedAt), {
         addSuffix: true,
-        locale: ru,
+        locale: enUS,
     })
 
     const firstThreeMembers = board.members.slice(0, 3)

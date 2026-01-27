@@ -22,11 +22,9 @@ const EditTaskComment = ({ isOpen, onOpenChange, initialComment }: Props) => {
     const [editComment, { loading }] = useMutation(EDIT_COMMENT, {
         onCompleted() {
             setTimeout(() => {
-                toast.success('Ваш комментарий успешно изменен!')
+                toast.success('Comment updated successfully!')
                 onOpenChange(false)
-
             }, 150)
-
         },
     })
 
@@ -45,15 +43,15 @@ const EditTaskComment = ({ isOpen, onOpenChange, initialComment }: Props) => {
 
     useEffect(() => {
         setComment(initialComment.content)
-    }, [isOpen])
+    }, [isOpen, initialComment.content])
 
     return (
         <form>
             <DialogContent className={`dark ${loading && 'bg-neutral-900'}`}>
                 <DialogHeader>
-                    <DialogTitle>Изменить комменатарий</DialogTitle>
+                    <DialogTitle>Edit Comment</DialogTitle>
                     <DialogDescription>
-                        Здесь вы можете изменить ваш комментарий к задаче
+                        Modify your comment for this task below.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -61,7 +59,7 @@ const EditTaskComment = ({ isOpen, onOpenChange, initialComment }: Props) => {
                     maxLength={500}
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    placeholder='Ваш комментарий:'
+                    placeholder='Your comment...'
                     className='max-h-50 min-h-30'
                 />
 
@@ -70,19 +68,19 @@ const EditTaskComment = ({ isOpen, onOpenChange, initialComment }: Props) => {
                         <TooltipTrigger asChild>
                             <div>
                                 <Button onClick={handleSubmit} className='w-full' disabled={!isUpdated || loading}>
-                                    Оставить
+                                    Save
                                 </Button>
                             </div>
                         </TooltipTrigger>
 
                         {!isUpdated && (
                             <TooltipContent side="top">
-                                <p className="max-w-50 truncate">Вы не написали комменатарий</p>
+                                <p className="max-w-50 truncate">No changes to save</p>
                             </TooltipContent>
                         )}
                     </Tooltip>
                     <DialogClose asChild>
-                        <Button variant="outline">Отмена</Button>
+                        <Button variant="outline">Cancel</Button>
                     </DialogClose>
                 </DialogFooter>
             </DialogContent>

@@ -17,7 +17,7 @@ import TaskInfo from './TaskInfo'
 import { getDateColor, getPriorityColor } from '@/utils/get-colors.util'
 import { PRIORITIES } from '@/data/priorities.data'
 import AddComment from './AddTaskComment'
-import { commentsWord } from '@/utils/get-comments-words.util'
+import { commentsWordEn } from '@/utils/get-comments-words.util'
 
 const Task = ({ task, isPrivate, membersWithOwner }: { task: TaskType, isPrivate: boolean, membersWithOwner: Member[] }) => {
     const [isOpen, setIsOpen] = useState(false)
@@ -39,7 +39,6 @@ const Task = ({ task, isPrivate, membersWithOwner }: { task: TaskType, isPrivate
             type: "Task",
             task,
         },
-        //disabled: isEditing,
     });
 
     const [deleteTask] = useMutation(DELETE_TASK, {
@@ -68,22 +67,28 @@ const Task = ({ task, isPrivate, membersWithOwner }: { task: TaskType, isPrivate
                     <CardTitle className={`${isDragging && 'opacity-0'}  max-w-[87%] break-all line-clamp-3 h-4.5`}>
                         {task.title}
                     </CardTitle>
-
                 </CardHeader>
-                <CardContent className={`px-4  text-sm ${isDragging && 'opacity-0'}  flex flex-col gap-2`}>
+                <CardContent className={`px-4 text-sm ${isDragging && 'opacity-0'} flex flex-col gap-2`}>
                     <div className='max-h-25 overflow-y-auto scrollbar-track-neutral-900! break-all'>
-                        {task.description ? <p className='text-neutral-400 font-mono break-all'>{task.description}</p> : <p className='text-center w-full text-neutral-600'>-- Без описания --</p>}
+                        {task.description ? (
+                            <p className='text-neutral-400 font-mono break-all'>{task.description}</p>
+                        ) : (
+                            <p className='text-center w-full text-neutral-600'>-- No description --</p>
+                        )}
                     </div>
                     <div className='text-neutral-400 flex items-center justify-between mt-2'>
-                        <div className={`${getDateColor(task.deadlineDate)} opacity-75`}>{new Date(task.deadlineDate).toLocaleDateString()}</div>
+                        <div className={`${getDateColor(task.deadlineDate)} opacity-75`}>
+                            {new Date(task.deadlineDate).toLocaleDateString()}
+                        </div>
                         <FirstThreeAvatars avatarSize={20} members={task.assignments} />
                     </div>
                     <div className='text-neutral-500 flex items-center justify-between'>
-                        {`${commentsWord(task.comments?.length ?? 0, true)}`}
+                        {`${commentsWordEn(task.comments?.length ?? 0, true)}`}
                         <div className={`w-2 h-2 rounded-full ${getPriorityColor(PRIORITIES, task)}`} />
                     </div>
                 </CardContent>
             </Card>
+
             {!isDragging &&
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild className={`${isTouchDevice && 'text-neutral-600!'} absolute top-1.5 right-3 cursor-pointer`}>
@@ -92,28 +97,29 @@ const Task = ({ task, isPrivate, membersWithOwner }: { task: TaskType, isPrivate
                     <DropdownMenuContent className="dark">
                         <DropdownMenuItem onClick={() => setIsInfoOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors">
                             <Maximize2 />
-                            Развернуть
+                            Expand
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setIsOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors">
                             <PencilLine />
-                            Редактировать
+                            Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setIsCommentOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors">
                             <MessageCirclePlus />
-                            Оставить комментарий
+                            Add Comment
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setIsDeleteOpen(true)} className="cursor-pointer hover:text-neutral-400 transition-colors hover:bg-red-700/15!">
                             <Trash2 />
-                            Удалить задачу
+                            Delete Task
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             }
+
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <EditTask onOpenChange={setIsOpen} isPrivate={isPrivate} membersWithOwner={membersWithOwner} isOpen={isOpen} task={task} />
             </Dialog>
             <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-                <ConfirmDelete onOpenChange={setIsDeleteOpen} deleteFn={deleteTask} payload={payload} isOpen={isDeleteOpen} title='Вы действительно хотите удалить эту задачу?' />
+                <ConfirmDelete onOpenChange={setIsDeleteOpen} deleteFn={deleteTask} payload={payload} isOpen={isDeleteOpen} title='Are you sure you want to delete this task?' />
             </Dialog>
             <Dialog open={isInfoOpen} onOpenChange={setIsInfoOpen}>
                 <TaskInfo task={task} />

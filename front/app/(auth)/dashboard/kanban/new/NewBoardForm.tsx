@@ -23,12 +23,8 @@ import BoardTemplate from "./BoardTemplate";
 import { MembersInput, MemberType } from "./MembersInput";
 
 import { AddBoardForm } from "@/types/add-board-form.type";
-import {
-  FIND_MEMBERS,
-} from "@/apollo/requests/members";
-import {
-  GET_BOARD_TEMPLATES,
-} from "@/apollo/requests/templates";
+import { FIND_MEMBERS } from "@/apollo/requests/members";
+import { GET_BOARD_TEMPLATES } from "@/apollo/requests/templates";
 import { CREATE_BOARD, GET_ALL_USER_BOARDS_FOR_NAVIGATION } from "@/apollo/requests/boards";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -37,15 +33,15 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function NewBoardForm() {
-  const router = useRouter()
+  const router = useRouter();
   const [findMembersInput, setFindMembersInput] = useState("");
   const [findMembers, { data, loading }] = useMutation(FIND_MEMBERS);
   const { data: templates, loading: loadingTemplates } = useQuery(GET_BOARD_TEMPLATES);
   const [sendForm, { data: boardData, loading: sendingForm }] = useMutation(CREATE_BOARD, {
-    refetchQueries: [GET_ALL_USER_BOARDS_FOR_NAVIGATION]
-  })
+    refetchQueries: [GET_ALL_USER_BOARDS_FOR_NAVIGATION],
+  });
 
-  const { data: userBoards } = useQuery(GET_ALL_USER_BOARDS_FOR_NAVIGATION)
+  const { data: userBoards } = useQuery(GET_ALL_USER_BOARDS_FOR_NAVIGATION);
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<AddBoardForm>({
     resolver: zodResolver(AddBoardForm),
@@ -72,10 +68,10 @@ export default function NewBoardForm() {
 
   useEffect(() => {
     if (boardData) {
-      toast.success('Доска успешно создана!', { duration: 1500 })
+      toast.success('Board created successfully!', { duration: 1500 });
       setTimeout(() => {
-        router.push(`/dashboard/kanban/${boardData.createBoard.id}`)
-      }, 1000)
+        router.push(`/dashboard/kanban/${boardData.createBoard.id}`);
+      }, 1000);
     }
   }, [boardData]);
 
@@ -84,11 +80,10 @@ export default function NewBoardForm() {
   const watchedName = watch("name");
   const watchedDescription = watch("description");
 
-  // нормализуем пробелы перед отправкой
   const onSubmit: SubmitHandler<AddBoardForm> = (formData) => {
     if (userBoards?.getAllUserBoards.length === 10) {
-      toast.error('Вы не можете создать больше 10 досок!')
-      return
+      toast.error('You cannot create more than 10 boards!');
+      return;
     }
     sendForm({
       variables: {
@@ -98,7 +93,7 @@ export default function NewBoardForm() {
           description: normalizeSpaces(formData.description ?? ""),
         }
       }
-    })
+    });
   };
 
   const selectedMembers: MemberType[] = formMemberIds
@@ -110,32 +105,31 @@ export default function NewBoardForm() {
     templates?.getAllBoardTemplates[0]?.id ||
     "";
 
-  // кнопка disabled, если поля пустые после нормализации пробелов
   const isButtonDisabled = !normalizeSpaces(watchedName) && !normalizeSpaces(watchedDescription ?? '');
 
   return (
     <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1, transition: { duration: 0.5 } }}>
       <Card aria-disabled={sendingForm} className={`${sendingForm && 'opacity-70'} max-w-5xl mx-auto`}>
         <CardHeader>
-          <CardTitle className="font-unbounded text-lg">Создание новой канбан-доски</CardTitle>
-          <CardDescription>Заполните данные и выберите шаблон</CardDescription>
+          <CardTitle className="font-unbounded text-lg">Create New Kanban Board</CardTitle>
+          <CardDescription>Fill in the details and choose a template</CardDescription>
         </CardHeader>
 
         <CardContent>
           <form className="flex flex-col gap-5 w-full overflow-x-hidden p-1" onSubmit={handleSubmit(onSubmit)}>
             <div>
               {errors.name?.message && <p className="text-sm text-red-400 mb-1">{errors.name.message}</p>}
-              <Input disabled={sendingForm} maxLength={50} {...register("name")} placeholder="Название доски" />
+              <Input disabled={sendingForm} maxLength={50} {...register("name")} placeholder="Board Name" />
             </div>
 
             <div>
               {errors.description?.message && <p className="text-sm text-red-400 mb-1">{errors.description.message}</p>}
-              <Textarea disabled={sendingForm} maxLength={100} {...register("description")} className="resize-none" placeholder="Описание (необязательно)" />
+              <Textarea disabled={sendingForm} maxLength={100} {...register("description")} className="resize-none" placeholder="Description (optional)" />
             </div>
 
-            {/* шаблоны */}
+            {/* Templates */}
             <div>
-              <Label className="text-lg mb-2 block">Выберите шаблон:</Label>
+              <Label className="text-lg mb-2 block">Choose a Template:</Label>
               <section className="grid grid-cols-1 xl:grid-cols-2 gap-5 p-1">
                 {loadingTemplates ? (
                     [...Array(6)].map((_, i) => (
@@ -148,17 +142,16 @@ export default function NewBoardForm() {
                     <BoardTemplate template={template} />
                   </div>
                 ))}
-
               </section>
             </div>
 
-            {/* тип доски */}
+            {/* Board Type */}
             <div>
-              <Label className="text-lg mb-2 block">Тип доски:</Label>
+              <Label className="text-lg mb-2 block">Board Type:</Label>
               <div className="flex gap-3 items-center">
-                <Label>Публичная</Label>
+                <Label>Public</Label>
                 <Switch checked={boardType} onCheckedChange={(checked) => setValue("boardType", checked)} />
-                <Label>Приватная</Label>
+                <Label>Private</Label>
               </div>
             </div>
 
@@ -176,19 +169,18 @@ export default function NewBoardForm() {
               />
             )}
 
-
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
                   <Button type="submit" size="lg" className="mt-4 w-full" disabled={isButtonDisabled || sendingForm}>
-                    Создать доску
+                    Create Board
                   </Button>
                 </div>
               </TooltipTrigger>
 
               {isButtonDisabled && (
                 <TooltipContent side="top">
-                  <p className="max-w-50 truncate">Вы не заполнили форму</p>
+                  <p className="max-w-50 truncate">You must fill in the form</p>
                 </TooltipContent>
               )}
             </Tooltip>

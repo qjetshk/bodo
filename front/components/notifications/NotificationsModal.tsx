@@ -27,7 +27,7 @@ export const NotificationsModal = ({
     <Dialog open={isOpened} onOpenChange={onOpenChange}>
       <DialogContent className="dark pr-2 sm:max-w-[95%] md:max-w-[85%] lg:max-w-[800px]">
         <DialogHeader>
-          <DialogTitle>Уведомления</DialogTitle>
+          <DialogTitle>Notifications</DialogTitle>
         </DialogHeader>
         <ScrollArea className="max-h-[500px] pr-4">
           {loading ? (
@@ -42,7 +42,7 @@ export const NotificationsModal = ({
             </div>
           ) : (
             <div className="h-15 flex items-center justify-center text-neutral-500 text-[16px]">
-              У вас нет новых уведомлений
+              You have no new notifications
             </div>
           )}
         </ScrollArea>

@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ import { getAvatarFallback } from "@/utils/avatar-fallback.util";
 import { useCurrentUser } from "@/hooks/use-user";
 
 const NavBar: React.FC = () => {
-  const {user} = useCurrentUser()
+  const { user } = useCurrentUser();
 
   if (user) {
     return (
@@ -34,11 +34,11 @@ const NavBar: React.FC = () => {
     <nav className="flex gap-5 items-center">
       <Link className="sm:block hidden" href={"/register"}>
         <Button className="bg-transparent" variant={"outline"}>
-          Зарегистрироваться
+          Sign up
         </Button>
       </Link>
       <Link href={"/login"}>
-        <Button variant={"secondary"}>Войти</Button>
+        <Button variant={"secondary"}>Sign in</Button>
       </Link>
     </nav>
   );

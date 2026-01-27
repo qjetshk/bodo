@@ -35,7 +35,7 @@ const DashBoardLayout = ({
         setTimeout(() => router.push('/dashboard'), 200)
       }
 
-      toast.warning(`Доска ${board.name} была удалена!`)
+      toast.warning(`Board ${board.name} has been deleted!`)
 
       client.refetchQueries({
         include: [GET_ALL_USER_BOARDS_FOR_NAVIGATION, GET_ALL_USER_BOARDS_FOR_DASHBOARD]

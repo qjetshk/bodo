@@ -39,9 +39,7 @@ export type Member = {
     email: string;
     nickName: string;
     id: string;
-
 }
-
 
 const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpen }: Props) => {
 
@@ -75,7 +73,7 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
 
     const [createTask, { loading }] = useMutation(CREATE_TASK, {
         onCompleted: () => {
-            toast.success('Задача успешно создана!', { duration: 1500 })
+            toast.success('Task successfully created!', { duration: 1500 })
 
             onOpenChange(false)
             reset({
@@ -109,18 +107,16 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
         setValue('membersIds', members.map(m => m.id));
     }, [members, setValue]);
 
-    const wathedDeadlineDate = watch('deadlineDate')
+    const watchedDeadlineDate = watch('deadlineDate')
     const watchedTitle = watch('title')
     const watchedDescription = watch('description')
 
     const isUpdated = useMemo(() => {
         const nameChanged = normalizeSpaces(watchedTitle).length > 0;
-
-        return nameChanged && wathedDeadlineDate
-    }, [watchedDescription, watchedTitle, wathedDeadlineDate])
+        return nameChanged && watchedDeadlineDate
+    }, [watchedDescription, watchedTitle, watchedDeadlineDate])
 
     const onSubmit: SubmitHandler<NewTaskForm> = (formData) => {
-        console.log(formData)
         createTask({
             variables: {
                 taskInput: {
@@ -133,16 +129,15 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
                 }
             }
         })
-
     }
 
     return (
         <DialogContent className={`dark ${loading && 'bg-neutral-900'}`}>
             <form className='flex flex-col gap-4' onSubmit={handleSubmit(onSubmit)}>
                 <DialogHeader>
-                    <DialogTitle>Новая задача</DialogTitle>
+                    <DialogTitle>New Task</DialogTitle>
                     <DialogDescription>
-                        Здесь вы можете создать новую задачу
+                        Fill in the details to create a new task
                     </DialogDescription>
                 </DialogHeader>
 
@@ -158,7 +153,7 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
                             maxLength={50}
                             className={errors.title ? 'outline-1! outline-red-400!' : ''}
                             {...register('title')}
-                            placeholder='Введите название задачи*'
+                            placeholder='Enter task title*'
                         />
                     </div>
 
@@ -173,21 +168,22 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
                             maxLength={2000}
                             className={`${errors.description ? 'outline-1 outline-red-400' : ''} min-h-15 resize-none break-all max-h-80`}
                             {...register('description')}
-                            placeholder='Введите описание задачи'
+                            placeholder='Enter task description'
                         />
                     </div>
+
                     <div className='flex flex-col gap-2'>
                         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                             <PopoverTrigger asChild>
                                 <Button className='w-full flex items-center justify-between' variant={'outline'}>
-                                    {wathedDeadlineDate ? `до ${wathedDeadlineDate.toLocaleDateString()}` : "Выберите дату дедлайна*"}
+                                    {watchedDeadlineDate ? `Due ${watchedDeadlineDate.toLocaleDateString()}` : "Select deadline date*"}
                                     <ChevronDownIcon className='mt-0.5 opacity-50' />
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className='z-100'>
                                 <Calendar
                                     mode="single"
-                                    selected={wathedDeadlineDate}
+                                    selected={watchedDeadlineDate}
                                     captionLayout="dropdown-months"
                                     onSelect={(date) => {
                                         if (!date) return
@@ -199,6 +195,7 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
                             </PopoverContent>
                         </Popover>
                     </div>
+
                     {!isPrivate &&
                         <div className='flex flex-col gap-2'>
                             <Popover open={commandOpen} onOpenChange={setCommandOpen}>
@@ -210,15 +207,15 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
                                     >
                                         {membersNicknames.length > 0
                                             ? membersNicknames.map(n => `@${n}`).join(', ')
-                                            : "Выберите исполнителей задачи"}
+                                            : "Select task assignees"}
                                         <ChevronsUpDown className="opacity-50" />
                                     </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="p-0 z-100">
                                     <Command>
-                                        <CommandInput placeholder="Найти участника..." className="h-9" />
+                                        <CommandInput placeholder="Search member..." className="h-9" />
                                         <CommandList>
-                                            <CommandEmpty className='py-3 text-center text-sm'>Участники не найдены</CommandEmpty>
+                                            <CommandEmpty className='py-3 text-center text-sm'>No members found</CommandEmpty>
                                             <CommandGroup>
                                                 {membersWithOwner.map((member) => (
                                                     <CommandItem
@@ -234,11 +231,9 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
 
                                                             setMembers(prev => {
                                                                 const arr = prev ?? [];
-
                                                                 if (arr.some(m => m.id === member.id)) {
                                                                     return arr.filter(m => m.id !== member.id);
                                                                 }
-
                                                                 return [...arr, member];
                                                             });;
 
@@ -275,7 +270,7 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
                     }
 
                     <div className='flex flex-col gap-2'>
-                        <Label className='pl-1 text-neutral-400'>Приоритет:</Label>
+                        <Label className='pl-1 text-neutral-400'>Priority:</Label>
                         <div className='flex sm:gap-3 gap-1.5'>
                             {priorities.map(priority => (
                                 <Toggle
@@ -289,7 +284,6 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
                                                 isChecked: p.priority === priority.priority && true
                                             }))
                                         );
-
                                         setValue('priority', priority.priority)
                                     }}
                                     className={`sm:text-sm text-[13px] rounded-2xl px-2 pr-3 flex items-center ${priority.isChecked ? `${priority.primaryColor}` : 'bg-transparent'}`}
@@ -298,7 +292,6 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
                                     {priority.title}
                                 </Toggle>
                             ))}
-
                         </div>
                     </div>
 
@@ -309,20 +302,20 @@ const AddNewTask = ({ membersWithOwner, isPrivate, columnId, onOpenChange, isOpe
                         <TooltipTrigger asChild>
                             <div>
                                 <Button className='w-full' disabled={!isUpdated || loading} type="submit">
-                                    Создать
+                                    Create
                                 </Button>
                             </div>
                         </TooltipTrigger>
 
                         {!isUpdated && (
                             <TooltipContent side="top">
-                                <p className="max-w-50 truncate">Вы не заполнили форму</p>
+                                <p className="max-w-50 truncate">Form is incomplete</p>
                             </TooltipContent>
                         )}
                     </Tooltip>
 
                     <DialogClose asChild>
-                        <Button variant="outline">Отмена</Button>
+                        <Button variant="outline">Cancel</Button>
                     </DialogClose>
                 </DialogFooter>
             </form>

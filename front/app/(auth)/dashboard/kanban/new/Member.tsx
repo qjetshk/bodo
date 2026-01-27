@@ -7,7 +7,7 @@ interface Props {
         id: string;
         email: string;
         nickName: string;
-        avatarUrl?: string | ''; // <-- null теперь разрешён
+        avatarUrl?: string | '';
     }
 }
 

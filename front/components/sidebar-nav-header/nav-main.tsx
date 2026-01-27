@@ -68,7 +68,7 @@ export function NavMain({
   return (
     <SidebarGroup>
       <SidebarGroupLabel>
-        <Link href={"/dashboard"}>Главная</Link>
+        <Link href={"/dashboard"}>Home</Link>
       </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {

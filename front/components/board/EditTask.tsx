@@ -141,9 +141,9 @@ const EditTask = ({ task, isOpen, isPrivate, membersWithOwner, onOpenChange }: P
         <DialogContent className={`dark ${loading && 'bg-neutral-900'}`}>
             <form className='flex flex-col gap-4' onSubmit={handleSubmit(onSubmit)}>
                 <DialogHeader>
-                    <DialogTitle>Изменить задачу</DialogTitle>
+                    <DialogTitle>Edit task</DialogTitle>
                     <DialogDescription>
-                        Здесь вы можете изменить текущую задачу
+                        Here you can change the current task
                     </DialogDescription>
                 </DialogHeader>
 
@@ -222,7 +222,7 @@ const EditTask = ({ task, isOpen, isPrivate, membersWithOwner, onOpenChange }: P
                                     <Command className='w-fit'>
                                         <CommandInput placeholder="Найти участника..." className="h-9" />
                                         <CommandList>
-                                            <CommandEmpty className='py-3 text-center text-sm'>Участники не найдены</CommandEmpty>
+                                            <CommandEmpty className='py-3 text-center text-sm'>No members found</CommandEmpty>
                                             <CommandGroup>
                                                 {membersWithOwner.map((member) => (
                                                     <CommandItem
@@ -279,7 +279,7 @@ const EditTask = ({ task, isOpen, isPrivate, membersWithOwner, onOpenChange }: P
                     }
 
                     <div className='flex flex-col gap-2'>
-                        <Label className='pl-1 text-neutral-400'>Приоритет:</Label>
+                        <Label className='pl-1 text-neutral-400'>Priority:</Label>
                         <div className='flex sm:gap-3 gap-1.5'>
                             {priorities.map(priority => (
                                 <Toggle
@@ -313,20 +313,20 @@ const EditTask = ({ task, isOpen, isPrivate, membersWithOwner, onOpenChange }: P
                         <TooltipTrigger asChild>
                             <div>
                                 <Button className='w-full' disabled={!isUpdated || loading} type="submit">
-                                    Сохранить
+                                    Save
                                 </Button>
                             </div>
                         </TooltipTrigger>
 
                         {!isUpdated && (
                             <TooltipContent side="top">
-                                <p className="max-w-50 truncate">Вы ничего не поменяли</p>
+                                <p className="max-w-50 truncate">You haven't changed anything.</p>
                             </TooltipContent>
                         )}
                     </Tooltip>
 
                     <DialogClose asChild>
-                        <Button variant="outline">Отмена</Button>
+                        <Button variant="outline">Cancel</Button>
                     </DialogClose>
                 </DialogFooter>
             </form>

@@ -11,7 +11,7 @@ export type Priority = {
 
 export const PRIORITIES: Priority[] = [
     {
-        title: 'Высокий',
+        title: 'High',
         priority: Priorities.High,
         primaryColor: 'bg-red-600!',
         isChecked: true,
@@ -19,7 +19,7 @@ export const PRIORITIES: Priority[] = [
         secondaryColor: 'bg-red-400'
     },
     {
-        title: 'Средний',
+        title: 'Medium',
         priority: Priorities.Medium,
         primaryColor: 'bg-orange-600!',
         isChecked: false,
@@ -27,7 +27,7 @@ export const PRIORITIES: Priority[] = [
         secondaryColor: 'bg-orange-500'
     },
     {
-        title: 'Низкий',
+        title: 'Low',
         priority: Priorities.Low,
         primaryColor: 'bg-green-600!',
         isChecked: false,

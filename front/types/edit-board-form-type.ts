@@ -2,14 +2,15 @@ import { z } from "zod";
 
 export const EditBoardForm = z
   .object({
-    name: z.string().min(1, "Введите название доски!").max(100, 'Название не должно быть больше 100 символов!'),
+    name: z
+      .string()
+      .min(1, "Enter a board name!") 
+      .max(100, "Board name must not exceed 100 characters!"), 
     description: z
       .string()
-      .max(101, "Описание не должно быть больше 100 символов!")
+      .max(100, "Description must not exceed 100 characters!") 
       .optional(),
-
     membersToAdd: z.array(z.string()).optional(),
-  })
-
+  });
 
 export type EditBoardForm = z.infer<typeof EditBoardForm>;

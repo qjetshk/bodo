@@ -14,7 +14,7 @@ export class ColumnService {
 
     async changeColumnTitle(newTitle: string, columnId: string) {
         if (!newTitle || newTitle.trim().length === 0) {
-            throw new ConflictException('Название не может быть пустым!');
+            throw new ConflictException('The name cannot be empty!');
         }
 
         const currentColumn = await this.prismaService.column.findUnique({
@@ -29,11 +29,11 @@ export class ColumnService {
         });
 
         if (!currentColumn) {
-            throw new NotFoundException("Колонка не найдена");
+            throw new NotFoundException("Column not found!");
         }
 
         if (currentColumn.title === newTitle) {
-            throw new ConflictException('Вы не поменяли название колонки!');
+            throw new ConflictException("You haven't changed the column title!");
         }
 
         const updatedColumn = await this.prismaService.column.update({
@@ -74,7 +74,7 @@ export class ColumnService {
         })
 
         if (!currentBoard) {
-            throw new NotFoundException('Такой доски не существует!')
+            throw new NotFoundException("There is no such board!")
         }
 
         const updatedColumns = await this.prismaService.$transaction(
@@ -135,7 +135,7 @@ export class ColumnService {
         })
 
         if (!board) {
-            throw new NotFoundException("Такой доски не существует!")
+            throw new NotFoundException("This board doesn't exist!")
         }
 
         const order = board.columns.length
@@ -182,7 +182,7 @@ export class ColumnService {
         })
 
         if (!deletedColumn) {
-            throw new NotFoundException('Такой колонки не существует!')
+            throw new NotFoundException('Such a column does not exist!')
         }
 
         const board = await this.prismaService.board.findUnique({
@@ -204,7 +204,7 @@ export class ColumnService {
         })
 
         if (!board) {
-            throw new NotFoundException('Такой доски не существует!')
+            throw new NotFoundException("There is no such board!")
         }
 
         const updatedColumns = await this.prismaService.$transaction(

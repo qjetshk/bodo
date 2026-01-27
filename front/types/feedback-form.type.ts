@@ -1,9 +1,17 @@
-import z from "zod";
+import { z } from "zod";
 
-export const feedbackFormSchema  = z.object({
-    nickName: z.string().min(1, "Введите свой логин!").regex(/^[A-Za-z0-9_-]+$/, "Только английские буквы, цифры и [  _  -  ] !"),
-    email: z.string().email("Введите корректный email!"),
-    message: z.string().min(1, 'Введите ваше пожелание!').max(2000, 'Пожелание не может быть больше 2000 символов!')
+export const feedbackFormSchema = z.object({
+  nickName: z
+    .string()
+    .min(1, "Enter your username!") 
+    .regex(/^[A-Za-z0-9_-]+$/, "Only English letters, numbers, and [ _ - ] are allowed!"), 
+  email: z
+    .string()
+    .email("Enter a valid email!"),
+  message: z
+    .string()
+    .min(1, "Enter your feedback!") 
+    .max(2000, "Feedback cannot exceed 2000 characters!"), 
 });
 
 export type FeedbackForm = z.infer<typeof feedbackFormSchema>;

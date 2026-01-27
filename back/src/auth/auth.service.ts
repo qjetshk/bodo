@@ -34,7 +34,7 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException('Пользователь с таким email уже существует');
+      throw new ConflictException('A user with this email already exists!');
     }
 
     const user = await this.prismaService.user.create({
@@ -47,14 +47,14 @@ export class AuthService {
 
     await this.prismaService.user.update({
       where: {
-        id: user.id
+        id: user.id,
       },
       data: {
-        avatarUrl: `https://api.dicebear.com/9.x/glass/svg?seed=${user.id}`
-      }
-    })
+        avatarUrl: `https://api.dicebear.com/9.x/glass/svg?seed=${user.id}`,
+      },
+    });
 
-    return { message: 'Вы успешно зарегистировались!' }
+    return { message: 'You have registered successfully!' };
   }
 
   async login(res: Response, dto: LoginRequest) {
@@ -67,13 +67,13 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException('Неправильный email или пароль');
+      throw new NotFoundException('Incorrect email or password');
     }
 
     const isValidPassword = await verify(user.password, password);
 
     if (!isValidPassword) {
-      throw new NotFoundException('Неправильный email или пароль');
+      throw new NotFoundException('Incorrect email or password');
     }
 
     return { accessToken: this.auth(res, user.id), user: user };
@@ -83,7 +83,7 @@ export class AuthService {
     const refreshToken = req.cookies['refreshToken'];
 
     if (!refreshToken) {
-      throw new UnauthorizedException('Недействительный refresh token');
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
     const payload: JwtPayload = await this.jwtService.verifyAsync(refreshToken);
@@ -97,7 +97,7 @@ export class AuthService {
       });
 
       if (!user) {
-        throw new NotFoundException('Такой пользователь не найден');
+        throw new NotFoundException('No such user found');
       }
 
       return { accessToken: this.auth(res, user.id) };
@@ -124,7 +124,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException('Такой пользователь не найден');
+      throw new NotFoundException('No such user found');
     }
 
     return user;
@@ -145,12 +145,13 @@ export class AuthService {
   }
 
   private setCookie(res: Response, value: string, expires: Date) {
+    const isDevEnv = isDev(this.configService);
+
     res.cookie('refreshToken', value, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: false,
+      secure: !isDevEnv, // false для dev, true для prod
       expires,
     });
   }
-
 }

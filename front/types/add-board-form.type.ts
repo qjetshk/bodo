@@ -2,32 +2,35 @@ import { z } from "zod";
 
 export const AddBoardForm = z
   .object({
-    name: z.string().min(1, "Введите название доски!").max(100, 'Название не должно быть больше 100 символов!'),
+    name: z
+      .string()
+      .min(1, "Enter a board name!") 
+      .max(100, "Board name must not exceed 100 characters!"), 
     description: z
       .string()
-      .max(100, "Описание не должно быть больше 100 символов!")
+      .max(100, "Description must not exceed 100 characters!")
       .optional(),
-    boardTemplateId: z.string().min(1, "Выберите шаблон!"),
-    boardType: z.boolean(), // false - публичная, true - приватная
+    boardTemplateId: z.string().min(1, "Select a template!"),
+    boardType: z.boolean(), // false - public, true - private
     membersToAdd: z.array(z.string()).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.boardType === false) {
-      // публичная доска → нужно хотя бы одного участника
+      // public board → at least one member is required
       if (!data.membersToAdd || data.membersToAdd.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["members"],
-          message: "Добавьте хотя бы одного участника для публичной доски!",
+          message: "Add at least one member for a public board!",
         });
       }
     } else {
-      // приватная доска → members всегда пустой
+      // private board → members array must always be empty
       if (data.membersToAdd && data.membersToAdd.length > 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["members"],
-          message: "Для приватной доски массив участников должен быть пустым",
+          message: "Members array must be empty for a private board",
         });
       }
     }

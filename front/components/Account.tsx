@@ -8,12 +8,12 @@ import { getAvatarFallback } from "@/utils/avatar-fallback.util";
 import { useCurrentUser } from "@/hooks/use-user";
 
 const Account = () => {
-  const { user } = useCurrentUser()
+  const { user } = useCurrentUser();
 
   return (
     <DialogContent className="dark">
       <DialogHeader>
-        <DialogTitle>Ваш аккаунт</DialogTitle>
+        <DialogTitle>Your Account</DialogTitle>
       </DialogHeader>
       <section className="flex justify-between">
         <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
@@ -43,7 +43,6 @@ const Account = () => {
             id: {user?.id}
           </span>
           <span className="text-sm text-neutral-600">
-            {" "}
             {new Date(user?.createdAt ?? '').toLocaleDateString()}
           </span>
         </div>
