@@ -1,0 +1,47 @@
+'use client'
+
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "../../shared/ui-kit/avatar";
+import { Button } from "../../shared/ui-kit/button";
+import { getAvatarFallback } from "@/shared/lib/avatar-fallback.util";
+import { useCurrentUser } from "@/shared/hooks/use-user";
+
+const NavBar: React.FC = () => {
+  const { user } = useCurrentUser();
+
+  if (user) {
+    return (
+      <nav className="flex gap-5 items-center">
+        <Link href={"/dashboard"} className="flex gap-2 items-center">
+          <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+            <Avatar className="h-8 w-8 rounded-lg dark">
+              <AvatarImage src={user.avatarUrl} alt={user.nickName} />
+              <AvatarFallback className="rounded-lg">
+                {getAvatarFallback(user.nickName)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-medium">@{user.nickName}</span>
+            </div>
+          </div>
+        </Link>
+      </nav>
+    );
+  }
+
+  return (
+    <nav className="flex gap-5 items-center">
+      <Link className="sm:block hidden" href={"/register"}>
+        <Button className="bg-transparent" variant={"outline"}>
+          Sign up
+        </Button>
+      </Link>
+      <Link href={"/login"}>
+        <Button variant={"secondary"}>Sign in</Button>
+      </Link>
+    </nav>
+  );
+};
+
+export default NavBar;

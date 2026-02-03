@@ -1,5 +1,5 @@
-import { MotionDiv } from "@/components/MotionDiv";
-import NavBar from "@/components/sidebar-nav-header/NavBar";
+import { MotionDiv } from "@/shared/components/MotionDiv";
+import NavBar from "@/widgets/sidebar-nav-header/NavBar";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -43,7 +43,7 @@ export default function HomeLayout({
                     </Link>
                 </div>
 
-                <p className="select-none text-center text-neutral-600">Copyright © 2025. All rights reserved.</p>
+                <p className="select-none text-center text-neutral-600">Copyright © 2026. All rights reserved.</p>
             </footer>
         </MotionDiv>
     );

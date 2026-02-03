@@ -146,7 +146,7 @@ export class BoardService {
         })
 
         if (!board) {
-            throw new NotFoundException('Такой доски не существует!')
+            throw new NotFoundException("There is no such board!")
         }
 
 
@@ -156,7 +156,7 @@ export class BoardService {
         if (isOwner || isMember) {
             return board
         } else {
-            throw new ForbiddenException('У вас нет доступа к этой доске, попросите ее владельца, чтобы он вас добавил!')
+            throw new ForbiddenException("You don't have access to this board, ask its owner to add you!")
         }
     }
 
@@ -172,15 +172,15 @@ export class BoardService {
         })
 
         if (!currentBoard) {
-            throw new NotFoundException('Такая доска не найдена!')
+            throw new NotFoundException('No such board found!')
         }
 
         if (currentBoard.ownerId !== userId) {
-            throw new ForbiddenException('У вас нет прав на редактирование этой доски!')
+            throw new ForbiddenException('You do not have permission to edit this board!')
         }
 
         if (editBoardInput.membersToAdd?.includes(currentBoard.ownerId)) {
-            throw new ConflictException('Вы не можете добавить владельца доски в ее участников!')
+            throw new ConflictException('You cannot add the board owner to its members!')
         }
 
         const updatedBoard = await this.prismaService.board.update({
@@ -211,7 +211,7 @@ export class BoardService {
             (currentBoard.description === editBoardInput.description) &&
             (newMembersOnly && newMembersOnly.length === 0)
         ) {
-            throw new ConflictException('Вы ничего не поменяли!')
+            throw new ConflictException("You haven't changed anything!")
         }
 
         if (newMembersOnly && newMembersOnly.length > 0) {
@@ -232,14 +232,14 @@ export class BoardService {
             })
 
             if (currentInvitations.length >= 5) {
-                throw new ConflictException('Вы не можете пригласить больше 5 пользователей!')
+                throw new ConflictException('You cannot invite more than 5 users!')
             }
 
             const invitedMembersIds = currentInvitations.flatMap(inv => inv.userId)
 
             for (const member of newMembersOnly) {
                 if (invitedMembersIds.includes(member)) {
-                    throw new ConflictException('Вы уже пригласили этих пользователей!')
+                    throw new ConflictException('You have already invited these users!')
                 }
             }
 
@@ -318,7 +318,7 @@ export class BoardService {
         })
 
         if (!deletedBoard) {
-            throw new NotFoundException('Такой доски не существует!')
+            throw new NotFoundException("There is no such board!")
         }
 
         await this.pubSub.publish('boardDeleted', {

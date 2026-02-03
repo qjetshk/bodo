@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Unbounded } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "sonner";
 import { PostHogProvider } from "./providers/ph-provider";
-import { PostHogPageview } from "./providers/ph-page-view";
 import { Suspense } from "react";
+import { PostHogPageview } from "./providers/ph-page-view";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,28 +23,30 @@ const unbounded = Unbounded({
 });
 
 export const metadata: Metadata = {
-  title: "Bōdo - Канбан-доска",
-  description: "Визуальный планировщик задач с канбан-доской",
-  keywords: ["канбан", "планировщик", "задачи", "проекты"],
+  title: "Bōdo - Kanban-Board",
+  description: "Visual task planner with Kanban board",
+  keywords: ["kanban", "task planner", "task manager", "tasks", "projects"],
   icons: "/logo.svg",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+
   return (
-    <html lang="ru">
+    <html lang='en'>
       <body
-        className={`${(geistSans.variable, geistMono.variable, unbounded.variable)
-          } bg-neutral-950 text-white `}
+        className={`${geistSans.variable} ${geistMono.variable} ${unbounded.variable} bg-neutral-950 text-white`}
       >
         <PostHogProvider>
           <Suspense fallback={null}>
             <PostHogPageview />
           </Suspense>
+
           {children}
+
           <Toaster theme="dark" richColors position="top-center" />
         </PostHogProvider>
       </body>

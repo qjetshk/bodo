@@ -18,7 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "template-seed": "ts-node prisma/seeds/board-templates.seed.ts"
+    "template-seed": "ts-node prisma/seeds/board-templates.seed.ts",
+    "typesafe-i18n": "typesafe-i18n"
   },
   "dependencies": {
     "@apollo/server": "^5.1.0",
@@ -33,7 +34,8 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
-    "@prisma/client": "^6.18.0",
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
     "argon2": "^0.44.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
@@ -71,7 +73,7 @@
     "globals": "^16.0.0",
     "jest": "^30.0.0",
     "prettier": "^3.4.2",
-    "prisma": "^6.18.0",
+    "prisma": "^7.2.0",
     "prisma-dbml-generator": "^0.12.0",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
@@ -79,6 +81,7 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },

@@ -1,23 +1,23 @@
 'use client'
 import { BOARD_DELETED, BOARD_EDITED, GET_ALL_USER_BOARDS_FOR_DASHBOARD, GET_ALL_USER_BOARDS_FOR_NAVIGATION, GET_INITIAL_BOARD } from "@/apollo/requests/boards";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui-kit/card";
+import { Dialog, DialogTrigger } from "@/shared/ui-kit/dialog";
 import { useQuery, useSubscription } from "@apollo/client/react";
 import { Loader2, MoveLeft, Settings as SettingsIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import DefaultUserPreview from "@/components/DefaultUserPreview";
-import SettingsForOwner from "@/components/board/SettingsForOwner";
-import SettingsForMembers from "@/components/board/SettingsForMembers";
+import DefaultUserPreview from "@/shared/components/DefaultUserPreview";
+import SettingsForOwner from "@/entities/board/ui/SettingsForOwner";
+import SettingsForMembers from "@/entities/board/ui/SettingsForMembers";
 import { motion } from 'motion/react'
-import Board from "@/components/board/Board";
+import Board from "@/entities/board/ui/Board";
 import { GetInitialBoardQuery } from "@/apollo/gql/graphql";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import { RootState } from "@/shared/store/store";
 import { USER_ACCEPT_INVITATION, USER_DECLINE_INVITATION } from "@/apollo/requests/invitation";
 import { toast } from "sonner";
-import { useCurrentUser } from "@/hooks/use-user";
-import { updateBoardTimeCache } from "@/utils/update-board-time.util";
+import { useCurrentUser } from "@/shared/hooks/use-user";
+import { updateBoardTimeCache } from "@/shared/lib/update-board-time.util";
 
 const BoardPage = () => {
   const { id } = useParams();
@@ -139,7 +139,7 @@ const BoardPage = () => {
           <div className="flex gap-10 items-center">
             <div className="lg:flex hidden items-center gap-3">
               <DefaultUserPreview nickName={board?.owner.nickName ?? ''} email={board?.owner.email ?? ''} avatarUrl={board?.owner.avatarUrl ?? ''} />
-              {user && user.id === board?.owner.id && <span className="text-neutral-500">(ВЫ)</span>}
+              {user && user.id === board?.owner.id && <span className="text-neutral-500">(YOU)</span>}
             </div>
 
 

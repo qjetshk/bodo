@@ -1,11 +1,16 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+});
+
+const prisma = new PrismaClient({ adapter });
 
 const templates = [
   {
-    name: 'Классический Kanban',
-    description: 'Базовый канбан из трёх колонок',
+    name: 'Classic Kanban',
+    description: 'Basic Kanban with three columns',
     columns: [
       { title: 'To Do', order: 0 },
       { title: 'In Progress', order: 1 },
@@ -13,8 +18,8 @@ const templates = [
     ],
   },
   {
-    name: 'Разработка ПО',
-    description: 'Типовой процесс разработки задач',
+    name: 'Software Development',
+    description: 'Typical task development process',
     columns: [
       { title: 'Backlog', order: 0 },
       { title: 'In Progress', order: 1 },
@@ -24,8 +29,8 @@ const templates = [
     ],
   },
   {
-    name: 'Маркетинг-кампания',
-    description: 'От идей до выполнения маркетинговых задач',
+    name: 'Marketing Campaign',
+    description: 'From ideas to execution of marketing tasks',
     columns: [
       { title: 'Ideas', order: 0 },
       { title: 'Planning', order: 1 },
@@ -35,8 +40,8 @@ const templates = [
     ],
   },
   {
-    name: 'Личный To-Do',
-    description: 'Простой шаблон для личных задач',
+    name: 'Personal To-Do',
+    description: 'Simple template for personal tasks',
     columns: [
       { title: 'Tasks', order: 0 },
       { title: 'In Progress', order: 1 },
@@ -44,8 +49,8 @@ const templates = [
     ],
   },
   {
-    name: 'Учёба / Обучение',
-    description: 'Контроль учебных задач и целей',
+    name: 'Study / Learning',
+    description: 'Track study tasks and goals',
     columns: [
       { title: 'To Study', order: 0 },
       { title: 'Studying', order: 1 },
@@ -55,7 +60,7 @@ const templates = [
   },
   {
     name: 'Scrum Board',
-    description: 'Рабочий процесс для команд, использующих Scrum',
+    description: 'Workflow for teams using Scrum',
     columns: [
       { title: 'Product Backlog', order: 0 },
       { title: 'Sprint Backlog', order: 1 },

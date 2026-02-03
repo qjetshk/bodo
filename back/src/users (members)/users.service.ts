@@ -89,7 +89,7 @@ export class UsersService {
     })
 
     if (!currentInvitation) {
-      throw new NotFoundException('This invitation doesn exist!')
+      throw new NotFoundException('This invitation doesnt exist!')
     }
 
     if (currentInvitation?.status === 'PENDING') {
@@ -159,7 +159,7 @@ export class UsersService {
     })
 
     if (!currentInvitation) {
-      throw new NotFoundException('This invitation doesn exist!')
+      throw new NotFoundException('This invitation doesnt exist!')
     }
 
     const currentBoard = await this.prismaService.board.findUnique({

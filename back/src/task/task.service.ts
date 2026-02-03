@@ -30,7 +30,7 @@ export class TaskService {
 
         if (!currentColumn) {
             console.log('asdasd')
-            throw new NotFoundException('Такой колонки не существует!')
+            throw new NotFoundException('Such a column does not exist!')
         }
 
         const newTask = await this.prismaService.$transaction(async (tx) => {
@@ -118,7 +118,7 @@ export class TaskService {
         });
 
         if (!currentTask) {
-            throw new NotFoundException('Такой таски не существует!');
+            throw new NotFoundException('There is no such task!');
         }
 
         // 2. Получаем текущие и новые ID пользователей
@@ -193,7 +193,7 @@ export class TaskService {
         })
 
         if (!updatedTask) {
-            throw new NotFoundException('Такой таски не существует!');
+            throw new NotFoundException('There is no such task!');
         }
 
         await this.prismaService.board.update({
@@ -338,7 +338,7 @@ export class TaskService {
         })
 
         if (!column) {
-            throw new NotFoundException('Такой колонки не существует!')
+            throw new NotFoundException('Such a column does not exist!')
         }
 
         await this.prismaService.$transaction(async (tx) => {
@@ -386,7 +386,7 @@ export class TaskService {
         })
 
         if (!board) {
-            throw new NotFoundException('Такой доски не существует!')
+            throw new NotFoundException("This board doesn't exist!")
         }
 
         const tasks = board.columns.flatMap(c =>
@@ -420,7 +420,7 @@ export class TaskService {
         })
 
         if (!comment) {
-            throw new NotFoundException('Такого коммента не существует!')
+            throw new NotFoundException("This comment doesn't exist!")
         }
 
         const updatedTask = await this.prismaService.task.findUnique({
@@ -453,7 +453,7 @@ export class TaskService {
         })
 
         if (!updatedTask) {
-            throw new NotFoundException('Такой таски не существует!');
+            throw new NotFoundException('There is no such task!');
         }
 
         await this.prismaService.board.update({
@@ -496,7 +496,7 @@ export class TaskService {
         })
 
         if (!updatedComment) {
-            throw new NotFoundException('Такого коммента не существует!')
+            throw new NotFoundException("This comment doesn't exist!")
         }
 
         const updatedTask = await this.prismaService.task.findUnique({
@@ -529,7 +529,7 @@ export class TaskService {
         })
 
         if (!updatedTask) {
-            throw new NotFoundException('Такой таски не существует!');
+            throw new NotFoundException('There is no such task!');
         }
 
         await this.prismaService.board.update({
@@ -569,7 +569,7 @@ export class TaskService {
         })
 
         if (!deletedComment) {
-            throw new NotFoundException('Такого коммента не существует!')
+            throw new NotFoundException("This comment doesn't exist!")
         }
 
         const updatedTask = await this.prismaService.task.findUnique({
@@ -602,7 +602,7 @@ export class TaskService {
         })
 
         if (!updatedTask) {
-            throw new NotFoundException('Такой таски не существует!');
+            throw new NotFoundException('There is no such task!');
         }
 
         await this.prismaService.board.update({
