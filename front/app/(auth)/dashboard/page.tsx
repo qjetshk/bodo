@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import React from "react";
-import DashBoard from "./DashBoardPage";
+import DashBoard from "./_ui/DashBoardPage";
 
 export const metadata: Metadata = {
   title: "Bōdo - Dashboard",

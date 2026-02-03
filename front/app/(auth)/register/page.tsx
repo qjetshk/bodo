@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { BgImage } from "@/components/bg/BgImage";
-import { BgSection } from "@/components/bg/BgSection";
-import { MotionDiv } from "@/components/MotionDiv";
-import { RegisterForm } from "./RegisterForm";
+import { BgImage } from "@/widgets/bg/BgImage";
+import { BgSection } from "@/widgets/bg/BgSection";
+import { MotionDiv } from "@/shared/components/MotionDiv";
+import { RegisterForm } from "../../../features/auth/ui/RegisterForm";
 import { Metadata } from "next";
 import { MoveLeft } from "lucide-react";
 

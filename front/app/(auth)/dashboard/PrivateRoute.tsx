@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useGetMeQuery } from "@/store/auth";
+import { useGetMeQuery } from "@/features/auth/api/auth.slice";
 import { Loader2 } from "lucide-react";
 
 export default function PrivateRoute({

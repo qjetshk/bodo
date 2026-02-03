@@ -8,7 +8,7 @@ export const CurrentUserId = createParamDecorator(async (data: unknown, ctx: Exe
   const refreshToken = gqlCtx.req.cookies['refreshToken'];
 
   if (!refreshToken) {
-    throw new UnauthorizedException('Нет refresh token');
+    throw new UnauthorizedException('No refresh token');
   }
 
   const jwtService: JwtService = gqlCtx.jwtService

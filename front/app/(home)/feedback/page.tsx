@@ -1,6 +1,6 @@
 import React from 'react'
-import FeedbackForm from './FeedbackForm'
-import { MotionDiv } from '@/components/MotionDiv'
+import FeedbackForm from '../../../features/other/add-feedback/ui/FeedbackForm'
+import { MotionDiv } from '@/shared/components/MotionDiv'
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {

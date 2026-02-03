@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import NewBoardForm from "./NewBoardForm";
+import NewBoardForm from "../../../../../features/board/add-new-board/ui/NewBoardForm";
 
 
 export const metadata: Metadata = {

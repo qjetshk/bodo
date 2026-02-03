@@ -1,0 +1,101 @@
+"use client";
+
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarRail,
+  useSidebar,
+} from "@/shared/ui-kit/sidebar";
+import Link from "next/link";
+import { MENU_BAR } from "@/widgets/sidebar-nav-header/model/menubar.data";
+import { useGetMeQuery } from "@/features/auth/api/auth.slice";
+import { useQuery } from "@apollo/client/react";
+import { GET_ALL_USER_BOARDS_FOR_NAVIGATION } from "@/apollo/requests/boards";
+import { useEffect, useMemo } from "react";
+import { useDispatch } from "react-redux";
+import { setNavMain } from "@/widgets/sidebar-nav-header/model/nav-main.slice";
+import { NavMain } from "./nav-main";
+import { NavUser } from "./nav-user";
+import { setIsMobile, setIsSidebarOpened } from "@/widgets/sidebar-nav-header/model/sidebar.slice";
+import { motion } from 'motion/react'
+
+// This is sample data.
+const menu_data = MENU_BAR;
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { state, isMobile } = useSidebar();
+  const isActive = state === "expanded";
+  const { isLoading, data: userData } = useGetMeQuery();
+
+  const { data: boardsData } = useQuery(GET_ALL_USER_BOARDS_FOR_NAVIGATION)
+  const boards = boardsData?.getAllUserBoards || []
+
+  const dispatch = useDispatch()
+
+  const navMain = useMemo(() => {
+    return MENU_BAR.navMain.map((item) => {
+      if (item.title === "Kanban") {
+        return {
+          ...item,
+          items: [
+            ...boards.map((board: any) => ({
+              title: board.name,
+              url: `/${board.id}`,
+              description: board.description,
+            })),
+            {
+              title: "+ New Board",
+              url: "/new",
+              description: "Create a new board",
+            },
+          ],
+        };
+      }
+      return item;
+    });
+  }, [boards]);
+
+  useEffect(() => {
+    dispatch(setNavMain(navMain));
+  }, [dispatch, navMain]);
+
+  useEffect(() => {
+    dispatch(setIsSidebarOpened(isActive));
+  }, [isActive])
+
+  useEffect(() => {
+    dispatch(setIsMobile(isMobile));
+  }, [isMobile])
+  return (
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader className="pb-0">
+        <Link
+          href={"/"}
+          className={`font-bold text-${isActive ? "2xl" : "lg"
+            } text-center font-unbounded pt-2`}
+        >
+          {isActive ? "Bōdo" : "Bō"}
+        </Link>
+        <motion.p
+          className={`select-none text-center text-neutral-600 text-[11px] mt-[-6px] ${isActive ? '' : 'hidden'} whitespace-nowrap`}
+          initial={{ opacity: 0, filter: 'blur(4px)' }}
+          animate={isActive ? { opacity: 1, filter: 'blur(0px)' } : { opacity: 0, filter: 'blur(4px)' }}
+          transition={{ duration: 0.2, delay: 0.3 }}
+        >
+          Copyright © 2026. All rights reserved.
+        </motion.p>
+
+
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain items={navMain} />
+      </SidebarContent>
+      <SidebarFooter>{userData && <NavUser />}</SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  );
+}
+

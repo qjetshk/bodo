@@ -14,7 +14,7 @@ export class GqlAuthGuard implements CanActivate {
     // Берём токен из cookie
     const token = req.cookies['refreshToken'];
     if (!token) {
-      throw new UnauthorizedException('Нет refresh token');
+      throw new UnauthorizedException('No refresh token');
     }
 
     try {

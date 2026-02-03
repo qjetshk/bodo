@@ -1,8 +1,8 @@
-import { BgSection } from "@/components/bg/BgSection";
-import FeatureCard from "@/components/FeatureCard";
-import { MotionDiv } from "@/components/MotionDiv";
-import { Button } from "@/components/ui/button";
-import { FEATURES_CARDS } from "@/data/features-cards.data";
+import { BgSection } from "@/widgets/bg/BgSection";
+import FeatureCard from "@/app/(home)/_ui/FeatureCard";
+import { MotionDiv } from "@/shared/components/MotionDiv";
+import { Button } from "@/shared/ui-kit/button";
+import { FEATURES_CARDS } from "@/app/(home)/_data/features-cards.data";
 import Link from "next/link";
 
 
