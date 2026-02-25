@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useLoginMutation } from "@/features/auth/api/auth.slice";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { apolloClient } from "@/apollo/client";
+import { apolloClient } from "@/shared/api/graphql/client";
 import { Card } from "@/shared/ui-kit/card";
 
 type LoginRequest = Omit<RegisterLoginForm, "nickName">;

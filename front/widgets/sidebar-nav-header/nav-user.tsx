@@ -34,7 +34,7 @@ import { Dialog } from "../../shared/ui-kit/dialog";
 import Account from "../../entities/user/ui/Account";
 import { useState } from "react";
 import { useSubscription } from "@apollo/client/react";
-import { GET_BOARD_INVITATION } from "@/apollo/requests/invitation";
+import { GET_BOARD_INVITATION } from "@/shared/api/graphql/requests/invitation";
 import { useCurrentUser } from "@/shared/hooks/use-user";
 
 export function NavUser() {

@@ -26,7 +26,11 @@
     "paths": {
       "@/*": [
         "./*"
-      ]
+      ],
+      "@shared/*": ["shared/*"],
+      "@features/*": ["features/*"],
+      "@entities/*": ["entities/*"],
+      "@widgets/*": ["widgets/*"]
     }
   },
   "include": [

@@ -3,7 +3,7 @@
 import { store } from "@/shared/store/store";
 import { Provider } from "react-redux";
 import { ApolloProvider } from '@apollo/client/react';
-import { apolloClient } from "@/apollo/client";
+import { apolloClient } from "@/shared/api/graphql/client";
 
 export default function RootLayout({
   children,

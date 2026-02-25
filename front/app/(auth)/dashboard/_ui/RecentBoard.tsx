@@ -1,4 +1,4 @@
-import { GetAllUserBoardsForDashboardQuery } from '@/apollo/gql/graphql'
+import { GetAllUserBoardsForDashboardQuery } from '@/shared/api/graphql/gql/graphql'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui-kit/card'
 import Link from 'next/link'
 import React from 'react'

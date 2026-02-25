@@ -5,7 +5,7 @@ import { Textarea } from '../../../../shared/ui-kit/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../../../shared/ui-kit/tooltip'
 import { useMutation } from '@apollo/client/react'
 import { toast } from 'sonner'
-import { CREATE_COMMENT } from '@/apollo/requests/task-comments'
+import { CREATE_COMMENT } from '@/shared/api/graphql/requests/task-comments'
 
 interface Props {
     isOpen: boolean, 

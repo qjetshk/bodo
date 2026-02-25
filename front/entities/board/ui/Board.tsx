@@ -24,8 +24,8 @@ import type { Board, ColumnWithoutTasks, Task as TaskType, Column as ColumnType 
 import { CirclePlus } from "lucide-react";
 import { motion } from "motion/react";
 import { useMutation, useSubscription } from "@apollo/client/react";
-import { ADD_NEW_COLUMN, CHANGE_COLUMNS_ORDER, COLUMN_ADDED, COLUMN_DELETED, COLUMN_ORDER_CHANGED } from "@/apollo/requests/columns";
-import { CHANGE_TASKS_ORDER, TASK_CREATED, TASK_DELETED, TASK_EDITED, TASKS_ORDER_CHANGED_IN_ONE_COLUMN } from "@/apollo/requests/tasks";
+import { ADD_NEW_COLUMN, CHANGE_COLUMNS_ORDER, COLUMN_ADDED, COLUMN_DELETED, COLUMN_ORDER_CHANGED } from "@/shared/api/graphql/requests/columns";
+import { CHANGE_TASKS_ORDER, TASK_CREATED, TASK_DELETED, TASK_EDITED, TASKS_ORDER_CHANGED_IN_ONE_COLUMN } from "@/shared/api/graphql/requests/tasks";
 import { createPortal } from "react-dom";
 import { updateBoardTimeCache } from "@/shared/lib/update-board-time.util";
 

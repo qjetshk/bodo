@@ -19,13 +19,13 @@ import {
   CardTitle,
 } from "@/shared/ui-kit/card";
 
-import BoardTemplate from "../../../../entities/board/ui/BoardTemplate";
-import { MembersInput, MemberType } from "../../../../entities/board/ui/MembersInput";
+import BoardTemplate from "@/entities/board/ui/BoardTemplate";
+import { MembersInput, MemberType } from "@/entities/board/ui/MembersInput";
 
 import { AddBoardForm } from "@/features/board/add-new-board/model/add-board-form.type";
-import { FIND_MEMBERS } from "@/apollo/requests/members";
-import { GET_BOARD_TEMPLATES } from "@/apollo/requests/templates";
-import { CREATE_BOARD, GET_ALL_USER_BOARDS_FOR_NAVIGATION } from "@/apollo/requests/boards";
+import { FIND_MEMBERS } from "@/shared/api/graphql/requests/members";
+import { GET_BOARD_TEMPLATES } from "@/shared/api/graphql/requests/templates";
+import { CREATE_BOARD, GET_ALL_USER_BOARDS_FOR_NAVIGATION } from "@/shared/api/graphql/requests/boards";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { normalizeSpaces } from "@/shared/lib/normalize-spaces.util";

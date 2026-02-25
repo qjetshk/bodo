@@ -1,5 +1,5 @@
 
-import { GetAllBoardTemplatesQuery } from "@/apollo/gql/graphql";
+import { GetAllBoardTemplatesQuery } from "@/shared/api/graphql/gql/graphql";
 import {
   Card,
   CardContent,

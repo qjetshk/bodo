@@ -1,7 +1,7 @@
 'use client'
 import RecentBoards from './RecentBoards'
 import { useQuery } from '@apollo/client/react'
-import { GET_ALL_USER_BOARDS_FOR_DASHBOARD } from '@/apollo/requests/boards'
+import { GET_ALL_USER_BOARDS_FOR_DASHBOARD } from '@/shared/api/graphql/requests/boards'
 import { Loader2 } from 'lucide-react'
 import { useMemo } from 'react'
 import HelloPage from './HelloPage'

@@ -1,5 +1,5 @@
 import React from 'react'
-import FeedbackForm from '../../../features/other/add-feedback/ui/FeedbackForm'
+import FeedbackForm from '../../../features/add-feedback/ui/FeedbackForm'
 import { MotionDiv } from '@/shared/components/MotionDiv'
 import { Metadata } from 'next';
 

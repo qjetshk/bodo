@@ -8,7 +8,7 @@ import { Dialog } from '../../../shared/ui-kit/dialog'
 import EditTaskComment from '../../../features/board/edit-task-comment/ui/EditTaskComment'
 import ConfirmDelete from '../../../shared/components/ConfirmDelete'
 import { useMutation } from '@apollo/client/react'
-import { DELETE_COMMENT } from '@/apollo/requests/task-comments'
+import { DELETE_COMMENT } from '@/shared/api/graphql/requests/task-comments'
 import { useCurrentUser } from '@/shared/hooks/use-user'
 import { PencilLine, Trash2 } from 'lucide-react'
 

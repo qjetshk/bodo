@@ -1,5 +1,5 @@
 'use client'
-import { GetAllUserBoardsForDashboardQuery } from '@/apollo/gql/graphql'
+import { GetAllUserBoardsForDashboardQuery } from '@/shared/api/graphql/gql/graphql'
 import { Label } from '@/shared/ui-kit/label'
 import React, { useEffect, useMemo, useState } from 'react'
 import RecentBoard from './RecentBoard'

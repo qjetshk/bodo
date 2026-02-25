@@ -1,4 +1,4 @@
-import { GetInitialBoardQuery } from "@/apollo/gql/graphql";
+import { GetInitialBoardQuery } from "@/shared/api/graphql/gql/graphql";
 
 
 type Board = GetInitialBoardQuery["getBoardById"]

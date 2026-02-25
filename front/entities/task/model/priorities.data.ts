@@ -1,4 +1,4 @@
-import { Priorities } from "@/apollo/gql/graphql"
+import { Priorities } from "@/shared/api/graphql/gql/graphql"
 
 export type Priority = {
     title: string

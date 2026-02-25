@@ -11,7 +11,7 @@ import DashBoardHeader from "@/widgets/sidebar-nav-header/DashBoardHeader";
 import PrivateRoute from "./PrivateRoute";
 import { ScrollArea } from "@/shared/ui-kit/scroll-area";
 import { useSubscription } from "@apollo/client/react";
-import { BOARD_DELETED, GET_ALL_USER_BOARDS_FOR_DASHBOARD, GET_ALL_USER_BOARDS_FOR_NAVIGATION } from "@/apollo/requests/boards";
+import { BOARD_DELETED, GET_ALL_USER_BOARDS_FOR_DASHBOARD, GET_ALL_USER_BOARDS_FOR_NAVIGATION } from "@/shared/api/graphql/requests/boards";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 

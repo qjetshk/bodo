@@ -13,7 +13,7 @@ import Link from "next/link";
 import { MENU_BAR } from "@/widgets/sidebar-nav-header/model/menubar.data";
 import { useGetMeQuery } from "@/features/auth/api/auth.slice";
 import { useQuery } from "@apollo/client/react";
-import { GET_ALL_USER_BOARDS_FOR_NAVIGATION } from "@/apollo/requests/boards";
+import { GET_ALL_USER_BOARDS_FOR_NAVIGATION } from "@/shared/api/graphql/requests/boards";
 import { useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { setNavMain } from "@/widgets/sidebar-nav-header/model/nav-main.slice";

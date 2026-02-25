@@ -20,7 +20,7 @@ import { Label } from '../../../../shared/ui-kit/label'
 import { Toggle } from '../../../../shared/ui-kit/toggle'
 import { cn } from '@/shared/lib/cn.util'
 import { useMutation } from '@apollo/client/react'
-import { EDIT_TASK } from '@/apollo/requests/tasks'
+import { EDIT_TASK } from '@/shared/api/graphql/requests/tasks'
 import { toast } from 'sonner'
 
 interface Props {

@@ -1,5 +1,5 @@
 'use client'
-import { BOARD_DELETED, BOARD_EDITED, GET_ALL_USER_BOARDS_FOR_DASHBOARD, GET_ALL_USER_BOARDS_FOR_NAVIGATION, GET_INITIAL_BOARD } from "@/apollo/requests/boards";
+import { BOARD_DELETED, BOARD_EDITED, GET_ALL_USER_BOARDS_FOR_DASHBOARD, GET_ALL_USER_BOARDS_FOR_NAVIGATION, GET_INITIAL_BOARD } from "@/shared/api/graphql/requests/boards";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui-kit/card";
 import { Dialog, DialogTrigger } from "@/shared/ui-kit/dialog";
 import { useQuery, useSubscription } from "@apollo/client/react";
@@ -11,10 +11,10 @@ import SettingsForOwner from "@/entities/board/ui/SettingsForOwner";
 import SettingsForMembers from "@/entities/board/ui/SettingsForMembers";
 import { motion } from 'motion/react'
 import Board from "@/entities/board/ui/Board";
-import { GetInitialBoardQuery } from "@/apollo/gql/graphql";
+import { GetInitialBoardQuery } from "@/shared/api/graphql/gql/graphql";
 import { useSelector } from "react-redux";
 import { RootState } from "@/shared/store/store";
-import { USER_ACCEPT_INVITATION, USER_DECLINE_INVITATION } from "@/apollo/requests/invitation";
+import { USER_ACCEPT_INVITATION, USER_DECLINE_INVITATION } from "@/shared/api/graphql/requests/invitation";
 import { toast } from "sonner";
 import { useCurrentUser } from "@/shared/hooks/use-user";
 import { updateBoardTimeCache } from "@/shared/lib/update-board-time.util";

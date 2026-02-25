@@ -13,7 +13,7 @@ import { Dialog } from "@radix-ui/react-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../shared/ui-kit/dropdown-menu";
 import { Ellipsis } from 'lucide-react'
 import ConfirmDelete from "../../../shared/components/ConfirmDelete";
-import { CHANGE_COLUMN_TITLE, COLUMN_TITLE_CHANGED, DELETE_COLUMN } from "@/apollo/requests/columns";
+import { CHANGE_COLUMN_TITLE, COLUMN_TITLE_CHANGED, DELETE_COLUMN } from "@/shared/api/graphql/requests/columns";
 import { updateBoardTimeCache } from "@/shared/lib/update-board-time.util";
 import { useIsTouchDevice } from "@/shared/hooks/is-touch-device";
 import { motion } from 'motion/react'

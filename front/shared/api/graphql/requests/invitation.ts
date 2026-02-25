@@ -1,4 +1,4 @@
-import { graphql } from "../gql";
+import { graphql } from "@/shared/api/graphql/gql";
 
 
 export const GET_ALL_USER_BOARD_INVITATIONS = graphql(`

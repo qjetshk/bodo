@@ -1,6 +1,6 @@
 import React, { SetStateAction, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../shared/ui-kit/dialog";
-import { GET_ALL_USER_BOARD_INVITATIONS } from "@/apollo/requests/invitation";
+import { GET_ALL_USER_BOARD_INVITATIONS } from "@/shared/api/graphql/requests/invitation";
 import { useQuery } from "@apollo/client/react";
 import Notification from "./Notification";
 import { ScrollArea } from "../../../shared/ui-kit/scroll-area";

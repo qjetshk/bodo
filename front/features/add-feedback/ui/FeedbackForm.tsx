@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Input } from '@/shared/ui-kit/input'
 import { Textarea } from '@/shared/ui-kit/textarea'
 import { useCurrentUser } from '@/shared/hooks/use-user'
-import { type FeedbackForm, feedbackFormSchema } from '@/features/other/add-feedback/model/feedback-form.type'
+import { type FeedbackForm, feedbackFormSchema } from '@/features/add-feedback/model/feedback-form.type'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React, { useEffect, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
